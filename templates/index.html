@@ -439,7 +439,7 @@ input, select, textarea { font-family: var(--font); }
   transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
 }
 .modal-overlay.active .modal { transform: scale(1) translateY(0); opacity: 1; }
-.modal.modal-wide { max-width: 640px; }
+.modal.modal-wide { max-width: 850px; }
 .modal-close {
   position: absolute; top: 1rem; left: 1rem;
   background: rgba(255,255,255,0.1);
@@ -447,7 +447,7 @@ input, select, textarea { font-family: var(--font); }
   color: var(--text2); width: 32px; height: 32px;
   border-radius: 50%; font-size: 0.8rem;
   display: flex; align-items: center; justify-content: center;
-  transition: all var(--transition); cursor: pointer;
+  transition: all var(--transition); cursor: pointer; z-index: 10;
 }
 .modal-close:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
 .modal-logo {
@@ -591,6 +591,16 @@ input, select, textarea { font-family: var(--font); }
 .movie-detail-desc { color: var(--text2); font-size: 0.9rem; line-height: 1.7; margin-bottom: 1.25rem; }
 .movie-detail-btns { display: flex; gap: 0.75rem; flex-wrap: wrap; }
 
+/* STREAM PLAYER CONTAINER */
+.player-container {
+  position: relative; width: 100%; padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  background: #000; border-radius: var(--radius); overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+}
+.player-container iframe {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
+}
+
 /* TOAST */
 #toast {
   position: fixed; bottom: 2rem; left: 50%;
@@ -640,7 +650,8 @@ input, select, textarea { font-family: var(--font); }
   .modal { padding: 1.75rem; }
 }
 </style>
-</head><body>
+</head>
+<body>
 
 <!-- LOADER -->
 <div id="loader">
@@ -931,24 +942,27 @@ input, select, textarea { font-family: var(--font); }
   </div>
 </div>
 
-<!-- WATCH -->
+<!-- WATCH PLAYER MODAL -->
 <div class="modal-overlay" id="watchModal" onclick="closeOnOverlay(event,'watchModal')">
-  <div class="modal modal-wide">
-    <button class="modal-close" onclick="closeModal('watchModal')">✕</button>
-    <div id="watchModalContent" style="text-align:center;padding:2rem">
-      <div style="font-size:4rem;margin-bottom:1rem">▶</div>
-      <h2 id="watchTitle">جاري التشغيل...</h2>
-      <p style="color:var(--text2);margin-top:1rem">هذا عرض تجريبي. في النسخة الكاملة سيتم تشغيل الفيديو.</p>
+  <div class="modal modal-wide" style="padding: 1.5rem;">
+    <button class="modal-close" onclick="closeWatchModal()">✕</button>
+    <h2 id="watchTitle" style="margin-bottom: 1rem; font-size: 1.2rem;">جاري التشغيل...</h2>
+    <div class="player-container" id="playerContainer">
+      <!-- Iframe Video Embed Will Load Here -->
     </div>
   </div>
 </div>
 
 <!-- TOAST -->
-<div id="toast"></div><script>
+<div id="toast"></div>
+
+<script>
 /* ═══════════════════════════════════════════════════════════
-   ONYX MOVIE — APP.JS + TMDB API
+   ONYX MOVIE — APP.JS + TMDB DIRECT API & EMBED PLAYER
    ═══════════════════════════════════════════════════════════ */
 
+const TMDB_API_KEY = '84931e21b0213793f7739540c4a45f9d';
+const TMDB_BASE = 'https://api.themoviedb.org/3';
 const IMG = 'https://image.tmdb.org/t/p';
 
 /* ── STATE ─────────────────────────────────────────────── */
@@ -982,11 +996,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function initLoader() {
   setTimeout(() => {
     document.getElementById('loader')?.classList.add('hidden');
-  }, 1500);
-  // Fallback إجباري بعد 4 ثواني
-  setTimeout(() => {
-    document.getElementById('loader')?.classList.add('hidden');
-  }, 4000);
+  }, 1200);
 }
 
 /* ── CURSOR ────────────────────────────────────────────── */
@@ -1074,28 +1084,25 @@ async function loadAll() {
 async function loadHero() {
   const bg = document.getElementById('heroBg');
   try {
-    const res = await fetch('/api/trending');
+    const res = await fetch(`${TMDB_BASE}/trending/all/day?api_key=${TMDB_API_KEY}&language=ar-SA`);
     const data = await res.json();
     const results = (data.results || []).filter(m => m.backdrop_path).slice(0, 5);
-    if (!results.length) {
-      bg.innerHTML = '<div class="hero-bg-slide active" style="background:linear-gradient(135deg,#0a0f20,#1a0a0a)"></div>';
-      document.getElementById('heroTitle').textContent = 'ONYX MOVIE';
-      document.getElementById('heroDesc').textContent = 'لا توجد أفلام حالياً. تأكد من إعداد TMDB_API_KEY.';
-      return;
-    }
+    if (!results.length) return;
+    
     state.heroMovies = results;
     bg.innerHTML = results.map((m, i) =>
       `<div class="hero-bg-slide ${i === 0 ? 'active' : ''}" style="background-image:url('${IMG}/original${m.backdrop_path}')"></div>`
     ).join('');
+    
     const dots = document.getElementById('heroDots');
     dots.innerHTML = results.map((_, i) =>
       `<span class="hero-dot ${i === 0 ? 'active' : ''}" onclick="setSlide(${i})"></span>`
     ).join('');
+    
     renderHero(0);
     state.heroInterval = setInterval(nextSlide, 6000);
   } catch (e) {
-    console.error('hero:', e);
-    bg.innerHTML = '<div class="hero-bg-slide active" style="background:linear-gradient(135deg,#0a0f20,#1a0a0a)"></div>';
+    console.error('hero error:', e);
   }
 }
 
@@ -1105,7 +1112,7 @@ function renderHero(i) {
   const title = m.title || m.name || '?';
   const year = (m.release_date || m.first_air_date || '').substring(0, 4);
   const rating = m.vote_average ? m.vote_average.toFixed(1) : '?';
-  const desc = m.overview || 'لا يوجد وصف';
+  const desc = m.overview || 'لا يوجد وصف متاح لهذا العمل حالياً.';
   document.getElementById('heroTitle').textContent = title;
   document.getElementById('heroMeta').innerHTML =
     `<span>${year}</span><span class="dot">•</span><span class="rating">⭐ ${rating}</span><span class="dot">•</span><span class="genre-tag">${m.media_type === 'tv' ? '📺 مسلسل' : '🎬 فيلم'}</span>`;
@@ -1138,8 +1145,9 @@ function movieCard(m) {
   const poster = m.poster_path
     ? `${IMG}/w500${m.poster_path}`
     : 'https://via.placeholder.com/400x600/161d30/5a6480?text=🎬';
-  const type = m.media_type || 'movie';
+  const type = m.media_type || (m.first_air_date ? 'tv' : 'movie');
   const isFav = state.favorites.includes(m.id);
+  
   return `
     <div class="movie-card" onclick="openMovie(${m.id}, '${type}')">
       <img class="movie-poster" src="${poster}" alt="${title}" loading="lazy"
@@ -1164,12 +1172,11 @@ function movieCard(m) {
 async function loadTrending() {
   const el = document.getElementById('trendingGrid');
   if (!el) return;
-  el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
   try {
-    const res = await fetch('/api/trending');
+    const res = await fetch(`${TMDB_BASE}/trending/movie/week?api_key=${TMDB_API_KEY}&language=ar-SA`);
     const data = await res.json();
     const results = (data.results || []).filter(m => m.poster_path).slice(0, 12);
-    el.innerHTML = results.map(movieCard).join('') || '<p class="loading">لا توجد نتائج</p>';
+    el.innerHTML = results.map(movieCard).join('');
     const title = document.getElementById('trendingTitle');
     if (title) title.textContent = '🔥 الأكثر رواجاً';
   } catch (e) {
@@ -1182,7 +1189,7 @@ async function loadPopular() {
   const el = document.getElementById('popularGrid');
   if (!el) return;
   try {
-    const res = await fetch('/api/popular/movie');
+    const res = await fetch(`${TMDB_BASE}/movie/popular?api_key=${TMDB_API_KEY}&language=ar-SA`);
     const data = await res.json();
     const results = (data.results || []).filter(m => m.poster_path).slice(0, 12);
     el.innerHTML = results.map(movieCard).join('');
@@ -1194,12 +1201,9 @@ async function loadTopRated() {
   const el = document.getElementById('topList');
   if (!el) return;
   try {
-    const res = await fetch('/api/popular/movie');
+    const res = await fetch(`${TMDB_BASE}/movie/top_rated?api_key=${TMDB_API_KEY}&language=ar-SA`);
     const data = await res.json();
-    const results = (data.results || [])
-      .filter(m => m.poster_path)
-      .sort((a, b) => b.vote_average - a.vote_average)
-      .slice(0, 8);
+    const results = (data.results || []).filter(m => m.poster_path).slice(0, 8);
     el.innerHTML = results.map((m, i) => {
       const title = m.title || m.name || '?';
       const year = (m.release_date || '').substring(0, 4);
@@ -1223,7 +1227,7 @@ async function loadSeries() {
   const el = document.getElementById('seriesGrid');
   if (!el) return;
   try {
-    const res = await fetch('/api/popular/tv');
+    const res = await fetch(`${TMDB_BASE}/tv/popular?api_key=${TMDB_API_KEY}&language=ar-SA`);
     const data = await res.json();
     const results = (data.results || []).filter(m => m.poster_path).slice(0, 12);
     el.innerHTML = results.map(movieCard).join('');
@@ -1235,7 +1239,7 @@ async function filterGenre(genreId) {
   const el = document.getElementById('trendingGrid');
   el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
   try {
-    const res = await fetch(`/api/genre?type=movie&id=${genreId}`);
+    const res = await fetch(`${TMDB_BASE}/discover/movie?api_key=${TMDB_API_KEY}&with_genres=${genreId}&language=ar-SA`);
     const data = await res.json();
     const results = (data.results || []).filter(m => m.poster_path).slice(0, 12);
     el.innerHTML = results.map(movieCard).join('') || '<p class="loading">لا توجد نتائج</p>';
@@ -1258,7 +1262,7 @@ async function doSearch() {
   if (title) title.textContent = `🔍 نتائج البحث: ${q}`;
   document.getElementById('movies').scrollIntoView({ behavior: 'smooth' });
   try {
-    const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+    const res = await fetch(`${TMDB_BASE}/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(q)}&language=ar-SA`);
     const data = await res.json();
     const results = (data.results || []).filter(m => m.poster_path).slice(0, 20);
     el.innerHTML = results.map(movieCard).join('') || '<p class="loading">لا توجد نتائج</p>';
@@ -1266,13 +1270,13 @@ async function doSearch() {
 }
 
 /* ── MOVIE DETAIL ──────────────────────────────────────── */
-async function openMovie(id, type) {
+async function openMovie(id, type = 'movie') {
   const modal = document.getElementById('movieModal');
   const content = document.getElementById('movieModalContent');
   content.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
   modal.classList.add('active');
   try {
-    const res = await fetch(`/api/${type}/${id}`);
+    const res = await fetch(`${TMDB_BASE}/${type}/${id}?api_key=${TMDB_API_KEY}&language=ar-SA`);
     const m = await res.json();
     const title = m.title || m.name || '?';
     const year = (m.release_date || m.first_air_date || '').substring(0, 4);
@@ -1281,6 +1285,7 @@ async function openMovie(id, type) {
     const poster = m.poster_path ? `${IMG}/w500${m.poster_path}` : '';
     const genres = (m.genres || []).map(g => g.name).join(' • ');
     const isFav = state.favorites.includes(id);
+    
     content.innerHTML = `
       <div class="movie-detail">
         <div class="movie-detail-poster">
@@ -1295,9 +1300,9 @@ async function openMovie(id, type) {
             <span>${type === 'tv' ? '📺 مسلسل' : '🎬 فيلم'}</span>
           </div>
           <p style="color:var(--text2);margin-bottom:1rem;font-size:0.85rem">${genres}</p>
-          <p class="movie-detail-desc">${m.overview || 'لا يوجد وصف'}</p>
+          <p class="movie-detail-desc">${m.overview || 'لا يوجد وصف متاح.'}</p>
           <div class="movie-detail-btns">
-            <button class="btn-watch" onclick="watchMovie(${id}, '${title.replace(/'/g, "\\'")}')">▶ شاهد الآن</button>
+            <button class="btn-watch" onclick="watchMovie(${id}, '${type}', '${title.replace(/'/g, "\\'")}')">▶ شاهد الآن</button>
             <button class="btn-info" onclick="toggleFav(${id}, this)">${isFav ? '❤️ في المفضلة' : '🤍 أضف للمفضلة'}</button>
           </div>
         </div>
@@ -1307,20 +1312,32 @@ async function openMovie(id, type) {
   }
 }
 
-/* ── WATCH ─────────────────────────────────────────────── */
-function watchMovie(id, title) {
-  if (!state.user) {
-    showToast('يرجى تسجيل الدخول أولاً', 'error');
-    setTimeout(() => openModal('loginModal'), 500);
-    return;
-  }
+/* ── WATCH STREAM (EMBED PLAYER) ───────────────────────── */
+function watchMovie(id, type, title) {
+  closeModal('movieModal');
+  
   const now = new Date().toLocaleDateString('ar-EG');
   state.watchHistory = state.watchHistory.filter(h => h.id !== id);
-  state.watchHistory.unshift({ id, title, date: now });
+  state.watchHistory.unshift({ id, title, date: now, type });
   if (state.watchHistory.length > 50) state.watchHistory = state.watchHistory.slice(0, 50);
   localStorage.setItem('onyx_history', JSON.stringify(state.watchHistory));
-  document.getElementById('watchTitle').textContent = title;
+
+  document.getElementById('watchTitle').textContent = `تشغيل: ${title}`;
+  
+  // VidSrc Embed Stream URL API
+  const embedUrl = type === 'tv' 
+    ? `https://vidsrc.sbs/embed/tv/${id}`
+    : `https://vidsrc.sbs/embed/movie/${id}`;
+
+  const container = document.getElementById('playerContainer');
+  container.innerHTML = `<iframe src="${embedUrl}" allowfullscreen frameborder="0" scrolling="no"></iframe>`;
+
   openModal('watchModal');
+}
+
+function closeWatchModal() {
+  document.getElementById('playerContainer').innerHTML = ''; // إيقاف التشغيل فور الغلق
+  closeModal('watchModal');
 }
 
 /* ── FAVORITES ─────────────────────────────────────────── */
@@ -1352,7 +1369,10 @@ function closeModal(id) {
   document.body.style.overflow = '';
 }
 function closeOnOverlay(e, id) {
-  if (e.target.id === id) closeModal(id);
+  if (e.target.id === id) {
+    if (id === 'watchModal') closeWatchModal();
+    else closeModal(id);
+  }
 }
 function switchModal(closeId, openId) {
   closeModal(closeId);
@@ -1360,7 +1380,10 @@ function switchModal(closeId, openId) {
 }
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    document.querySelectorAll('.modal-overlay.active').forEach(m => closeModal(m.id));
+    document.querySelectorAll('.modal-overlay.active').forEach(m => {
+      if (m.id === 'watchModal') closeWatchModal();
+      else closeModal(m.id);
+    });
   }
 });
 
@@ -1498,7 +1521,7 @@ async function populateFavs() {
   container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
   const items = await Promise.all(state.favorites.map(async id => {
     try {
-      const res = await fetch(`/api/movie/${id}`);
+      const res = await fetch(`${TMDB_BASE}/movie/${id}?api_key=${TMDB_API_KEY}&language=ar-SA`);
       const m = await res.json();
       const title = m.title || m.name || '?';
       const poster = m.poster_path ? `${IMG}/w200${m.poster_path}` : '';
