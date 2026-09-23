@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""🎬 ONYX MOVIE — Flask Web App + TMDB API"""
+"""🎬 ONYX MOVIE — Flask + TMDB + VidSrc Player"""
 
 from flask import Flask, jsonify, request
 import os
@@ -12,9 +12,29 @@ TMDB_API_KEY = os.getenv("TMDB_API_KEY", "")
 TMDB_BASE = "https://api.themoviedb.org/3"
 IMG_BASE = "https://image.tmdb.org/t/p"
 
+# مصادر المشاهدة (iframe)
+PLAYER_SOURCES = {
+    "vidsrc": {
+        "movie": "https://vidsrc.to/embed/movie/{id}",
+        "tv": "https://vidsrc.to/embed/tv/{id}/{season}/{episode}",
+    },
+    "2embed": {
+        "movie": "https://www.2embed.cc/embed/{id}",
+        "tv": "https://www.2embed.cc/embedtv/{id}&s={season}&e={episode}",
+    },
+    "vidsrc_me": {
+        "movie": "https://vidsrc.me/embed/movie?tmdb={id}",
+        "tv": "https://vidsrc.me/embed/tv?tmdb={id}&season={season}&episode={episode}",
+    },
+    "superembed": {
+        "movie": "https://multiembed.mov/?video_id={id}&tmdb=1",
+        "tv": "https://multiembed.mov/?video_id={id}&tmdb=1&s={season}&e={episode}",
+    },
+}
+
 
 # ══════════════════════════════════════════════════════════
-# 🎬 HTML + CSS + JS (كل شي في ملف واحد)
+# HTML الصفحة الرئيسية
 # ══════════════════════════════════════════════════════════
 
 INDEX_HTML = r"""
@@ -23,7 +43,7 @@ INDEX_HTML = r"""
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ONYX MOVIE — أفضل تجربة سينمائية</title>
+<title>ONYX MOVIE — مشاهدة الأفلام</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet" />
 <style>
@@ -47,6 +67,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); dire
 a { text-decoration: none; color: inherit; }
 img { max-width: 100%; display: block; }
 button { cursor: pointer; font-family: var(--font); border: none; }
+input { font-family: var(--font); }
 
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg2); }
@@ -79,13 +100,12 @@ button { cursor: pointer; font-family: var(--font); border: none; }
   display: flex; align-items: center; flex-shrink: 0;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 8px; overflow: hidden;
-  transition: border-color var(--transition);
 }
 .nav-search:focus-within { border-color: var(--accent); }
 .nav-search input {
   background: transparent; border: none; outline: none;
   color: var(--text); padding: 0.55rem 1rem;
-  width: 240px; font-size: 0.85rem; font-family: var(--font);
+  width: 240px; font-size: 0.85rem;
 }
 .nav-search input::placeholder { color: var(--text3); }
 .nav-search button {
@@ -97,7 +117,7 @@ button { cursor: pointer; font-family: var(--font); border: none; }
 
 /* HERO */
 .hero {
-  position: relative; height: 80vh; min-height: 500px;
+  position: relative; height: 75vh; min-height: 500px;
   overflow: hidden; display: flex; align-items: center;
   margin-top: 70px;
 }
@@ -112,10 +132,7 @@ button { cursor: pointer; font-family: var(--font); border: none; }
   position: absolute; inset: 0;
   background: linear-gradient(90deg, rgba(8,11,20,0.95) 0%, rgba(8,11,20,0.6) 50%, rgba(8,11,20,0.2) 100%), linear-gradient(0deg, rgba(8,11,20,1) 0%, transparent 40%);
 }
-.hero-content {
-  position: relative; z-index: 2;
-  max-width: 650px; padding: 0 4rem;
-}
+.hero-content { position: relative; z-index: 2; max-width: 650px; padding: 0 4rem; }
 .hero-badge {
   display: inline-flex; align-items: center; gap: 0.4rem;
   background: rgba(229,9,20,0.15); border: 1px solid rgba(229,9,20,0.4);
@@ -125,8 +142,7 @@ button { cursor: pointer; font-family: var(--font); border: none; }
 .hero-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: clamp(2.5rem, 6vw, 5rem); line-height: 1;
-  letter-spacing: 0.04em; color: #fff;
-  text-shadow: 0 4px 30px rgba(0,0,0,0.5); margin-bottom: 1rem;
+  color: #fff; text-shadow: 0 4px 30px rgba(0,0,0,0.5); margin-bottom: 1rem;
 }
 .hero-meta {
   display: flex; align-items: center; gap: 1rem;
@@ -134,29 +150,22 @@ button { cursor: pointer; font-family: var(--font); border: none; }
   margin-bottom: 1rem; flex-wrap: wrap;
 }
 .hero-meta .rating { color: var(--gold); }
-.hero-desc {
-  color: var(--text2); font-size: 1rem; line-height: 1.7;
-  max-width: 550px; margin-bottom: 2rem;
-}
-.btn-watch {
+.hero-desc { color: var(--text2); font-size: 1rem; line-height: 1.7; max-width: 550px; margin-bottom: 2rem; }
+
+/* BUTTONS */
+.btn-play {
   display: inline-flex; align-items: center; gap: 0.6rem;
   background: var(--accent); color: #fff;
   padding: 0.85rem 2rem; border-radius: var(--radius);
   font-size: 1rem; font-weight: 700;
   transition: all var(--transition);
 }
-.btn-watch:hover {
-  background: var(--accent2); box-shadow: var(--glow);
-  transform: translateY(-2px);
-}
+.btn-play:hover { background: var(--accent2); box-shadow: var(--glow); transform: translateY(-2px); }
 
 /* SECTIONS */
 .section { padding: 3rem 4rem; max-width: 1600px; margin: 0 auto; }
-.section-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 1.75rem;
-}
-.section-title { font-size: 1.6rem; font-weight: 700; color: var(--text); }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; }
+.section-title { font-size: 1.6rem; font-weight: 700; }
 .section-sub { font-size: 0.85rem; color: var(--text2); }
 
 /* GRID */
@@ -170,15 +179,10 @@ button { cursor: pointer; font-family: var(--font); border: none; }
   overflow: hidden; background: var(--surface);
   transition: all var(--transition); cursor: pointer;
 }
-.card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-  z-index: 2;
-}
+.card:hover { transform: translateY(-8px); box-shadow: 0 20px 60px rgba(0,0,0,0.6); z-index: 2; }
 .card img {
   width: 100%; aspect-ratio: 2/3;
-  object-fit: cover; display: block;
-  background: var(--surface2);
+  object-fit: cover; display: block; background: var(--surface2);
   transition: transform var(--transition);
 }
 .card:hover img { transform: scale(1.05); }
@@ -188,10 +192,7 @@ button { cursor: pointer; font-family: var(--font); border: none; }
   color: #fff; margin-bottom: 0.3rem;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.card-meta {
-  font-size: 0.75rem; color: var(--text2);
-  display: flex; gap: 0.5rem; flex-wrap: wrap;
-}
+.card-meta { font-size: 0.75rem; color: var(--text2); display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .card-meta .rating { color: var(--gold); font-weight: 700; }
 
 /* TOP LIST */
@@ -202,90 +203,130 @@ button { cursor: pointer; font-family: var(--font); border: none; }
   border-radius: var(--radius); padding: 0.85rem 1.25rem;
   transition: all var(--transition); cursor: pointer;
 }
-.top-item:hover { background: var(--surface2); transform: translateX(-4px); }
+.top-item:hover { background: var(--surface2); }
 .top-rank {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 1.8rem; color: var(--accent);
   width: 2.5rem; text-align: center; flex-shrink: 0;
 }
-.top-thumb {
-  width: 60px; height: 85px;
-  border-radius: 8px; object-fit: cover; flex-shrink: 0;
-  background: var(--surface2);
-}
-.top-details { flex: 1; min-width: 0; }
+.top-thumb { width: 60px; height: 85px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+.top-details { flex: 1; }
 .top-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; }
 .top-meta { font-size: 0.8rem; color: var(--text2); display: flex; gap: 0.75rem; }
 .top-meta .rating { color: var(--gold); }
 
 /* FOOTER */
-.footer {
-  background: var(--bg2); border-top: 1px solid var(--border);
-  padding: 2rem; text-align: center;
-  color: var(--text3); font-size: 0.85rem;
-}
+.footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text3); font-size: 0.85rem; }
 
 /* LOADING */
-.loading {
-  text-align: center; padding: 3rem;
-  color: var(--text2); grid-column: 1/-1;
-}
+.loading { text-align: center; padding: 3rem; color: var(--text2); grid-column: 1/-1; }
 .spinner {
   display: inline-block; width: 40px; height: 40px;
-  border: 3px solid var(--surface2);
-  border-top-color: var(--accent);
-  border-radius: 50%; animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
+  border: 3px solid var(--surface2); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* MODAL */
 .modal-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,0.95);
   backdrop-filter: blur(8px);
   z-index: 5000; display: none;
-  align-items: center; justify-content: center;
-  padding: 1rem;
+  align-items: flex-start; justify-content: center;
+  padding: 2rem 1rem; overflow-y: auto;
 }
 .modal-overlay.active { display: flex; }
 .modal {
   background: var(--bg3); border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 2rem; max-width: 800px;
-  width: 100%; max-height: 90vh; overflow-y: auto;
-  position: relative;
+  padding: 2rem; max-width: 1200px;
+  width: 100%; position: relative;
 }
 .modal-close {
   position: absolute; top: 1rem; left: 1rem;
   background: rgba(255,255,255,0.1);
   border: 1px solid rgba(255,255,255,0.15);
-  color: var(--text2); width: 36px; height: 36px;
-  border-radius: 50%; font-size: 1rem;
-  transition: all var(--transition);
+  color: var(--text2); width: 40px; height: 40px;
+  border-radius: 50%; font-size: 1.2rem;
+  transition: all var(--transition); z-index: 10;
 }
 .modal-close:hover { background: var(--accent); color: #fff; }
-.modal-content { display: flex; gap: 2rem; flex-wrap: wrap; }
-.modal-poster { width: 220px; flex-shrink: 0; }
-.modal-poster img { width: 100%; border-radius: var(--radius); }
-.modal-info { flex: 1; min-width: 250px; }
-.modal-info h2 { font-size: 1.8rem; margin-bottom: 0.75rem; }
-.modal-meta {
+
+/* PLAYER */
+.player-container {
+  width: 100%; aspect-ratio: 16/9;
+  background: #000; border-radius: var(--radius);
+  overflow: hidden; margin-bottom: 1.5rem;
+  position: relative;
+}
+.player-container iframe {
+  width: 100%; height: 100%; border: none;
+}
+.player-tabs {
+  display: flex; gap: 0.5rem; margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.player-tab {
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text2); padding: 0.5rem 1.2rem;
+  border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  transition: all var(--transition);
+}
+.player-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.player-tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+/* MOVIE INFO */
+.movie-header {
+  display: flex; gap: 2rem; flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.movie-poster {
+  width: 200px; flex-shrink: 0;
+  border-radius: var(--radius); overflow: hidden;
+}
+.movie-info { flex: 1; min-width: 250px; }
+.movie-info h2 { font-size: 1.8rem; margin-bottom: 0.75rem; }
+.movie-meta {
   display: flex; gap: 0.75rem; flex-wrap: wrap;
   color: var(--text2); font-size: 0.9rem; margin-bottom: 1rem;
 }
-.modal-meta .rating { color: var(--gold); }
-.modal-desc { color: var(--text2); line-height: 1.7; margin-bottom: 1.5rem; }
+.movie-meta .rating { color: var(--gold); font-weight: 700; }
+.movie-genres { color: var(--text2); font-size: 0.85rem; margin-bottom: 1rem; }
+.movie-desc { color: var(--text2); line-height: 1.7; margin-bottom: 1rem; }
+
+/* SEASONS (TV) */
+.seasons-section { margin-top: 1.5rem; }
+.seasons-section h3 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--text); }
+.season-selector { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.season-btn {
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text2); padding: 0.4rem 0.9rem;
+  border-radius: 6px; font-size: 0.85rem;
+  transition: all var(--transition);
+}
+.season-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.episodes-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+.episode-btn {
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text2); padding: 0.75rem 1rem;
+  border-radius: 8px; font-size: 0.85rem;
+  text-align: right; transition: all var(--transition);
+}
+.episode-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
 
 /* RESPONSIVE */
 @media (max-width: 900px) {
   .nav-links { display: none; }
-  .nav-search input { width: 150px; }
+  .nav-search input { width: 140px; }
   .section { padding: 2rem 1.5rem; }
   .hero-content { padding: 0 1.5rem; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-  .modal-content { flex-direction: column; }
-  .modal-poster { width: 100%; max-width: 250px; margin: 0 auto; }
+  .modal { padding: 1rem; }
+  .movie-poster { width: 100%; max-width: 200px; margin: 0 auto; }
 }
 </style>
 </head>
@@ -315,7 +356,7 @@ button { cursor: pointer; font-family: var(--font); border: none; }
     <h1 class="hero-title" id="heroTitle">جاري التحميل...</h1>
     <div class="hero-meta" id="heroMeta"></div>
     <p class="hero-desc" id="heroDesc"></p>
-    <button class="btn-watch" onclick="watchHero()">▶ شاهد الآن</button>
+    <button class="btn-play" onclick="playHero()">▶ شاهد الآن</button>
   </div>
 </section>
 
@@ -362,6 +403,7 @@ button { cursor: pointer; font-family: var(--font); border: none; }
   🚀 ONYX STUDIO — جميع الحقوق محفوظة
 </footer>
 
+<!-- MODAL -->
 <div class="modal-overlay" id="movieModal" onclick="if(event.target.id==='movieModal') closeModal()">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">✕</button>
@@ -395,7 +437,7 @@ function movieCard(m) {
   '</div>';
 }
 
-/* ─── LOAD HERO ─── */
+/* ─── HERO ─── */
 async function loadHero() {
   try {
     const res = await fetch('/api/trending');
@@ -431,12 +473,12 @@ function renderHero(i) {
   document.getElementById('heroDesc').textContent = desc.substring(0, 220) + (desc.length > 220 ? '...' : '');
 }
 
-function watchHero() {
+function playHero() {
   const m = heroMovies[heroIndex];
   if (m) openMovie(m.id, m.media_type || 'movie');
 }
 
-/* ─── LOAD TRENDING ─── */
+/* ─── LOAD DATA ─── */
 async function loadTrending() {
   const el = document.getElementById('trendingGrid');
   try {
@@ -445,12 +487,9 @@ async function loadTrending() {
     const results = (data.results || []).filter(m => m.poster_path);
     el.innerHTML = results.map(movieCard).join('') || '<div class="loading">لا توجد نتائج</div>';
     document.getElementById('trendingCount').textContent = results.length + ' عنصر';
-  } catch (e) {
-    el.innerHTML = '<div class="loading">❌ خطأ في التحميل</div>';
-  }
+  } catch (e) { el.innerHTML = '<div class="loading">❌ خطأ</div>'; }
 }
 
-/* ─── LOAD POPULAR ─── */
 async function loadPopular() {
   const el = document.getElementById('popularGrid');
   try {
@@ -462,7 +501,6 @@ async function loadPopular() {
   } catch (e) { el.innerHTML = '<div class="loading">❌</div>'; }
 }
 
-/* ─── LOAD TOP RATED ─── */
 async function loadTopRated() {
   const el = document.getElementById('topList');
   try {
@@ -489,7 +527,6 @@ async function loadTopRated() {
   } catch (e) { el.innerHTML = '<div class="loading">❌</div>'; }
 }
 
-/* ─── LOAD SERIES ─── */
 async function loadSeries() {
   const el = document.getElementById('seriesGrid');
   try {
@@ -504,10 +541,7 @@ async function loadSeries() {
 /* ─── SEARCH ─── */
 async function doSearch() {
   const q = document.getElementById('searchInput').value.trim();
-  if (!q) {
-    alert('اكتب كلمة البحث');
-    return;
-  }
+  if (!q) return;
   const el = document.getElementById('trendingGrid');
   const title = document.querySelector('#trending-section .section-title');
   el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
@@ -519,15 +553,17 @@ async function doSearch() {
     const results = (data.results || []).filter(m => m.poster_path);
     el.innerHTML = results.map(movieCard).join('') || '<div class="loading">لا توجد نتائج لـ: ' + q + '</div>';
     document.getElementById('trendingCount').textContent = results.length + ' نتيجة';
-  } catch (e) { el.innerHTML = '<div class="loading">❌ خطأ في البحث</div>'; }
+  } catch (e) { el.innerHTML = '<div class="loading">❌ خطأ</div>'; }
 }
 
-/* ─── OPEN MOVIE DETAIL ─── */
+/* ─── OPEN MOVIE (with player) ─── */
 async function openMovie(id, type) {
   const modal = document.getElementById('movieModal');
   const content = document.getElementById('modalContent');
   content.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
   modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
   try {
     const res = await fetch('/api/' + type + '/' + id);
     const m = await res.json();
@@ -537,28 +573,130 @@ async function openMovie(id, type) {
     const runtime = m.runtime || (m.episode_run_time && m.episode_run_time[0]) || '?';
     const poster = m.poster_path ? IMG + '/w500' + m.poster_path : '';
     const genres = (m.genres || []).map(g => g.name).join(' • ');
-    content.innerHTML = '<div class="modal-content">' +
-      '<div class="modal-poster"><img src="' + poster + '" alt="' + title + '"></div>' +
-      '<div class="modal-info">' +
-        '<h2>' + title + '</h2>' +
-        '<div class="modal-meta">' +
-          '<span class="rating">⭐ ' + rating + '/10</span>' +
-          '<span>📅 ' + year + '</span>' +
-          '<span>⏱️ ' + runtime + ' دقيقة</span>' +
-          '<span>' + (type === 'tv' ? '📺 مسلسل' : '🎬 فيلم') + '</span>' +
-        '</div>' +
-        '<p style="color:var(--text2);margin-bottom:1rem;font-size:0.85rem">' + genres + '</p>' +
-        '<p class="modal-desc">' + (m.overview || 'لا يوجد وصف متاح') + '</p>' +
-        '<button class="btn-watch" onclick="alert(\'🎬 جاري تشغيل: ' + title.replace(/'/g, '') + '\')">▶ شاهد الآن</button>' +
-      '</div>' +
-    '</div>';
+    const desc = m.overview || 'لا يوجد وصف متاح';
+
+    let html = '';
+
+    /* PLAYER */
+    html += '<div class="player-container" id="playerContainer">';
+    html += '<iframe id="playerFrame" src="" allowfullscreen allow="autoplay; encrypted-media; fullscreen"></iframe>';
+    html += '</div>';
+
+    /* PLAYER SOURCES TABS */
+    html += '<div class="player-tabs">';
+    html += '<button class="player-tab active" onclick="switchPlayer(this, \'' + type + '\', ' + id + ', \'vidsrc\')">🎬 VidSrc</button>';
+    html += '<button class="player-tab" onclick="switchPlayer(this, \'' + type + '\', ' + id + ', \'2embed\')">🎥 2Embed</button>';
+    html += '<button class="player-tab" onclick="switchPlayer(this, \'' + type + '\', ' + id + ', \'vidsrc_me\')">📺 VidSrc.me</button>';
+    html += '<button class="player-tab" onclick="switchPlayer(this, \'' + type + '\', ' + id + ', \'superembed\')">🎞️ SuperEmbed</button>';
+    html += '</div>';
+
+    /* MOVIE INFO */
+    html += '<div class="movie-header">';
+    html += '<div class="movie-poster"><img src="' + poster + '" alt="' + title + '"></div>';
+    html += '<div class="movie-info">';
+    html += '<h2>' + title + '</h2>';
+    html += '<div class="movie-meta">';
+    html += '<span class="rating">⭐ ' + rating + '/10</span>';
+    html += '<span>📅 ' + year + '</span>';
+    html += '<span>⏱️ ' + runtime + ' دقيقة</span>';
+    html += '<span>' + (type === 'tv' ? '📺 مسلسل' : '🎬 فيلم') + '</span>';
+    html += '</div>';
+    if (genres) html += '<p class="movie-genres">🎭 ' + genres + '</p>';
+    html += '<p class="movie-desc">' + desc + '</p>';
+    html += '</div>';
+    html += '</div>';
+
+    /* SEASONS for TV */
+    if (type === 'tv' && m.seasons && m.seasons.length) {
+      html += '<div class="seasons-section">';
+      html += '<h3>📺 المواسم والحلقات</h3>';
+      html += '<div class="season-selector" id="seasonSelector">';
+      m.seasons.filter(s => s.season_number > 0).forEach(s => {
+        html += '<button class="season-btn" data-season="' + s.season_number + '" onclick="changeSeason(this, ' + id + ', ' + s.season_number + ')">الموسم ' + s.season_number + '</button>';
+      });
+      html += '</div>';
+      html += '<div class="episodes-grid" id="episodesGrid"></div>';
+      html += '</div>';
+    }
+
+    content.innerHTML = html;
+
+    /* Load player */
+    loadPlayer(type, id, 'vidsrc');
+
+    /* Load episodes for TV */
+    if (type === 'tv') {
+      const firstSeason = m.seasons.filter(s => s.season_number > 0)[0];
+      if (firstSeason) {
+        document.querySelector('.season-btn')?.classList.add('active');
+        loadEpisodes(id, firstSeason.season_number);
+      }
+    }
+
   } catch (e) {
-    content.innerHTML = '<div class="loading">❌ خطأ في التحميل</div>';
+    content.innerHTML = '<div class="loading">❌ خطأ في التحميل: ' + e.message + '</div>';
   }
+}
+
+/* ─── PLAYER ─── */
+function loadPlayer(type, id, source) {
+  const frame = document.getElementById('playerFrame');
+  if (!frame) return;
+  frame.src = '/player?type=' + type + '&id=' + id + '&source=' + source;
+}
+
+function switchPlayer(btn, type, id, source) {
+  document.querySelectorAll('.player-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  loadPlayer(type, id, source);
+}
+
+/* ─── EPISODES ─── */
+async function loadEpisodes(tvId, seasonNum) {
+  const el = document.getElementById('episodesGrid');
+  if (!el) return;
+  el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const res = await fetch('/api/tv/' + tvId + '/season/' + seasonNum);
+    const data = await res.json();
+    const episodes = data.episodes || [];
+    if (!episodes.length) {
+      el.innerHTML = '<div class="loading">لا توجد حلقات</div>';
+      return;
+    }
+    el.innerHTML = episodes.map(ep => 
+      '<button class="episode-btn" onclick="playEpisode(' + tvId + ', ' + seasonNum + ', ' + ep.episode_number + ')">' +
+        '<strong>حلقة ' + ep.episode_number + '</strong><br>' +
+        '<span style="font-size:0.75rem;color:var(--text3)">' + (ep.name || '') + '</span>' +
+      '</button>'
+    ).join('');
+  } catch (e) {
+    el.innerHTML = '<div class="loading">❌ خطأ</div>';
+  }
+}
+
+function changeSeason(btn, tvId, seasonNum) {
+  document.querySelectorAll('.season-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadEpisodes(tvId, seasonNum);
+}
+
+function playEpisode(tvId, season, episode) {
+  const frame = document.getElementById('playerFrame');
+  if (!frame) return;
+  const activeTab = document.querySelector('.player-tab.active');
+  const source = activeTab ? activeTab.textContent.includes('2Embed') ? '2embed' : 
+                            activeTab.textContent.includes('VidSrc.me') ? 'vidsrc_me' :
+                            activeTab.textContent.includes('SuperEmbed') ? 'superembed' : 'vidsrc' : 'vidsrc';
+  frame.src = '/player?type=tv&id=' + tvId + '&source=' + source + '&season=' + season + '&episode=' + episode;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function closeModal() {
   document.getElementById('movieModal').classList.remove('active');
+  document.body.style.overflow = '';
+  const frame = document.getElementById('playerFrame');
+  if (frame) frame.src = '';
 }
 
 document.addEventListener('keydown', e => {
@@ -582,7 +720,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 # ══════════════════════════════════════════════════════════
-# 🎯 ROUTES
+# PLAYER PAGE (iframe للفيديو)
+# ══════════════════════════════════════════════════════════
+
+PLAYER_HTML = r"""
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; background: #000; overflow: hidden; }
+iframe { width: 100%; height: 100%; border: none; display: block; }
+</style>
+</head>
+<body>
+<iframe id="player" src="" allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe>
+<script>
+const params = new URLSearchParams(window.location.search);
+const type = params.get('type') || 'movie';
+const id = params.get('id');
+const source = params.get('source') || 'vidsrc';
+const season = params.get('season') || '1';
+const episode = params.get('episode') || '1';
+
+let url = '';
+
+const sources = {
+  vidsrc: {
+    movie: 'https://vidsrc.to/embed/movie/' + id,
+    tv: 'https://vidsrc.to/embed/tv/' + id + '/' + season + '/' + episode
+  },
+  '2embed': {
+    movie: 'https://www.2embed.cc/embed/' + id,
+    tv: 'https://www.2embed.cc/embedtv/' + id + '&s=' + season + '&e=' + episode
+  },
+  vidsrc_me: {
+    movie: 'https://vidsrc.me/embed/movie?tmdb=' + id,
+    tv: 'https://vidsrc.me/embed/tv?tmdb=' + id + '&season=' + season + '&episode=' + episode
+  },
+  superembed: {
+    movie: 'https://multiembed.mov/?video_id=' + id + '&tmdb=1',
+    tv: 'https://multiembed.mov/?video_id=' + id + '&tmdb=1&s=' + season + '&e=' + episode
+  }
+};
+
+if (sources[source]) {
+  url = sources[source][type] || sources[source].movie;
+}
+
+document.getElementById('player').src = url;
+</script>
+</body>
+</html>
+"""
+
+
+# ══════════════════════════════════════════════════════════
+# ROUTES
 # ══════════════════════════════════════════════════════════
 
 @app.route("/")
@@ -590,8 +786,12 @@ def index():
     return INDEX_HTML
 
 
+@app.route("/player")
+def player():
+    return PLAYER_HTML
+
+
 def tmdb_get(endpoint, params=None):
-    """جلب من TMDB"""
     if not TMDB_API_KEY:
         return {"error": "TMDB_API_KEY missing", "results": []}
     params = params or {}
@@ -607,19 +807,16 @@ def tmdb_get(endpoint, params=None):
 
 @app.route("/api/trending")
 def api_trending():
-    """كل الأفلام الرائجة"""
     return jsonify(tmdb_get("/trending/all/week"))
 
 
 @app.route("/api/popular/<media_type>")
 def api_popular(media_type):
-    """كل الأفلام/المسلسلات الشائعة"""
     return jsonify(tmdb_get(f"/{media_type}/popular"))
 
 
 @app.route("/api/search")
 def api_search():
-    """بحث"""
     q = request.args.get("q", "").strip()
     if not q:
         return jsonify({"results": []})
@@ -628,25 +825,17 @@ def api_search():
 
 @app.route("/api/movie/<int:movie_id>")
 def api_movie(movie_id):
-    """تفاصيل فيلم"""
     return jsonify(tmdb_get(f"/movie/{movie_id}"))
 
 
 @app.route("/api/tv/<int:tv_id>")
 def api_tv(tv_id):
-    """تفاصيل مسلسل"""
     return jsonify(tmdb_get(f"/tv/{tv_id}"))
 
 
-@app.route("/api/genre")
-def api_genre():
-    """حسب التصنيف"""
-    media_type = request.args.get("type", "movie")
-    genre_id = request.args.get("id", "28")
-    return jsonify(tmdb_get(f"/discover/{media_type}", {
-        "with_genres": genre_id,
-        "sort_by": "popularity.desc",
-    }))
+@app.route("/api/tv/<int:tv_id>/season/<int:season_num>")
+def api_tv_season(tv_id, season_num):
+    return jsonify(tmdb_get(f"/tv/{tv_id}/season/{season_num}"))
 
 
 @app.route("/health")
