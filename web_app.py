@@ -1,5 +1,5 @@
 # -*- -*- coding: utf-8 -*-
-"""ONYX MOVIE — Flask + TMDB + Episodes & Movie Collection Images"""
+"""ONYX MOVIE — Flask + TMDB + Original Audio Language Support"""
 
 from flask import Flask, jsonify, request
 import os
@@ -14,20 +14,31 @@ IMG_BASE = "https://image.tmdb.org/t/p"
 
 
 # ══════════════════════════════════════════════════════════
-# المصدر الرئيسي المباشر (VidLink 4K)
+# المصادر الداعمة للغة الصوتية الأصلية والترجمة Multi-Audio
 # ══════════════════════════════════════════════════════════
 
 PLAYER_SOURCES = [
-    {"name": "", "quality": "4K", "ads": "none",
-     "movie": "https://vidlink.pro/movie/{id}?primaryColor=e50914&autoplay=true",
-     "tv":    "https://vidlink.pro/tv/{id}/{season}/{episode}?primaryColor=e50914&autoplay=true"}
+    # المصدر الأول: VidLink مع تفعيل الصوت الأصلي المباشر
+    {"name": "VidLink Original", "quality": "4K", "ads": "none",
+     "movie": "https://vidlink.pro/movie/{id}?primaryColor=e50914&autoplay=true&multiLang=true",
+     "tv":    "https://vidlink.pro/tv/{id}/{season}/{episode}?primaryColor=e50914&autoplay=true&multiLang=true"},
+
+    # المصدر الثاني: Videasy (يدعم تغيير الصوت والترجمة من داخل مشغل الفيديو)
+    {"name": "Videasy Multi-Audio", "quality": "4K", "ads": "none",
+     "movie": "https://player.videasy.net/movie/{id}",
+     "tv":    "https://player.videasy.net/tv/{id}/{season}/{episode}"},
+
+    # المصدر الثالث: VidSrc PRO (الصوت الأصلي دائماً)
+    {"name": "VidSrc Original", "quality": "HD", "ads": "none",
+     "movie": "https://vidsrc.pro/embed/movie/{id}",
+     "tv":    "https://vidsrc.pro/embed/tv/{id}/{season}/{episode}"}
 ]
 
 SOURCES_JSON = json.dumps(PLAYER_SOURCES, ensure_ascii=False)
 
 
 # ══════════════════════════════════════════════════════════
-# HTML — الصفحة الرئيسية
+# HTML — الواجهة الرئيسية
 # ══════════════════════════════════════════════════════════
 
 INDEX_HTML = r"""<!DOCTYPE html>
@@ -147,6 +158,7 @@ html[dir="ltr"] .modal-close { left: auto; right: 1.2rem; }
 .movie-info h2 { font-size: 2.4rem; margin-bottom: 0.8rem; font-weight: 800; line-height: 1.2; }
 .movie-meta { display: flex; gap: 1rem; flex-wrap: wrap; color: var(--text2); font-size: 0.95rem; margin-bottom: 1.2rem; align-items: center; }
 .movie-meta .rating { color: var(--gold); font-weight: 700; background: rgba(245, 197, 24, 0.1); padding: 0.2rem 0.6rem; border-radius: 4px; }
+.movie-meta .lang-badge { background: var(--surface2); color: #fff; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 700; text-transform: uppercase; }
 .movie-genres { color: var(--text2); font-size: 0.9rem; margin-bottom: 1.2rem; }
 .movie-desc { color: var(--text2); line-height: 1.7; font-size: 0.95rem; margin-bottom: 1.5rem; max-width: 850px; }
 
@@ -362,18 +374,19 @@ async function openMovie(id, type) {
     const year = (m.release_date || m.first_air_date || '').substring(0, 4);
     const rating = m.vote_average ? m.vote_average.toFixed(1) : '?';
     const runtime = m.runtime || (m.episode_run_time && m.episode_run_time[0]) || '?';
+    const origLang = (m.original_language || 'EN').toUpperCase();
     const poster = m.poster_path ? IMG + '/w500' + m.poster_path : '';
     const genres = (m.genres || []).map(g => g.name).join(' • ');
     const desc = m.overview || '';
     const t = I18N[currentLang];
 
-    let html = '<div class="player-wrapper" id="playerWrapper"><div class="player-container"><iframe id="playerFrame" src="" allowfullscreen allow="autoplay; encrypted-media; fullscreen"></iframe></div></div>';
+    let html = '<div class="player-wrapper" id="playerWrapper"><div class="player-container"><iframe id="playerFrame" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe></div></div>';
 
     html += '<div class="movie-header">';
     html += '<div class="movie-poster"><img src="' + poster + '" alt="' + title + '"></div>';
     html += '<div class="movie-info">';
     html += '<h2>' + title + '</h2>';
-    html += '<div class="movie-meta"><span class="rating">' + t.rating + ' ' + rating + '/10</span><span>' + year + '</span><span>' + runtime + ' min</span></div>';
+    html += '<div class="movie-meta"><span class="rating">' + t.rating + ' ' + rating + '/10</span><span>' + year + '</span><span>' + runtime + ' min</span><span class="lang-badge">اللغة الأصلية: ' + origLang + '</span></div>';
     if (genres) html += '<p class="movie-genres">' + genres + '</p>';
     html += '<p class="movie-desc">' + desc + '</p>';
     html += '<button class="btn-watch-now" onclick="startStreaming(0, 1, 1)">' + t.watchNow + '</button>';
@@ -389,7 +402,7 @@ async function openMovie(id, type) {
       html += '</div></div>';
     }
 
-    // Movie Collection Parts (أجزاء الفيلم السابقة والقادمة مع صورها)
+    // Movie Collection Parts
     if (type === 'movie' && m.belongs_to_collection) {
       const colRes = await fetch('/api/collection/' + m.belongs_to_collection.id + '?lang=' + currentLang);
       const colData = await colRes.json();
@@ -414,7 +427,6 @@ async function openMovie(id, type) {
 
     content.innerHTML = html;
 
-    // جلب حلقات الموسم الأول مع صورها تلقائياً للمسلسلات
     if (type === 'tv' && m.seasons && m.seasons.length) {
       const firstSeason = m.seasons.filter(s => s.season_number > 0)[0];
       if (firstSeason) loadEpisodes(id, firstSeason.season_number);
