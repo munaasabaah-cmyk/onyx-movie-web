@@ -1,133 +1,89 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CineMax – أفضل تجربة سينمائية</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet" />
-  <style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ONYX MOVIE – أفضل تجربة سينمائية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet" />
+<style>
 /* ═══════════════════════════════════════════════════════════
-   CINEMAX — MAIN STYLESHEET
+   ONYX MOVIE — STYLESHEET (CineMax Style + TMDB)
    ═══════════════════════════════════════════════════════════ */
 
-/* ── 1. RESET & ROOT ──────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:        #080b14;
-  --bg2:       #0d1117;
-  --bg3:       #12172a;
-  --surface:   #161d30;
-  --surface2:  #1e2740;
-  --accent:    #e50914;
-  --accent2:   #ff4c54;
-  --gold:      #f5c518;
-  --blue:      #0077ff;
-  --text:      #f0f0f0;
-  --text2:     #a0aabf;
-  --text3:     #5a6480;
-  --border:    rgba(255,255,255,0.07);
-  --radius:    12px;
-  --radius-lg: 20px;
+  --bg: #080b14; --bg2: #0d1117; --bg3: #12172a;
+  --surface: #161d30; --surface2: #1e2740;
+  --accent: #e50914; --accent2: #ff4c54; --gold: #f5c518;
+  --blue: #0077ff;
+  --text: #f0f0f0; --text2: #a0aabf; --text3: #5a6480;
+  --border: rgba(255,255,255,0.07);
+  --radius: 12px; --radius-lg: 20px;
   --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
-  --glow:      0 0 40px rgba(229,9,20,0.3);
-  --font:      'Cairo', sans-serif;
+  --glow: 0 0 40px rgba(229,9,20,0.3);
+  --font: 'Cairo', sans-serif;
 }
 
 html { scroll-behavior: smooth; font-size: 16px; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font);
-  direction: rtl;
-  overflow-x: hidden;
-  cursor: none;
-}
-
+body { background: var(--bg); color: var(--text); font-family: var(--font); direction: rtl; overflow-x: hidden; cursor: none; }
 a { text-decoration: none; color: inherit; }
 ul { list-style: none; }
 img { max-width: 100%; display: block; }
 button { cursor: none; font-family: var(--font); }
 input, select, textarea { font-family: var(--font); }
 
-/* ── 2. SCROLLBAR ─────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg2); }
 ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent2); }
-
-/* ── 3. SELECTION ─────────────────────────────────────────── */
 ::selection { background: var(--accent); color: #fff; }
 
-/* ── 4. CUSTOM CURSOR ─────────────────────────────────────── */
+/* CURSOR */
 #cursor {
-  position: fixed;
-  width: 14px; height: 14px;
-  background: var(--accent);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
+  position: fixed; width: 14px; height: 14px;
+  background: var(--accent); border-radius: 50%;
+  pointer-events: none; z-index: 9999;
   transform: translate(-50%,-50%);
   transition: transform 0.1s, width 0.2s, height 0.2s, background 0.2s;
   mix-blend-mode: screen;
 }
 #cursor-blur {
-  position: fixed;
-  width: 40px; height: 40px;
+  position: fixed; width: 40px; height: 40px;
   border: 1.5px solid rgba(229,9,20,0.5);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9998;
+  border-radius: 50%; pointer-events: none; z-index: 9998;
   transform: translate(-50%,-50%);
   transition: all 0.15s ease-out;
 }
-body:has(button:hover) #cursor,
-body:has(a:hover) #cursor { width: 22px; height: 22px; background: var(--accent2); }
 
-/* ── 5. LOADER ────────────────────────────────────────────── */
+/* LOADER */
 #loader {
-  position: fixed; inset: 0;
-  background: var(--bg);
-  z-index: 10000;
-  display: flex; align-items: center; justify-content: center;
+  position: fixed; inset: 0; background: var(--bg);
+  z-index: 10000; display: flex; align-items: center; justify-content: center;
   transition: opacity 0.6s ease, visibility 0.6s;
 }
-#loader.hidden { opacity: 0; visibility: hidden; }
-
+#loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 .loader-inner { text-align: center; }
-
 .loader-logo {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 4rem;
-  letter-spacing: 0.1em;
-  color: var(--text);
-  margin-bottom: 2rem;
+  font-size: 4rem; letter-spacing: 0.1em;
+  color: var(--text); margin-bottom: 2rem;
 }
 .loader-logo span { color: var(--accent); }
-
 .loader-bar {
-  width: 260px; height: 3px;
-  background: var(--surface);
-  border-radius: 2px;
-  overflow: hidden;
-  margin: 0 auto;
+  width: 260px; height: 3px; background: var(--surface);
+  border-radius: 2px; overflow: hidden; margin: 0 auto;
 }
 .loader-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  border-radius: 2px;
-  animation: loaderAnim 2s ease forwards;
+  height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 2px; animation: loaderAnim 2s ease forwards;
 }
 @keyframes loaderAnim { from { width: 0 } to { width: 100% } }
 
-/* ── 6. NAVBAR ────────────────────────────────────────────── */
+/* NAVBAR */
 #navbar {
   position: fixed; top: 0; left: 0; right: 0;
-  z-index: 1000;
-  padding: 0 2rem;
-  height: 70px;
+  z-index: 1000; padding: 0 2rem; height: 70px;
   display: flex; align-items: center;
   background: transparent;
   transition: background var(--transition), box-shadow var(--transition);
@@ -137,54 +93,32 @@ body:has(a:hover) #cursor { width: 22px; height: 22px; background: var(--accent2
   backdrop-filter: blur(20px);
   box-shadow: 0 2px 40px rgba(0,0,0,0.5);
 }
-
-.nav-container {
-  width: 100%;
-  display: flex; align-items: center; gap: 2rem;
-}
-
+.nav-container { width: 100%; display: flex; align-items: center; gap: 2rem; }
 .nav-logo {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.8rem;
-  letter-spacing: 0.08em;
-  flex-shrink: 0;
+  font-size: 1.8rem; letter-spacing: 0.08em; flex-shrink: 0;
 }
 .nav-logo span { color: var(--accent); }
-
-.nav-links {
-  display: flex; gap: 0.25rem;
-  flex: 1;
-  justify-content: center;
-}
+.nav-links { display: flex; gap: 0.25rem; flex: 1; justify-content: center; }
 .nav-links a {
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text2);
-  transition: color var(--transition), background var(--transition);
+  padding: 0.5rem 1rem; border-radius: 8px;
+  font-size: 0.9rem; font-weight: 600; color: var(--text2);
+  transition: color var(--transition);
   position: relative;
 }
 .nav-links a::after {
-  content: '';
-  position: absolute;
-  bottom: 2px; left: 50%; right: 50%;
-  height: 2px;
-  background: var(--accent);
-  border-radius: 1px;
+  content: ''; position: absolute;
+  bottom: 2px; left: 50%; right: 50%; height: 2px;
+  background: var(--accent); border-radius: 1px;
   transition: left var(--transition), right var(--transition);
 }
 .nav-links a:hover, .nav-links a.active { color: var(--text); }
 .nav-links a:hover::after, .nav-links a.active::after { left: 12%; right: 12%; }
-
 .nav-right { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
-
 .nav-search {
   display: flex; align-items: center;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden;
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 .nav-search:focus-within {
@@ -192,1551 +126,409 @@ body:has(a:hover) #cursor { width: 22px; height: 22px; background: var(--accent2
   box-shadow: 0 0 0 2px rgba(229,9,20,0.15);
 }
 .nav-search input {
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--text);
-  padding: 0.5rem 1rem;
-  width: 200px;
-  font-size: 0.85rem;
+  background: transparent; border: none; outline: none;
+  color: var(--text); padding: 0.5rem 1rem;
+  width: 200px; font-size: 0.85rem;
 }
 .nav-search input::placeholder { color: var(--text3); }
 .search-btn {
-  background: none;
-  border: none;
-  padding: 0.5rem 0.75rem;
-  color: var(--text2);
-  display: flex;
-  transition: color var(--transition);
+  background: none; border: none;
+  padding: 0.5rem 0.75rem; color: var(--text2);
+  display: flex; transition: color var(--transition);
+  cursor: pointer;
 }
 .search-btn:hover { color: var(--accent); }
-.search-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
-
 .btn-login {
-  background: transparent;
-  border: 1.5px solid var(--border);
-  color: var(--text);
-  padding: 0.45rem 1.1rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  transition: border-color var(--transition), color var(--transition);
+  background: transparent; border: 1.5px solid var(--border);
+  color: var(--text); padding: 0.45rem 1.1rem;
+  border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  transition: all var(--transition); cursor: pointer;
 }
 .btn-login:hover { border-color: var(--accent); color: var(--accent); }
-
 .btn-register {
-  background: var(--accent);
-  border: 1.5px solid var(--accent);
-  color: #fff;
-  padding: 0.45rem 1.1rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  transition: background var(--transition), box-shadow var(--transition);
+  background: var(--accent); border: 1.5px solid var(--accent);
+  color: #fff; padding: 0.45rem 1.1rem;
+  border-radius: 8px; font-size: 0.85rem; font-weight: 700;
+  transition: all var(--transition); cursor: pointer;
 }
-.btn-register:hover {
-  background: var(--accent2);
-  box-shadow: 0 0 20px rgba(229,9,20,0.4);
-}
-
-.user-avatar {
-  position: relative;
-  cursor: none;
-}
+.btn-register:hover { background: var(--accent2); box-shadow: 0 0 20px rgba(229,9,20,0.4); }
+.user-avatar { position: relative; }
 .user-avatar img {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  border: 2px solid var(--accent);
-  object-fit: cover;
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 2px solid var(--accent); object-fit: cover; cursor: pointer;
 }
 .user-avatar.hidden { display: none; }
-
 .user-dropdown {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  left: 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  min-width: 160px;
-  padding: 0.5rem 0;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-8px);
-  transition: all var(--transition);
+  position: absolute; top: calc(100% + 0.5rem); left: 0;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); min-width: 180px;
+  padding: 0.5rem 0; opacity: 0; visibility: hidden;
+  transform: translateY(-8px); transition: all var(--transition);
   box-shadow: 0 8px 32px rgba(0,0,0,0.4);
 }
-.user-avatar:hover .user-dropdown {
-  opacity: 1; visibility: visible; transform: translateY(0);
-}
+.user-avatar:hover .user-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
 .user-dropdown a {
-  display: block;
-  padding: 0.6rem 1rem;
-  font-size: 0.85rem;
-  color: var(--text2);
-  transition: color var(--transition), background var(--transition);
+  display: block; padding: 0.6rem 1rem;
+  font-size: 0.85rem; color: var(--text2);
+  transition: all var(--transition); cursor: pointer;
 }
 .user-dropdown a:hover { color: var(--text); background: rgba(255,255,255,0.05); }
 
-/* ── 7. HERO ──────────────────────────────────────────────── */
+/* HERO */
 .hero {
-  position: relative;
-  height: 100vh; min-height: 600px;
-  overflow: hidden;
-  display: flex; align-items: center;
+  position: relative; height: 100vh; min-height: 600px;
+  overflow: hidden; display: flex; align-items: center;
 }
-
 .hero-bg { position: absolute; inset: 0; }
 .hero-bg-slide {
   position: absolute; inset: 0;
-  background-size: cover;
-  background-position: center top;
-  opacity: 0;
-  transition: opacity 1.2s ease;
-  transform: scale(1.05);
-  animation: kenBurns 12s ease infinite alternate;
+  background-size: cover; background-position: center top;
+  opacity: 0; transition: opacity 1.2s ease;
+  transform: scale(1.05); animation: kenBurns 12s ease infinite alternate;
 }
 .hero-bg-slide.active { opacity: 1; }
-@keyframes kenBurns {
-  from { transform: scale(1.05); }
-  to   { transform: scale(1); }
-}
-
+@keyframes kenBurns { from { transform: scale(1.05); } to { transform: scale(1); } }
 .hero-overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(8,11,20,0.95) 0%,
-    rgba(8,11,20,0.7) 50%,
-    rgba(8,11,20,0.1) 100%
-  ), linear-gradient(
-    0deg,
-    rgba(8,11,20,1) 0%,
-    transparent 40%
-  );
+  background: linear-gradient(90deg, rgba(8,11,20,0.95) 0%, rgba(8,11,20,0.7) 50%, rgba(8,11,20,0.1) 100%), linear-gradient(0deg, rgba(8,11,20,1) 0%, transparent 40%);
 }
-
 .hero-content {
-  position: relative; z-index: 2;
-  max-width: 650px;
-  padding: 0 4rem;
+  position: relative; z-index: 2; max-width: 650px; padding: 0 4rem;
   animation: heroIn 1s ease 0.5s both;
 }
-@keyframes heroIn {
-  from { opacity: 0; transform: translateY(40px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
+@keyframes heroIn { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
 .hero-badge {
   display: inline-flex; align-items: center; gap: 0.4rem;
-  background: rgba(229,9,20,0.15);
-  border: 1px solid rgba(229,9,20,0.4);
-  color: var(--accent2);
-  font-size: 0.8rem;
-  font-weight: 700;
-  padding: 0.35rem 0.85rem;
-  border-radius: 50px;
-  margin-bottom: 1rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  background: rgba(229,9,20,0.15); border: 1px solid rgba(229,9,20,0.4);
+  color: var(--accent2); font-size: 0.8rem; font-weight: 700;
+  padding: 0.35rem 0.85rem; border-radius: 50px; margin-bottom: 1rem;
+  letter-spacing: 0.05em; text-transform: uppercase;
 }
-
 .hero-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(3rem, 7vw, 6rem);
-  line-height: 1;
-  letter-spacing: 0.04em;
-  color: #fff;
-  text-shadow: 0 4px 30px rgba(0,0,0,0.5);
-  margin-bottom: 0.75rem;
+  font-size: clamp(3rem, 7vw, 6rem); line-height: 1;
+  letter-spacing: 0.04em; color: #fff;
+  text-shadow: 0 4px 30px rgba(0,0,0,0.5); margin-bottom: 0.75rem;
 }
-
 .hero-meta {
   display: flex; align-items: center; gap: 0.6rem;
-  color: var(--text2);
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
+  color: var(--text2); font-size: 0.9rem; font-weight: 600;
+  margin-bottom: 1rem; flex-wrap: wrap;
 }
 .dot { color: var(--text3); }
 .rating { color: var(--gold); }
 .genre-tag {
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.15);
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.78rem;
-  color: var(--text2);
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+  padding: 0.2rem 0.6rem; border-radius: 4px;
+  font-size: 0.78rem; color: var(--text2);
 }
-
 .hero-desc {
-  color: var(--text2);
-  font-size: 1rem;
-  line-height: 1.7;
-  max-width: 500px;
-  margin-bottom: 2rem;
+  color: var(--text2); font-size: 1rem; line-height: 1.7;
+  max-width: 500px; margin-bottom: 2rem;
 }
-
 .hero-btns { display: flex; gap: 1rem; }
-
 .btn-watch {
   display: inline-flex; align-items: center; gap: 0.6rem;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  padding: 0.85rem 2rem;
-  border-radius: var(--radius);
-  font-size: 1rem;
-  font-weight: 700;
-  transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+  background: var(--accent); color: #fff; border: none;
+  padding: 0.85rem 2rem; border-radius: var(--radius);
+  font-size: 1rem; font-weight: 700;
+  transition: all var(--transition); cursor: pointer;
 }
-.btn-watch svg {
-  width: 18px; height: 18px;
-  stroke: none; fill: #fff;
-}
-.btn-watch:hover {
-  background: var(--accent2);
-  box-shadow: var(--glow);
-  transform: translateY(-2px);
-}
-
+.btn-watch:hover { background: var(--accent2); box-shadow: var(--glow); transform: translateY(-2px); }
 .btn-info {
   display: inline-flex; align-items: center; gap: 0.6rem;
   background: rgba(255,255,255,0.1);
   border: 1.5px solid rgba(255,255,255,0.15);
-  color: #fff;
-  padding: 0.85rem 2rem;
-  border-radius: var(--radius);
-  font-size: 1rem;
-  font-weight: 600;
-  backdrop-filter: blur(10px);
-  transition: background var(--transition), border-color var(--transition), transform var(--transition);
+  color: #fff; padding: 0.85rem 2rem;
+  border-radius: var(--radius); font-size: 1rem; font-weight: 600;
+  backdrop-filter: blur(10px); transition: all var(--transition); cursor: pointer;
 }
-.btn-info svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2; }
-.btn-info:hover {
-  background: rgba(255,255,255,0.18);
-  border-color: rgba(255,255,255,0.3);
-  transform: translateY(-2px);
-}
-
+.btn-info:hover { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.3); transform: translateY(-2px); }
 .hero-controls {
   position: absolute; bottom: 3rem; left: 50%;
-  transform: translateX(-50%);
-  z-index: 3;
+  transform: translateX(-50%); z-index: 3;
   display: flex; align-items: center; gap: 1rem;
 }
 .hero-prev, .hero-next {
   background: rgba(255,255,255,0.1);
   border: 1px solid rgba(255,255,255,0.2);
-  color: #fff;
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  font-size: 1rem;
-  display: flex; align-items: center; justify-content: center;
-  transition: background var(--transition);
+  color: #fff; width: 40px; height: 40px;
+  border-radius: 50%; font-size: 1rem;
+  transition: background var(--transition); cursor: pointer;
 }
 .hero-prev:hover, .hero-next:hover { background: var(--accent); border-color: var(--accent); }
-
 .hero-dots { display: flex; gap: 0.5rem; }
 .hero-dot {
-  width: 8px; height: 8px;
-  background: rgba(255,255,255,0.3);
-  border-radius: 50%;
-  transition: background var(--transition), width var(--transition);
-  cursor: none;
+  width: 8px; height: 8px; background: rgba(255,255,255,0.3);
+  border-radius: 50%; transition: all var(--transition); cursor: pointer;
 }
-.hero-dot.active {
-  background: var(--accent);
-  width: 24px;
-  border-radius: 4px;
-}
+.hero-dot.active { background: var(--accent); width: 24px; border-radius: 4px; }
 
-.hero-scroll {
-  position: absolute; bottom: 2rem; right: 4rem;
-  z-index: 3;
-  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-  color: var(--text3);
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.scroll-arrow {
-  width: 20px; height: 20px;
-  border-bottom: 2px solid var(--text3);
-  border-right: 2px solid var(--text3);
-  transform: rotate(45deg);
-  animation: scrollBounce 1.5s ease infinite;
-}
-@keyframes scrollBounce {
-  0%,100% { transform: rotate(45deg) translateY(0); }
-  50%      { transform: rotate(45deg) translateY(4px); }
-}
-
-/* ── 8. STATS BAR ─────────────────────────────────────────── */
+/* STATS */
 .stats-bar {
   background: linear-gradient(135deg, var(--surface), var(--surface2));
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-template-columns: repeat(4, 1fr);
   padding: 1.5rem 4rem;
 }
-.stat-item {
-  text-align: center;
-  border-left: 1px solid var(--border);
-  padding: 0.75rem 1rem;
-}
+.stat-item { text-align: center; border-left: 1px solid var(--border); padding: 0.75rem 1rem; }
 .stat-item:last-child { border-left: none; }
 .stat-num {
-  display: block;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 2.5rem;
-  color: var(--accent);
-  letter-spacing: 0.05em;
-  line-height: 1;
+  display: block; font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.5rem; color: var(--accent);
+  letter-spacing: 0.05em; line-height: 1;
 }
-.stat-label {
-  display: block;
-  font-size: 0.8rem;
-  color: var(--text2);
-  margin-top: 0.25rem;
-}
+.stat-label { display: block; font-size: 0.8rem; color: var(--text2); margin-top: 0.25rem; }
 
-/* ── 9. SECTIONS ──────────────────────────────────────────── */
-.section {
-  padding: 3rem 4rem;
-}
-
+/* SECTIONS */
+.section { padding: 3rem 4rem; }
 .section-header {
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 1.75rem;
 }
-.section-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text);
-}
+.section-title { font-size: 1.5rem; font-weight: 700; color: var(--text); }
 .section-title.center { text-align: center; width: 100%; }
 .section-sub { color: var(--text2); text-align: center; margin-top: 0.5rem; margin-bottom: 2rem; }
-
-.see-all {
-  font-size: 0.85rem;
-  color: var(--accent);
-  font-weight: 600;
-  transition: color var(--transition);
-}
+.see-all { font-size: 0.85rem; color: var(--accent); font-weight: 600; cursor: pointer; }
 .see-all:hover { color: var(--accent2); }
 
-/* ── 10. MOVIES GRID ──────────────────────────────────────── */
+/* MOVIES GRID */
 .movies-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1.25rem;
 }
-
 .movie-card {
-  position: relative;
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--surface);
-  transition: transform var(--transition), box-shadow var(--transition);
-  cursor: none;
+  position: relative; border-radius: var(--radius);
+  overflow: hidden; background: var(--surface);
+  transition: all var(--transition); cursor: pointer;
 }
 .movie-card:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  z-index: 2;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5); z-index: 2;
 }
 .movie-card:hover .card-overlay { opacity: 1; }
 .movie-card:hover .card-info { transform: translateY(0); opacity: 1; }
-
 .movie-poster {
-  width: 100%;
-  aspect-ratio: 2/3;
-  object-fit: cover;
-  display: block;
-  transition: transform var(--transition);
+  width: 100%; aspect-ratio: 2/3; object-fit: cover;
+  display: block; transition: transform var(--transition);
 }
 .movie-card:hover .movie-poster { transform: scale(1.05); }
-
 .card-overlay {
   position: absolute; inset: 0;
   background: linear-gradient(0deg, rgba(8,11,20,0.95) 0%, rgba(8,11,20,0.3) 60%, transparent 100%);
-  opacity: 0;
-  transition: opacity var(--transition);
+  opacity: 0; transition: opacity var(--transition);
   display: flex; flex-direction: column; justify-content: flex-end;
   padding: 1rem;
 }
-
 .card-info { transform: translateY(10px); opacity: 0; transition: all var(--transition); }
 .card-title { font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 0.3rem; line-height: 1.3; }
-.card-meta { font-size: 0.75rem; color: var(--text2); display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+.card-meta { font-size: 0.75rem; color: var(--text2); display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
 .card-rating { color: var(--gold); font-weight: 700; }
-
 .card-btns { display: flex; gap: 0.5rem; }
 .card-btn-play {
-  flex: 1;
-  background: var(--accent);
-  border: none; color: #fff;
-  padding: 0.45rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  transition: background var(--transition);
-  display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+  flex: 1; background: var(--accent); border: none; color: #fff;
+  padding: 0.45rem; border-radius: 6px;
+  font-size: 0.8rem; font-weight: 600;
+  transition: background var(--transition); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
 }
 .card-btn-play:hover { background: var(--accent2); }
-.card-btn-fav {
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: #fff;
-  width: 34px; height: 34px;
-  border-radius: 6px;
-  font-size: 1rem;
-  display: flex; align-items: center; justify-content: center;
-  transition: background var(--transition), color var(--transition);
-}
-.card-btn-fav:hover { background: rgba(229,9,20,0.2); color: var(--accent); }
-.card-btn-fav.active { color: var(--accent); }
-
 .card-badge {
   position: absolute; top: 0.6rem; right: 0.6rem;
-  background: var(--accent);
-  color: #fff;
-  font-size: 0.68rem;
-  font-weight: 700;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  background: var(--accent); color: #fff;
+  font-size: 0.68rem; font-weight: 700;
+  padding: 0.2rem 0.5rem; border-radius: 4px;
+  text-transform: uppercase; z-index: 2;
 }
-.card-badge.new { background: var(--blue); }
-.card-badge.series { background: #7928ca; }
 
-/* ── 11. MOVIES ROW ───────────────────────────────────────── */
+/* MOVIES ROW */
 .movies-row {
-  display: flex;
-  gap: 1.25rem;
-  overflow-x: auto;
-  padding-bottom: 1rem;
-  scrollbar-width: thin;
+  display: flex; gap: 1.25rem; overflow-x: auto;
+  padding-bottom: 1rem; scrollbar-width: thin;
   scrollbar-color: var(--accent) var(--surface);
 }
 .movies-row .movie-card { flex: 0 0 180px; }
-.movies-row::-webkit-scrollbar { height: 4px; }
-.movies-row::-webkit-scrollbar-track { background: var(--surface); }
-.movies-row::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
 
-/* ── 12. FEATURED BANNER ──────────────────────────────────── */
-.featured-banner {
-  margin: 0 4rem;
-  border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, #0a0f20 0%, #161d30 50%, #1a0a0a 100%);
-  border: 1px solid var(--border);
-  display: flex;
-  overflow: hidden;
-  position: relative;
-}
-.featured-banner::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 70% 50%, rgba(229,9,20,0.08) 0%, transparent 70%);
-}
-.featured-content {
-  flex: 1;
-  padding: 3rem;
-  display: flex; flex-direction: column; justify-content: center;
-  position: relative; z-index: 1;
-}
-.featured-badge {
-  display: inline-block;
-  background: var(--accent);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.3rem 0.8rem;
-  border-radius: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 1rem;
-  width: fit-content;
-}
-.featured-content h2 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 3.5rem;
-  letter-spacing: 0.06em;
-  color: #fff;
-  margin-bottom: 0.75rem;
-}
-.featured-content p {
-  color: var(--text2);
-  font-size: 0.95rem;
-  line-height: 1.7;
-  max-width: 420px;
-  margin-bottom: 1rem;
-}
-.featured-meta {
-  display: flex; gap: 0.75rem; align-items: center;
-  color: var(--text2); font-size: 0.85rem;
-  margin-bottom: 1.5rem;
-}
-.featured-meta span:first-child { color: var(--gold); font-weight: 700; }
-.featured-image {
-  width: 300px; flex-shrink: 0;
-  position: relative; overflow: hidden;
-}
-.featured-image img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  filter: brightness(0.85);
-  transition: filter var(--transition), transform var(--transition);
-}
-.featured-banner:hover .featured-image img { filter: brightness(1); transform: scale(1.03); }
-
-/* ── 13. CATEGORIES ───────────────────────────────────────── */
-.categories-section { text-align: center; }
-.categories-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-top: 2rem;
-}
-.cat-card {
-  padding: 2rem 1rem;
-  border-radius: var(--radius);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text2);
-  transition: all var(--transition);
-  cursor: none;
-  position: relative;
-  overflow: hidden;
-}
-.cat-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--clr, var(--accent));
-  opacity: 0;
-  transition: opacity var(--transition);
-}
-.cat-card:hover::before { opacity: 0.12; }
-.cat-card:hover {
-  border-color: var(--clr, var(--accent));
-  color: var(--text);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-}
-
-/* ── 14. TOP RATED LIST ───────────────────────────────────── */
-.top-list {
-  display: flex; flex-direction: column; gap: 0.75rem;
-}
+/* TOP LIST */
+.top-list { display: flex; flex-direction: column; gap: 0.75rem; }
 .top-item {
   display: flex; align-items: center; gap: 1.25rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0.85rem 1.25rem;
-  transition: background var(--transition), transform var(--transition);
-  cursor: none;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 0.85rem 1.25rem;
+  transition: all var(--transition); cursor: pointer;
 }
 .top-item:hover { background: var(--surface2); transform: translateX(-4px); }
-
 .top-rank {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.8rem;
-  color: var(--accent);
-  width: 2.5rem;
-  text-align: center;
-  flex-shrink: 0;
+  font-size: 1.8rem; color: var(--accent);
+  width: 2.5rem; text-align: center; flex-shrink: 0;
 }
 .top-item:nth-child(1) .top-rank { color: var(--gold); }
 .top-item:nth-child(2) .top-rank { color: #c0c0c0; }
 .top-item:nth-child(3) .top-rank { color: #cd7f32; }
-
 .top-thumb {
   width: 60px; height: 85px;
-  border-radius: 8px;
-  object-fit: cover;
-  flex-shrink: 0;
+  border-radius: 8px; object-fit: cover; flex-shrink: 0;
 }
 .top-details { flex: 1; }
 .top-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
 .top-meta { font-size: 0.8rem; color: var(--text2); display: flex; gap: 0.75rem; }
-.top-score { color: var(--gold); font-weight: 700; }
 
-.top-score-circle {
-  width: 50px; height: 50px;
-  border-radius: 50%;
-  background: conic-gradient(var(--gold) calc(var(--pct) * 1%), var(--surface2) 0%);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--gold);
-  flex-shrink: 0;
-  position: relative;
+/* CATEGORIES */
+.categories-section { text-align: center; }
+.categories-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1rem; margin-top: 2rem;
 }
-.top-score-circle::after {
-  content: '';
-  position: absolute;
-  inset: 5px;
-  background: var(--surface);
-  border-radius: 50%;
-  z-index: -1;
+.cat-card {
+  padding: 2rem 1rem; border-radius: var(--radius);
+  background: var(--surface); border: 1px solid var(--border);
+  font-size: 1.1rem; font-weight: 700; color: var(--text2);
+  transition: all var(--transition); cursor: pointer;
+  position: relative; overflow: hidden;
+}
+.cat-card:hover {
+  border-color: var(--accent); color: var(--text);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
 }
 
-/* ── 15. PLANS ────────────────────────────────────────────── */
-.plans-section {
-  background: var(--bg2);
-  padding: 4rem;
-}
-.plans-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-top: 2.5rem;
-  max-width: 1000px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.plan-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 2rem 1.75rem;
-  text-align: center;
-  position: relative;
-  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
-}
-.plan-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 50px rgba(0,0,0,0.35);
-}
-.plan-card.featured-plan {
-  border-color: var(--accent);
-  background: linear-gradient(160deg, var(--surface2) 0%, #1a0a12 100%);
-  box-shadow: 0 0 40px rgba(229,9,20,0.2);
-}
-.plan-card.featured-plan:hover { box-shadow: 0 0 60px rgba(229,9,20,0.35); }
-
-.plan-badge {
-  position: absolute;
-  top: -14px; left: 50%;
-  transform: translateX(-50%);
-  background: var(--accent);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.25rem 1rem;
-  border-radius: 50px;
-  white-space: nowrap;
-  letter-spacing: 0.04em;
-}
-.plan-name {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text2);
-  margin-bottom: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.plan-price {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 3rem;
-  color: var(--text);
-  letter-spacing: 0.04em;
-  margin-bottom: 1.5rem;
-}
-.plan-price span { font-family: var(--font); font-size: 1rem; color: var(--text2); }
-
-.plan-features { text-align: right; margin-bottom: 1.75rem; }
-.plan-features li {
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 0.875rem;
-  color: var(--text2);
-}
-.plan-features li:last-child { border-bottom: none; }
-.plan-features li.no { color: var(--text3); text-decoration: line-through; }
-
-.btn-plan {
-  width: 100%;
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
-  color: var(--text);
-  padding: 0.75rem;
-  border-radius: var(--radius);
-  font-size: 0.95rem;
-  font-weight: 700;
-  transition: all var(--transition);
-}
-.btn-plan:hover { border-color: var(--accent); color: var(--accent); }
-.btn-plan.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-  box-shadow: 0 4px 20px rgba(229,9,20,0.3);
-}
-.btn-plan.primary:hover { background: var(--accent2); box-shadow: var(--glow); }
-
-/* ── 16. FOOTER ───────────────────────────────────────────── */
+/* FOOTER */
 .footer {
-  background: var(--bg2);
-  border-top: 1px solid var(--border);
+  background: var(--bg2); border-top: 1px solid var(--border);
   padding: 3rem 4rem 1.5rem;
 }
 .footer-content {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 3rem;
-  margin-bottom: 2rem;
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 3rem; margin-bottom: 2rem;
 }
 .footer-logo {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 2rem;
-  letter-spacing: 0.08em;
-  margin-bottom: 0.75rem;
+  font-size: 2rem; letter-spacing: 0.08em; margin-bottom: 0.75rem;
 }
 .footer-logo span { color: var(--accent); }
 .footer-brand p { color: var(--text2); font-size: 0.875rem; line-height: 1.7; margin-bottom: 1rem; }
-
-.social-links { display: flex; gap: 0.6rem; }
-.social-links a {
-  width: 36px; height: 36px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text2);
-  font-size: 0.85rem;
-  font-weight: 700;
-  transition: all var(--transition);
-}
-.social-links a:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
-
 .footer-col h4 { font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 1rem; }
 .footer-col a {
-  display: block;
-  color: var(--text2);
-  font-size: 0.85rem;
-  padding: 0.3rem 0;
-  transition: color var(--transition);
+  display: block; color: var(--text2); font-size: 0.85rem;
+  padding: 0.3rem 0; transition: color var(--transition);
 }
 .footer-col a:hover { color: var(--accent); }
-
 .footer-bottom {
-  border-top: 1px solid var(--border);
-  padding-top: 1.25rem;
-  text-align: center;
-  color: var(--text3);
-  font-size: 0.8rem;
+  border-top: 1px solid var(--border); padding-top: 1.25rem;
+  text-align: center; color: var(--text3); font-size: 0.8rem;
 }
 
-/* ── 17. MODALS ───────────────────────────────────────────── */
+/* MODALS */
 .modal-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.85);
-  backdrop-filter: blur(8px);
-  z-index: 5000;
-  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+  z-index: 5000; display: flex; align-items: center; justify-content: center;
   opacity: 0; visibility: hidden;
-  transition: opacity var(--transition), visibility var(--transition);
-  padding: 1rem;
+  transition: all var(--transition); padding: 1rem;
 }
 .modal-overlay.active { opacity: 1; visibility: visible; }
-.modal-overlay.active .modal { transform: scale(1) translateY(0); opacity: 1; }
-
 .modal {
-  background: var(--bg3);
-  border: 1px solid var(--border);
+  background: var(--bg3); border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 2.5rem;
-  width: 100%;
-  max-width: 440px;
-  position: relative;
-  transform: scale(0.92) translateY(20px);
-  opacity: 0;
+  padding: 2.5rem; width: 100%; max-width: 440px;
+  position: relative; max-height: 90vh; overflow-y: auto;
+  transform: scale(0.92) translateY(20px); opacity: 0;
   transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
-  max-height: 90vh;
-  overflow-y: auto;
 }
+.modal-overlay.active .modal { transform: scale(1) translateY(0); opacity: 1; }
 .modal.modal-wide { max-width: 640px; }
-.modal.modal-player { max-width: 800px; padding: 0; background: #000; border-radius: var(--radius-lg); overflow: hidden; }
-
 .modal-close {
   position: absolute; top: 1rem; left: 1rem;
   background: rgba(255,255,255,0.1);
   border: 1px solid rgba(255,255,255,0.15);
-  color: var(--text2);
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  font-size: 0.8rem;
+  color: var(--text2); width: 32px; height: 32px;
+  border-radius: 50%; font-size: 0.8rem;
   display: flex; align-items: center; justify-content: center;
-  transition: all var(--transition);
+  transition: all var(--transition); cursor: pointer;
 }
 .modal-close:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
-
 .modal-logo {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.8rem;
-  letter-spacing: 0.08em;
-  text-align: center;
-  margin-bottom: 0.5rem;
+  font-size: 1.8rem; letter-spacing: 0.08em;
+  text-align: center; margin-bottom: 0.5rem;
 }
 .modal-logo span { color: var(--accent); }
+.modal h2 { font-size: 1.4rem; text-align: center; color: var(--text); margin-bottom: 1.75rem; }
 
-.modal h2 {
-  font-size: 1.4rem;
-  text-align: center;
-  color: var(--text);
-  margin-bottom: 1.75rem;
-}
-
-/* ── 18. FORMS ────────────────────────────────────────────── */
+/* FORMS */
 .form-group { margin-bottom: 1.1rem; }
 .form-group label {
-  display: block;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text2);
-  margin-bottom: 0.4rem;
+  display: block; font-size: 0.82rem; font-weight: 600;
+  color: var(--text2); margin-bottom: 0.4rem;
 }
 .form-group input, .form-group select {
-  width: 100%;
-  background: var(--surface);
+  width: 100%; background: var(--surface);
   border: 1.5px solid var(--border);
-  border-radius: 8px;
-  color: var(--text);
-  padding: 0.7rem 1rem;
-  font-size: 0.9rem;
-  outline: none;
-  transition: border-color var(--transition), box-shadow var(--transition);
+  border-radius: 8px; color: var(--text);
+  padding: 0.7rem 1rem; font-size: 0.9rem; outline: none;
 }
 .form-group input:focus, .form-group select:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(229,9,20,0.12);
 }
 .form-group input::placeholder { color: var(--text3); }
-
 .input-eye { position: relative; }
 .input-eye input { padding-left: 2.5rem; }
 .input-eye button {
   position: absolute; left: 0.75rem; top: 50%;
   transform: translateY(-50%);
-  background: none; border: none;
-  color: var(--text3); font-size: 0.9rem;
-  transition: color var(--transition);
+  background: none; border: none; color: var(--text3);
+  font-size: 0.9rem; cursor: pointer;
 }
-.input-eye button:hover { color: var(--text); }
-
-.pass-strength {
-  height: 4px;
-  background: var(--surface2);
-  border-radius: 2px;
-  margin-top: 0.4rem;
-  overflow: hidden;
-}
-.strength-bar { height: 100%; width: 0; border-radius: 2px; transition: width 0.3s, background 0.3s; }
-#strengthText { color: var(--text3); font-size: 0.75rem; margin-top: 0.25rem; display: block; }
-
 .form-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
 .check-label {
   display: flex; align-items: center; gap: 0.5rem;
   font-size: 0.83rem; color: var(--text2);
-  cursor: none;
 }
-.check-label input[type=checkbox] {
-  width: 15px; height: 15px;
-  accent-color: var(--accent);
-  cursor: none;
-}
-.check-label a { color: var(--accent); }
-
-.forgot { font-size: 0.82rem; color: var(--accent); }
-.forgot:hover { color: var(--accent2); }
-
+.check-label input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--accent); }
 .btn-submit {
-  width: 100%;
-  background: var(--accent);
-  border: none;
-  color: #fff;
-  padding: 0.85rem;
-  border-radius: var(--radius);
-  font-size: 1rem;
-  font-weight: 700;
-  margin-top: 1rem;
-  transition: background var(--transition), box-shadow var(--transition);
+  width: 100%; background: var(--accent); border: none;
+  color: #fff; padding: 0.85rem;
+  border-radius: var(--radius); font-size: 1rem;
+  font-weight: 700; margin-top: 1rem;
+  transition: all var(--transition); cursor: pointer;
 }
 .btn-submit:hover { background: var(--accent2); box-shadow: var(--glow); }
-
 .switch-modal { text-align: center; font-size: 0.85rem; color: var(--text2); margin-top: 1rem; }
-.switch-modal a { color: var(--accent); }
-
-.social-auth { margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1.25rem; }
-.social-auth p { text-align: center; font-size: 0.8rem; color: var(--text3); margin-bottom: 0.75rem; }
-.social-btns { display: flex; gap: 0.75rem; }
-.social-btn {
-  flex: 1;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text2);
-  padding: 0.65rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  transition: all var(--transition);
-}
-.social-btn.google:hover { border-color: #4285F4; color: #4285F4; }
-.social-btn.facebook:hover { border-color: #1877F2; color: #1877F2; }
-
-/* ── 19. PLAN SELECTOR (in modal) ────────────────────────── */
+.switch-modal a { color: var(--accent); cursor: pointer; }
+.pass-strength { height: 4px; background: var(--surface2); border-radius: 2px; margin-top: 0.4rem; overflow: hidden; }
+.strength-bar { height: 100%; width: 0; border-radius: 2px; transition: all 0.3s; }
+#strengthText { color: var(--text3); font-size: 0.75rem; margin-top: 0.25rem; display: block; }
 .plan-selector { margin-bottom: 1.25rem; }
 .plan-selector p { font-size: 0.82rem; color: var(--text2); margin-bottom: 0.5rem; }
 .plan-options { display: flex; gap: 0.5rem; }
 .plan-opt {
-  flex: 1;
-  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
-  background: var(--surface);
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  gap: 0.4rem; background: var(--surface);
   border: 1.5px solid var(--border);
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.82rem;
-  color: var(--text2);
-  cursor: none;
-  transition: all var(--transition);
+  border-radius: 8px; padding: 0.5rem 0.75rem;
+  font-size: 0.82rem; color: var(--text2);
+  cursor: pointer; transition: all var(--transition);
 }
 .plan-opt:has(input:checked) { border-color: var(--accent); color: var(--accent); background: rgba(229,9,20,0.08); }
-.plan-opt input { accent-color: var(--accent); }
 
-/* ── 20. PROFILE ──────────────────────────────────────────── */
+/* PROFILE */
 .profile-header {
   display: flex; align-items: center; gap: 1.25rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--border);
-}
-.profile-avatar-big {
-  width: 70px; height: 70px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), #7928ca);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2rem;
-  flex-shrink: 0;
-  border: 3px solid var(--accent);
-}
-.profile-header h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.2rem; }
-.profile-header p { font-size: 0.85rem; color: var(--text2); }
-.plan-badge-sm {
-  display: inline-block;
-  background: rgba(229,9,20,0.15);
-  border: 1px solid rgba(229,9,20,0.4);
-  color: var(--accent2);
-  font-size: 0.72rem;
-  padding: 0.2rem 0.6rem;
-  border-radius: 50px;
-  margin-top: 0.4rem;
-}
-
-.profile-tabs { display: flex; gap: 0.4rem; margin-bottom: 1.5rem; }
-.tab {
-  flex: 1;
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text2);
-  padding: 0.55rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  transition: all var(--transition);
-}
-.tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-.tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
-
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-
-.watch-history { display: flex; flex-direction: column; gap: 0.75rem; }
-.watch-item {
-  display: flex; align-items: center; gap: 0.75rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.6rem 0.85rem;
-}
-.watch-thumb { width: 45px; height: 64px; border-radius: 5px; object-fit: cover; }
-.watch-details { flex: 1; }
-.watch-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.2rem; }
-.watch-date { font-size: 0.75rem; color: var(--text3); }
-
-/* ── 21. PLAYER ───────────────────────────────────────────── */
-.player-area {
-  background: #000;
-  aspect-ratio: 16/9;
-  display: flex; align-items: center; justify-content: center;
-}
-.player-placeholder {
-  text-align: center; color: var(--text2);
-}
-.player-icon {
-  font-size: 4rem;
-  width: 80px; height: 80px;
-  background: rgba(229,9,20,0.2);
-  border: 2px solid var(--accent);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 1rem;
-  animation: pulse 2s ease infinite;
-}
-@keyframes pulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(229,9,20,0.4); }
-  50%      { box-shadow: 0 0 0 15px rgba(229,9,20,0); }
-}
-.player-bar {
-  width: 200px;
-  height: 3px;
-  background: var(--surface2);
-  border-radius: 2px;
-  margin: 1rem auto 0;
-  overflow: hidden;
-}
-.player-progress {
-  height: 100%;
-  background: var(--accent);
-  width: 30%;
-  animation: loadProgress 2s ease infinite;
-}
-@keyframes loadProgress { 0% { width: 0 } 100% { width: 60% } }
-
-.player-info {
-  background: var(--surface);
-  padding: 1rem 1.5rem;
-}
-.player-info h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.75rem; }
-.player-controls {
-  display: flex; align-items: center; gap: 0.75rem;
-}
-.player-controls button {
-  background: none; border: none; color: var(--text2);
-  font-size: 1.2rem; padding: 0.3rem;
-  transition: color var(--transition);
-}
-.player-controls button:hover { color: var(--text); }
-.play-btn { color: var(--accent) !important; font-size: 1.4rem !important; }
-.vol { display: flex; align-items: center; gap: 0.4rem; font-size: 1rem; color: var(--text2); }
-.vol input { width: 70px; accent-color: var(--accent); }
-.time { font-size: 0.78rem; color: var(--text2); margin-right: auto; }
-.fullscreen-btn { font-size: 1rem !important; }
-
-/* ── 22. TOAST ────────────────────────────────────────────── */
-#toast {
-  position: fixed;
-  bottom: 2rem; left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 50px;
-  padding: 0.7rem 1.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-  z-index: 9999;
-  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
-  white-space: nowrap;
-}
-#toast.show { transform: translateX(-50%) translateY(0); }
-#toast.success { border-color: #22c55e; color: #22c55e; }
-#toast.error   { border-color: var(--accent); color: var(--accent); }
-
-/* ── 23. MOVIE DETAIL ─────────────────────────────────────── */
-.movie-detail { display: flex; gap: 2rem; }
-.movie-detail-poster { width: 180px; flex-shrink: 0; border-radius: var(--radius); overflow: hidden; }
-.movie-detail-poster img { width: 100%; border-radius: var(--radius); }
-.movie-detail-info { flex: 1; }
-.movie-detail-info h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem; }
-.movie-detail-meta { display: flex; gap: 0.75rem; color: var(--text2); font-size: 0.85rem; margin-bottom: 1rem; flex-wrap: wrap; }
-.movie-detail-desc { color: var(--text2); font-size: 0.9rem; line-height: 1.7; margin-bottom: 1.25rem; }
-.movie-detail-btns { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-
-/* ── 24. SEARCH RESULTS OVERLAY ───────────────────────────── */
-.search-overlay {
-  position: fixed; top: 70px; left: 0; right: 0;
-  background: rgba(8,11,20,0.97);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  padding: 1.5rem 4rem;
-  z-index: 900;
-  max-height: 60vh; overflow-y: auto;
-  transform: translateY(-100%);
-  transition: transform var(--transition);
-}
-.search-overlay.active { transform: translateY(0); }
-.search-result-item {
-  display: flex; align-items: center; gap: 1rem;
-  padding: 0.75rem;
-  border-radius: 8px;
-  transition: background var(--transition);
-  cursor: none;
-}
-.search-result-item:hover { background: var(--surface); }
-.search-result-thumb { width: 50px; height: 70px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
-.search-result-title { font-weight: 600; margin-bottom: 0.2rem; }
-.search-result-meta { font-size: 0.8rem; color: var(--text2); }
-
-/* ── 25. ANIMATIONS ───────────────────────────────────────── */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@keyframes slideInRight {
-  from { opacity: 0; transform: translateX(30px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-@keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.animate-up { animation: fadeInUp 0.6s ease both; }
-.animate-up:nth-child(1) { animation-delay: 0.05s; }
-.animate-up:nth-child(2) { animation-delay: 0.1s; }
-.animate-up:nth-child(3) { animation-delay: 0.15s; }
-.animate-up:nth-child(4) { animation-delay: 0.2s; }
-.animate-up:nth-child(5) { animation-delay: 0.25s; }
-.animate-up:nth-child(6) { animation-delay: 0.3s; }
-.animate-up:nth-child(7) { animation-delay: 0.35s; }
-.animate-up:nth-child(8) { animation-delay: 0.4s; }
-
-/* ── 26. SKELETON LOADING ─────────────────────────────────── */
-.skeleton {
-  background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: var(--radius);
-}
-.skeleton-card { aspect-ratio: 2/3; }
-.skeleton-row { height: 100px; border-radius: 8px; }
-
-/* ── 27. NOTIFICATION DOT ────────────────────────────────── */
-.notif-dot {
-  width: 8px; height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
-  position: absolute; top: -2px; right: -2px;
-  animation: pulseDot 1.5s ease infinite;
-}
-@keyframes pulseDot {
-  0%,100% { transform: scale(1); opacity: 1; }
-  50%      { transform: scale(1.5); opacity: 0.6; }
-}
-
-/* ── 28. RESPONSIVE ───────────────────────────────────────── */
-@media (max-width: 1100px) {
-  .stats-bar { grid-template-columns: repeat(2,1fr); padding: 1.5rem 2rem; }
-  .categories-grid { grid-template-columns: repeat(4,1fr); }
-  .footer-content { grid-template-columns: 1fr 1fr; gap: 2rem; }
-}
-
-@media (max-width: 900px) {
-  .nav-links { display: none; }
-  .nav-search input { width: 140px; }
-  .section { padding: 2rem 1.5rem; }
-  .featured-banner { margin: 0 1.5rem; flex-direction: column; }
-  .featured-image { width: 100%; height: 200px; }
-  .plans-grid { grid-template-columns: 1fr; max-width: 380px; }
-  .hero-content { padding: 0 2rem; }
-  .movies-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-  .categories-grid { grid-template-columns: repeat(2,1fr); }
-  .footer-content { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-}
-
-@media (max-width: 600px) {
-  .stats-bar { grid-template-columns: repeat(2,1fr); padding: 1rem; }
-  .stat-item { border: none; border-bottom: 1px solid var(--border); }
-  .hero-btns { flex-direction: column; }
-  .hero-title { font-size: 2.5rem; }
-  .section { padding: 2rem 1rem; }
-  .featured-banner { margin: 0 1rem; }
-  .footer { padding: 2rem 1rem 1rem; }
-  .footer-content { grid-template-columns: 1fr; gap: 1.5rem; }
-  .modal { padding: 1.75rem; }
-  .plans-section { padding: 2rem 1rem; }
-}
-
-/* ── 29. MISC UTILITIES ───────────────────────────────────── */
-.hidden { display: none !important; }
-.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
-.text-accent { color: var(--accent); }
-.text-gold   { color: var(--gold); }
-.text-muted  { color: var(--text2); }
-
-/* Glow on hover for interactive elements */
-.glow-hover:hover { text-shadow: 0 0 8px currentColor; }
-
-/* ── 30. PARTICLES CANVAS ────────────────────────────────── */
-#particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.4; }
-
-/* ── 31. BACK TO TOP ─────────────────────────────────────── */
-#backTop {
-  position: fixed; bottom: 2rem; right: 2rem;
-  width: 44px; height: 44px;
-  background: var(--accent);
-  border: none;
-  border-radius: 50%;
-  color: #fff;
-  font-size: 1.2rem;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 800;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: all var(--transition);
-  box-shadow: 0 4px 20px rgba(229,9,20,0.4);
-}
-#backTop.visible { opacity: 1; transform: translateY(0); }
-#backTop:hover { background: var(--accent2); transform: translateY(-3px); }
-
-/* ── 32. GENRE FILTER BAR ────────────────────────────────── */
-.genre-filter-bar {
-  display: flex; gap: 0.5rem;
-  padding: 0 4rem 1.5rem;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.genre-filter-bar::-webkit-scrollbar { display: none; }
-.genre-pill {
-  flex-shrink: 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text2);
-  padding: 0.4rem 1rem;
-  border-radius: 50px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  transition: all var(--transition);
-  cursor: none;
-}
-.genre-pill:hover, .genre-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
-/* ── 33. TOOLTIP ─────────────────────────────────────────── */
-[data-tip] { position: relative; }
-[data-tip]::after {
-  content: attr(data-tip);
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-size: 0.74rem;
-  padding: 0.3rem 0.6rem;
-  border-radius: 5px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--transition);
-}
-[data-tip]:hover::after { opacity: 1; }
-
-/* ── 34. RATING STARS ─────────────────────────────────────── */
-.stars { display: inline-flex; gap: 2px; color: var(--text3); font-size: 0.9rem; }
-.stars .filled { color: var(--gold); }
-
-/* ── 35. BADGE VARIANTS ───────────────────────────────────── */
-.badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 700; }
-.badge-red    { background: rgba(229,9,20,0.15); color: var(--accent2); border: 1px solid rgba(229,9,20,0.3); }
-.badge-gold   { background: rgba(245,197,24,0.15); color: var(--gold); border: 1px solid rgba(245,197,24,0.3); }
-.badge-blue   { background: rgba(0,119,255,0.15); color: #5ba4ff; border: 1px solid rgba(0,119,255,0.3); }
-.badge-purple { background: rgba(121,40,202,0.15); color: #a855f7; border: 1px solid rgba(121,40,202,0.3); }
-
-/* ── 36. SHIMMER CARD PLACEHOLDER ────────────────────────── */
-.card-placeholder {
-  background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
-  border-radius: var(--radius);
-  aspect-ratio: 2/3;
-}
-
-/* ── 37. SECTION DIVIDER ──────────────────────────────────── */
-.divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border), transparent);
-  margin: 0 4rem;
-}
-
-/* ── 38. HOVER CARD GLOW ──────────────────────────────────── */
-.movie-card::after {
-  content: '';
-  position: absolute; inset: 0;
-  border-radius: var(--radius);
-  box-shadow: 0 0 30px rgba(229,9,20,0.25);
-  opacity: 0;
-  transition: opacity var(--transition);
-  pointer-events: none;
-}
-.movie-card:hover::after { opacity: 1; }
-
-/* ── 39. LETTER SPACING UTILITY ───────────────────────────── */
-.ls-wide { letter-spacing: 0.12em; }
-.ls-tight { letter-spacing: -0.02em; }
-
-/* ── 40. FOCUS VISIBLE ─────────────────────────────────────── */
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-  border-radius: 4px;
-}
-
-/* ── 41. REDUCED MOTION ────────────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-}
-
-
-/* ══ IMAGE EDITOR PANEL ══════════════════════════════════ */
-#editorToggle {
-  position: fixed; bottom: 5rem; right: 2rem;
-  z-index: 900;
-  background: linear-gradient(135deg, #7928ca, var(--accent));
-  border: none; color: #fff;
-  width: 52px; height: 52px;
-  border-radius: 50%;
-  font-size: 1.3rem;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 24px rgba(121,40,202,0.5);
-  transition: all var(--transition);
-  cursor: pointer;
-}
-#editorToggle:hover { transform: scale(1.1) rotate(15deg); box-shadow: 0 6px 30px rgba(229,9,20,0.5); }
-
-#editorPanel {
-  position: fixed; left: 0; top: 0; bottom: 0;
-  width: 360px;
-  background: rgba(12,15,28,0.97);
-  backdrop-filter: blur(20px);
-  border-right: 1px solid var(--border);
-  z-index: 8000;
-  display: flex; flex-direction: column;
-  transform: translateX(-100%);
-  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
-  overflow: hidden;
-}
-#editorPanel.open { transform: translateX(0); }
-
-.ep-header {
-  padding: 1.25rem 1.5rem;
-  background: linear-gradient(135deg, rgba(121,40,202,0.2), rgba(229,9,20,0.1));
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  flex-shrink: 0;
-}
-.ep-header h3 { font-size: 1rem; font-weight: 700; }
-.ep-header span { font-size: 0.75rem; color: var(--text2); }
-.ep-close {
-  background: rgba(255,255,255,0.08); border: 1px solid var(--border);
-  color: var(--text2); width: 30px; height: 30px; border-radius: 50%;
-  font-size: 0.8rem; display: flex; align-items: center; justify-content: center;
-  transition: all var(--transition); cursor: pointer;
-}
-.ep-close:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
-
-.ep-tabs {
-  display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0;
-}
-.ep-tab {
-  flex: 1; padding: 0.7rem; background: none; border: none;
-  color: var(--text2); font-size: 0.78rem; font-weight: 600;
-  border-bottom: 2px solid transparent;
-  transition: all var(--transition); cursor: pointer;
-}
-.ep-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(229,9,20,0.05); }
-
-.ep-body { flex: 1; overflow-y: auto; padding: 1rem; }
-
-.ep-section { margin-bottom: 1.5rem; }
-.ep-section-title {
-  font-size: 0.72rem; font-weight: 700; color: var(--text3);
-  text-transform: uppercase; letter-spacing: 0.1em;
-  margin-bottom: 0.75rem; padding-bottom: 0.4rem;
-  border-bottom: 1px solid var(--border);
-}
-
-/* Hero Image Slots */
-.hero-slot {
-  margin-bottom: 0.85rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  transition: border-color var(--transition);
-}
-.hero-slot:focus-within { border-color: var(--accent); }
-.hero-slot-header {
-  display: flex; align-items: center; gap: 0.6rem;
-  padding: 0.6rem 0.85rem;
-  background: rgba(255,255,255,0.03);
-}
-.hero-slot-num {
-  width: 22px; height: 22px; border-radius: 50%;
-  background: var(--accent); color: #fff;
-  font-size: 0.7rem; font-weight: 700;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.hero-slot-header span { font-size: 0.78rem; color: var(--text2); }
-.hero-slot-preview {
-  width: 100%; height: 70px; object-fit: cover;
-  border-top: 1px solid var(--border);
-  background: var(--bg2);
-  display: block;
-}
-.hero-slot-input {
-  display: flex; align-items: center; gap: 0.5rem;
-  padding: 0.6rem 0.85rem;
-  border-top: 1px solid var(--border);
-}
-.hero-slot-input input {
-  flex: 1; background: transparent; border: none; outline: none;
-  color: var(--text); font-size: 0.75rem;
-}
-.hero-slot-input input::placeholder { color: var(--text3); }
-.hero-slot-input button {
-  background: var(--accent); border: none; color: #fff;
-  padding: 0.3rem 0.65rem; border-radius: 5px; font-size: 0.72rem; font-weight: 600;
-  transition: background var(--transition); cursor: pointer; white-space: nowrap;
-}
-.hero-slot-input button:hover { background: var(--accent2); }
-
-/* Upload button */
-.upload-area {
-  border: 2px dashed var(--border);
-  border-radius: var(--radius);
-  padding: 1rem;
-  text-align: center;
-  cursor: pointer;
-  transition: all var(--transition);
-  margin-bottom: 0.75rem;
-}
-.upload-area:hover { border-color: var(--accent); background: rgba(229,9,20,0.05); }
-.upload-area input { display: none; }
-.upload-area label { cursor: pointer; font-size: 0.82rem; color: var(--text2); display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
-.upload-icon { font-size: 1.8rem; }
-
-/* Movie card editor */
-.movie-edit-card {
-  display: flex; gap: 0.75rem; align-items: flex-start;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0.75rem;
-  margin-bottom: 0.6rem;
-  transition: border-color var(--transition);
-}
-.movie-edit-card:focus-within { border-color: rgba(229,9,20,0.4); }
-.movie-edit-thumb {
-  width: 44px; height: 62px;
-  border-radius: 5px; object-fit: cover; flex-shrink: 0;
-  border: 1px solid var(--border);
-}
-.movie-edit-info { flex: 1; min-width: 0; }
-.movie-edit-title { font-size: 0.78rem; font-weight: 600; margin-bottom: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.movie-edit-url {
-  width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
-  border-radius: 5px; color: var(--text); font-size: 0.68rem;
-  padding: 0.3rem 0.5rem; outline: none;
-  transition: border-color var(--transition);
-}
-.movie-edit-url:focus { border-color: var(--accent); }
-.movie-edit-url::placeholder { color: var(--text3); }
-.movie-edit-actions { display: flex; gap: 0.3rem; margin-top: 0.4rem; }
-.movie-edit-apply {
-  background: var(--accent); border: none; color: #fff;
-  padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.68rem;
-  font-weight: 600; cursor: pointer; transition: background var(--transition);
-}
-.movie-edit-apply:hover { background: var(--accent2); }
-.movie-edit-reset {
-  background: var(--surface2); border: 1px solid var(--border); color: var(--text2);
-  padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.68rem; cursor: pointer;
-  transition: all var(--transition);
-}
-.movie-edit-reset:hover { border-color: var(--accent); color: var(--accent); }
-
-/* Featured banner editor */
-.ep-featured-preview {
-  width: 100%; height: 80px; object-fit: cover;
-  border-radius: 8px; margin-bottom: 0.6rem;
-  background: var(--surface); border: 1px solid var(--border);
-}
-.ep-input-group { margin-bottom: 0.75rem; }
-.ep-input-group label { font-size: 0.72rem; color: var(--text2); display: block; margin-bottom: 0.3rem; }
-.ep-input-group input {
-  width: 100%; background: var(--surface); border: 1px solid var(--border);
-  border-radius: 6px; color: var(--text); padding: 0.45rem 0.7rem; font-size: 0.78rem; outline: none;
-  transition: border-color var(--transition);
-}
-.ep-input-group input:focus { border-color: var(--accent); }
-.ep-input-group input::placeholder { color: var(--text3); }
-
-.ep-apply-btn {
-  width: 100%; background: linear-gradient(135deg, var(--accent), #c00710);
-  border: none; color: #fff; padding: 0.65rem;
-  border-radius: var(--radius); font-size: 0.85rem; font-weight: 700;
-  cursor: pointer; transition: all var(--transition);
-  margin-top: 0.25rem;
-}
-.ep-apply-btn:hover { box-shadow: 0 0 20px rgba(229,9,20,0.4); transform: translateY(-1px); }
-
-.ep-reset-all {
-  width: 100%; background: transparent; border: 1px dashed var(--border);
-  color: var(--text3); padding: 0.55rem;
-  border-radius: var(--radius); font-size: 0.8rem; cursor: pointer;
-  transition: all var(--transition); margin-top: 0.5rem;
-}
-.ep-reset-all:hover { border-color: var(--accent); color: var(--accent); }
-
-/* Tab content */
-.ep-tab-content { display: none; }
-.ep-tab-content.active { display: block; }
-
-/* Color theme picker */
-.theme-swatches { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
-.swatch {
-  width: 32px; height: 32px; border-radius: 6px; cursor: pointer;
-  border: 2px solid transparent; transition: all var(--transition);
-  position: relative;
-}
-.swatch.active::after {
-  content: '✓'; position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.8rem; color: #fff; font-weight: 700;
-}
-.swatch:hover { transform: scale(1.1); border-color: rgba(255,255,255,0.4); }
-
-
-/* ══ AVATAR UPLOAD ══════════════════════════════════════ */
-.avatar-upload-wrap {
-  display: flex; flex-direction: column; align-items: center; gap: 1rem;
   margin-bottom: 1.5rem; padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--border);
 }
-.avatar-upload-circle {
-  position: relative; width: 100px; height: 100px; cursor: pointer;
+.avatar-upload-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
 }
+.avatar-upload-circle { position: relative; width: 100px; height: 100px; cursor: pointer; }
 .avatar-upload-circle img {
   width: 100%; height: 100%; border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid var(--accent);
+  object-fit: cover; border: 3px solid var(--accent);
   box-shadow: 0 0 20px rgba(229,9,20,0.3);
-  transition: filter 0.2s;
 }
 .avatar-upload-circle:hover img { filter: brightness(0.6); }
 .avatar-upload-overlay {
@@ -1746,67 +538,126 @@ body:has(a:hover) #cursor { width: 22px; height: 22px; background: var(--accent2
   opacity: 0; transition: opacity 0.2s;
   font-size: 1.4rem; color: #fff;
 }
-.avatar-upload-overlay span { font-size: 0.65rem; color: rgba(255,255,255,0.8); margin-top: 0.2rem; }
 .avatar-upload-circle:hover .avatar-upload-overlay { opacity: 1; }
 #avatarFileInput { display: none; }
-.avatar-upload-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
 .avatar-url-row { display: flex; gap: 0.5rem; width: 100%; }
 .avatar-url-row input {
-  flex: 1; background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: 8px; color: var(--text); padding: 0.5rem 0.75rem;
-  font-size: 0.8rem; outline: none; transition: border-color 0.2s;
+  flex: 1; background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px; color: var(--text);
+  padding: 0.5rem 0.75rem; font-size: 0.8rem; outline: none;
 }
-.avatar-url-row input:focus { border-color: var(--accent); }
-.avatar-url-row input::placeholder { color: var(--text3); }
 .avatar-url-row button {
   background: var(--accent); border: none; color: #fff;
-  padding: 0.5rem 0.85rem; border-radius: 8px; font-size: 0.8rem;
-  font-weight: 700; cursor: pointer; white-space: nowrap;
-  transition: background 0.2s;
+  padding: 0.5rem 0.85rem; border-radius: 8px;
+  font-size: 0.8rem; font-weight: 700;
+  cursor: pointer; white-space: nowrap;
 }
-.avatar-url-row button:hover { background: var(--accent2); }
-.avatar-btn-file {
+.plan-badge-sm {
+  display: inline-block; background: rgba(229,9,20,0.15);
+  border: 1px solid rgba(229,9,20,0.4);
+  color: var(--accent2); font-size: 0.72rem;
+  padding: 0.2rem 0.6rem; border-radius: 50px; margin-top: 0.4rem;
+}
+.profile-tabs { display: flex; gap: 0.4rem; margin-bottom: 1.5rem; }
+.tab {
+  flex: 1; background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text2); padding: 0.55rem;
+  border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; transition: all var(--transition);
+}
+.tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.watch-history { display: flex; flex-direction: column; gap: 0.75rem; }
+.watch-item {
+  display: flex; align-items: center; gap: 0.75rem;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.6rem 0.85rem;
+}
+.watch-thumb { width: 45px; height: 64px; border-radius: 5px; object-fit: cover; }
+.watch-details { flex: 1; }
+.watch-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.2rem; }
+.watch-date { font-size: 0.75rem; color: var(--text3); }
+
+/* MOVIE DETAIL */
+.movie-detail { display: flex; gap: 2rem; flex-wrap: wrap; }
+.movie-detail-poster { width: 200px; flex-shrink: 0; }
+.movie-detail-poster img { width: 100%; border-radius: var(--radius); }
+.movie-detail-info { flex: 1; min-width: 250px; }
+.movie-detail-info h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem; }
+.movie-detail-meta { display: flex; gap: 0.75rem; color: var(--text2); font-size: 0.85rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.movie-detail-desc { color: var(--text2); font-size: 0.9rem; line-height: 1.7; margin-bottom: 1.25rem; }
+.movie-detail-btns { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+/* TOAST */
+#toast {
+  position: fixed; bottom: 2rem; left: 50%;
+  transform: translateX(-50%) translateY(100px);
   background: var(--surface2); border: 1px solid var(--border);
-  color: var(--text2); padding: 0.45rem 0.85rem; border-radius: 8px;
-  font-size: 0.78rem; font-weight: 600; cursor: pointer;
-  transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.4rem;
+  border-radius: 50px; padding: 0.7rem 1.5rem;
+  font-size: 0.875rem; font-weight: 600;
+  color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  z-index: 9999; transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  white-space: nowrap;
 }
-.avatar-btn-file:hover { border-color: var(--accent); color: var(--accent); }
-.avatar-btn-remove {
-  background: transparent; border: 1px solid rgba(229,9,20,0.3);
-  color: var(--text3); padding: 0.45rem 0.85rem; border-radius: 8px;
-  font-size: 0.78rem; cursor: pointer; transition: all 0.2s;
-}
-.avatar-btn-remove:hover { border-color: var(--accent); color: var(--accent); }
-.avatar-preview-big {
-  font-size: 0; /* hide emoji when img loads */
-}
-/* Nav avatar small */
-#userAvatar img {
-  transition: box-shadow 0.3s;
-}
-#userAvatar img:hover { box-shadow: 0 0 12px rgba(229,9,20,0.6); }
+#toast.show { transform: translateX(-50%) translateY(0); }
+#toast.success { border-color: #22c55e; color: #22c55e; }
+#toast.error { border-color: var(--accent); color: var(--accent); }
 
+/* LOADING */
+.loading { text-align: center; padding: 3rem; color: var(--text2); grid-column: 1/-1; }
+.spinner {
+  display: inline-block; width: 40px; height: 40px;
+  border: 3px solid var(--surface2);
+  border-top-color: var(--accent);
+  border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* RESPONSIVE */
+@media (max-width: 1100px) {
+  .stats-bar { grid-template-columns: repeat(2,1fr); padding: 1.5rem 2rem; }
+  .footer-content { grid-template-columns: 1fr 1fr; gap: 2rem; }
+}
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .nav-search input { width: 140px; }
+  .section { padding: 2rem 1.5rem; }
+  .hero-content { padding: 0 2rem; }
+  .movies-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .categories-grid { grid-template-columns: repeat(2,1fr); }
+  .footer-content { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+}
+@media (max-width: 600px) {
+  .stats-bar { grid-template-columns: repeat(2,1fr); padding: 1rem; }
+  .hero-title { font-size: 2.5rem; }
+  .hero-btns { flex-direction: column; }
+  .section { padding: 2rem 1rem; }
+  .footer { padding: 2rem 1rem 1rem; }
+  .footer-content { grid-template-columns: 1fr; }
+  .modal { padding: 1.75rem; }
+}
 </style>
-</head>
-<body>
+</head><body>
 
-<!-- ══════════════════════════════════════════════ LOADER ══ -->
+<!-- LOADER -->
 <div id="loader">
   <div class="loader-inner">
-    <div class="loader-logo">CINE<span>MAX</span></div>
+    <div class="loader-logo">ONYX <span>MOVIE</span></div>
     <div class="loader-bar"><div class="loader-fill"></div></div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════ CURSOR ══ -->
+<!-- CURSOR -->
 <div id="cursor"></div>
 <div id="cursor-blur"></div>
 
-<!-- ══════════════════════════════════════════════ NAV ══════ -->
+<!-- NAVBAR -->
 <nav id="navbar">
   <div class="nav-container">
-    <div class="nav-logo">CINE<span>MAX</span></div>
+    <div class="nav-logo">ONYX <span>MOVIE</span></div>
 
     <ul class="nav-links">
       <li><a href="#" class="active">الرئيسية</a></li>
@@ -1819,8 +670,8 @@ body:has(a:hover) #cursor { width: 22px; height: 22px; background: var(--accent2
     <div class="nav-right">
       <div class="nav-search">
         <input type="text" placeholder="ابحث عن فيلم..." id="searchInput" />
-        <button class="search-btn">
-          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <button class="search-btn" onclick="doSearch()">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </button>
       </div>
       <button class="btn-login" onclick="openModal('loginModal')">تسجيل الدخول</button>
@@ -1828,67 +679,40 @@ body:has(a:hover) #cursor { width: 22px; height: 22px; background: var(--accent2
       <div class="user-avatar hidden" id="userAvatar">
         <img src="" alt="" id="avatarImg" />
         <div class="user-dropdown">
-          <a href="#" onclick="openModal('profileModal')">الملف الشخصي</a>
-          <a href="#">مفضلتي</a>
-          <a href="#">سجل المشاهدة</a>
-          <a href="#" onclick="logout()">تسجيل الخروج</a>
+          <a onclick="openModal('profileModal')">الملف الشخصي</a>
+          <a onclick="showFavs()">مفضلتي</a>
+          <a onclick="showHistory()">سجل المشاهدة</a>
+          <a onclick="logout()">تسجيل الخروج</a>
         </div>
       </div>
     </div>
   </div>
 </nav>
 
-<!-- ══════════════════════════════════════════════ HERO ═════ -->
+<!-- HERO -->
 <section class="hero" id="hero">
-  <div class="hero-bg">
-    <div class="hero-bg-slide active" style="background-image:url('https://image.tmdb.org/t/p/original/628Dep6AxEtDxjZoGP78TsOxYbK.jpg')"></div>
-    <div class="hero-bg-slide" style="background-image:url('https://image.tmdb.org/t/p/original/9n2tJBplPbgR2ca05hS5CKXwP2c.jpg')"></div>
-    <div class="hero-bg-slide" style="background-image:url('https://image.tmdb.org/t/p/original/hv7o3VgfsairBoQFAawgaQ4cR1m.jpg')"></div>
-  </div>
+  <div class="hero-bg" id="heroBg"></div>
   <div class="hero-overlay"></div>
 
   <div class="hero-content">
     <div class="hero-badge">🔥 الأكثر مشاهدة الآن</div>
-    <h1 class="hero-title" id="heroTitle">Dune: Part Two</h1>
-    <p class="hero-meta">
-      <span>2024</span>
-      <span class="dot">•</span>
-      <span>166 دقيقة</span>
-      <span class="dot">•</span>
-      <span class="rating">⭐ 8.6</span>
-      <span class="dot">•</span>
-      <span class="genre-tag">خيال علمي</span>
-    </p>
-    <p class="hero-desc">يتابع بول أتريدز مسيرته ليتحالف مع شعب فريمن ويشنّ حرباً ضد القوى التي دمّرت عائلته.</p>
+    <h1 class="hero-title" id="heroTitle">جاري التحميل...</h1>
+    <p class="hero-meta" id="heroMeta"></p>
+    <p class="hero-desc" id="heroDesc"></p>
     <div class="hero-btns">
-      <button class="btn-watch" onclick="openModal('watchModal')">
-        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        شاهد الآن
-      </button>
-      <button class="btn-info">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        مزيد من المعلومات
-      </button>
+      <button class="btn-watch" onclick="watchHero()">▶ شاهد الآن</button>
+      <button class="btn-info" onclick="infoHero()">ℹ️ مزيد من المعلومات</button>
     </div>
   </div>
 
   <div class="hero-controls">
     <button class="hero-prev" onclick="prevSlide()">❮</button>
-    <div class="hero-dots">
-      <span class="hero-dot active"></span>
-      <span class="hero-dot"></span>
-      <span class="hero-dot"></span>
-    </div>
+    <div class="hero-dots" id="heroDots"></div>
     <button class="hero-next" onclick="nextSlide()">❯</button>
-  </div>
-
-  <div class="hero-scroll">
-    <span>اكتشف المزيد</span>
-    <div class="scroll-arrow"></div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════ STATS ════ -->
+<!-- STATS -->
 <section class="stats-bar">
   <div class="stat-item"><span class="stat-num" data-target="50000">0</span><span class="stat-label">فيلم ومسلسل</span></div>
   <div class="stat-item"><span class="stat-num" data-target="12000000">0</span><span class="stat-label">مشترك نشط</span></div>
@@ -1896,137 +720,77 @@ body:has(a:hover) #cursor { width: 22px; height: 22px; background: var(--accent2
   <div class="stat-item"><span class="stat-num" data-target="4">0</span><span class="stat-label">K جودة عرض</span></div>
 </section>
 
-<!-- ══════════════════════════════════════════════ TRENDING ═ -->
+<!-- TRENDING -->
 <section class="section" id="movies">
   <div class="section-header">
-    <h2 class="section-title">🔥 الأكثر رواجاً</h2>
-    <a href="#" class="see-all">عرض الكل →</a>
+    <h2 class="section-title" id="trendingTitle">🔥 الأكثر رواجاً</h2>
+    <a class="see-all" onclick="loadTrending()">عرض الكل →</a>
   </div>
-  <div class="movies-grid" id="trendingGrid"></div>
-</section>
-
-<!-- ══════════════════════════════════════════════ FEATURED ═ -->
-<section class="featured-banner">
-  <div class="featured-content">
-    <div class="featured-badge">حصري</div>
-    <h2>Oppenheimer</h2>
-    <p>القنبلة التي غيّرت العالم — القصة الكاملة وراء أكبر مشروع سري في التاريخ.</p>
-    <div class="featured-meta">
-      <span>⭐ 8.9</span><span>•</span><span>180 دقيقة</span><span>•</span><span>دراما، تاريخي</span>
-    </div>
-    <button class="btn-watch" onclick="openModal('watchModal')">▶ شاهد الآن</button>
-  </div>
-  <div class="featured-image">
-    <img src="https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg" alt="Oppenheimer" />
+  <div class="movies-grid" id="trendingGrid">
+    <div class="loading"><div class="spinner"></div><p>جاري تحميل الأفلام...</p></div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════ NEW ══════ -->
+<!-- POPULAR -->
 <section class="section">
   <div class="section-header">
-    <h2 class="section-title">✨ الأحدث إضافةً</h2>
-    <a href="#" class="see-all">عرض الكل →</a>
+    <h2 class="section-title">🎬 أفلام شائعة</h2>
+    <a class="see-all" onclick="loadPopular()">عرض الكل →</a>
   </div>
-  <div class="movies-row" id="newGrid"></div>
-</section>
-
-<!-- ══════════════════════════════════════════════ CATEGORIES -->
-<section class="section categories-section" id="categories">
-  <h2 class="section-title center">استكشف التصنيفات</h2>
-  <div class="categories-grid">
-    <div class="cat-card" style="--clr:#e50914" onclick="filterCategory('أكشن')">🎬 أكشن</div>
-    <div class="cat-card" style="--clr:#0070f3" onclick="filterCategory('خيال علمي')">🚀 خيال علمي</div>
-    <div class="cat-card" style="--clr:#7928ca" onclick="filterCategory('رعب')">👻 رعب</div>
-    <div class="cat-card" style="--clr:#ff4d4d" onclick="filterCategory('رومانسي')">❤️ رومانسي</div>
-    <div class="cat-card" style="--clr:#f5a623" onclick="filterCategory('مغامرة')">🗺️ مغامرة</div>
-    <div class="cat-card" style="--clr:#50e3c2" onclick="filterCategory('كوميدي')">😂 كوميدي</div>
-    <div class="cat-card" style="--clr:#b8860b" onclick="filterCategory('تاريخي')">🏛️ تاريخي</div>
-    <div class="cat-card" style="--clr:#ff6b35" onclick="filterCategory('دراما')">🎭 دراما</div>
+  <div class="movies-row" id="popularGrid">
+    <div class="loading"><div class="spinner"></div></div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════ TOP RATED ═ -->
+<!-- TOP RATED -->
 <section class="section" id="top">
   <div class="section-header">
     <h2 class="section-title">⭐ الأعلى تقييماً</h2>
-    <a href="#" class="see-all">عرض الكل →</a>
   </div>
-  <div class="top-list" id="topList"></div>
+  <div class="top-list" id="topList">
+    <div class="loading"><div class="spinner"></div></div>
+  </div>
 </section>
 
-<!-- ══════════════════════════════════════════════ SERIES ═══ -->
+<!-- SERIES -->
 <section class="section" id="series">
   <div class="section-header">
     <h2 class="section-title">📺 أحدث المسلسلات</h2>
-    <a href="#" class="see-all">عرض الكل →</a>
+    <a class="see-all" onclick="loadSeries()">عرض الكل →</a>
   </div>
-  <div class="movies-row" id="seriesGrid"></div>
-</section>
-
-<!-- ══════════════════════════════════════════════ PLANS ════ -->
-<section class="section plans-section" id="plans">
-  <h2 class="section-title center">اختر خطتك</h2>
-  <p class="section-sub center">استمتع بأفضل تجربة مشاهدة بأسعار تناسب الجميع</p>
-  <div class="plans-grid">
-    <div class="plan-card">
-      <div class="plan-name">مجاني</div>
-      <div class="plan-price">$0<span>/شهر</span></div>
-      <ul class="plan-features">
-        <li>✓ 500 فيلم ومسلسل</li>
-        <li>✓ جودة HD</li>
-        <li>✓ جهاز واحد</li>
-        <li class="no">✗ بدون إعلانات</li>
-        <li class="no">✗ تحميل للمشاهدة لاحقاً</li>
-      </ul>
-      <button class="btn-plan" onclick="openModal('registerModal')">ابدأ مجاناً</button>
-    </div>
-    <div class="plan-card featured-plan">
-      <div class="plan-badge">الأكثر شعبية</div>
-      <div class="plan-name">بريميوم</div>
-      <div class="plan-price">$9.99<span>/شهر</span></div>
-      <ul class="plan-features">
-        <li>✓ 50,000+ فيلم ومسلسل</li>
-        <li>✓ جودة 4K HDR</li>
-        <li>✓ 4 أجهزة</li>
-        <li>✓ بدون إعلانات</li>
-        <li>✓ تحميل للمشاهدة لاحقاً</li>
-      </ul>
-      <button class="btn-plan primary" onclick="openModal('registerModal')">اشترك الآن</button>
-    </div>
-    <div class="plan-card">
-      <div class="plan-name">عائلي</div>
-      <div class="plan-price">$14.99<span>/شهر</span></div>
-      <ul class="plan-features">
-        <li>✓ كل محتوى بريميوم</li>
-        <li>✓ 6 ملفات شخصية</li>
-        <li>✓ 6 أجهزة</li>
-        <li>✓ محتوى الأطفال</li>
-        <li>✓ رقابة أبوية</li>
-      </ul>
-      <button class="btn-plan" onclick="openModal('registerModal')">اشترك الآن</button>
-    </div>
+  <div class="movies-row" id="seriesGrid">
+    <div class="loading"><div class="spinner"></div></div>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════ FOOTER ═══ -->
+<!-- CATEGORIES -->
+<section class="section categories-section" id="categories">
+  <h2 class="section-title center">استكشف التصنيفات</h2>
+  <div class="categories-grid">
+    <div class="cat-card" onclick="filterGenre(28)">🎬 أكشن</div>
+    <div class="cat-card" onclick="filterGenre(878)">🚀 خيال علمي</div>
+    <div class="cat-card" onclick="filterGenre(27)">👻 رعب</div>
+    <div class="cat-card" onclick="filterGenre(10749)">❤️ رومانسي</div>
+    <div class="cat-card" onclick="filterGenre(12)">🗺️ مغامرة</div>
+    <div class="cat-card" onclick="filterGenre(35)">😂 كوميدي</div>
+    <div class="cat-card" onclick="filterGenre(36)">🏛️ تاريخي</div>
+    <div class="cat-card" onclick="filterGenre(18)">🎭 دراما</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
 <footer class="footer">
   <div class="footer-content">
     <div class="footer-brand">
-      <div class="footer-logo">CINE<span>MAX</span></div>
+      <div class="footer-logo">ONYX <span>MOVIE</span></div>
       <p>أفضل منصة لمشاهدة الأفلام والمسلسلات العالمية بجودة عالية.</p>
-      <div class="social-links">
-        <a href="#">𝕏</a>
-        <a href="#">f</a>
-        <a href="#">in</a>
-        <a href="#">▶</a>
-      </div>
     </div>
     <div class="footer-col">
       <h4>المحتوى</h4>
-      <a href="#">الأفلام</a>
-      <a href="#">المسلسلات</a>
-      <a href="#">الوثائقيات</a>
-      <a href="#">الأنيميشن</a>
+      <a href="#movies">الأفلام</a>
+      <a href="#series">المسلسلات</a>
+      <a href="#categories">التصنيفات</a>
+      <a href="#top">الأعلى تقييماً</a>
     </div>
     <div class="footer-col">
       <h4>الدعم</h4>
@@ -2042,17 +806,17 @@ body:has(a:hover) #cursor { width: 22px; height: 22px; background: var(--accent2
     </div>
   </div>
   <div class="footer-bottom">
-    <p>© 2024 CineMax. جميع الحقوق محفوظة.</p>
+    <p>© 2024 ONYX STUDIO. جميع الحقوق محفوظة.</p>
   </div>
 </footer>
 
-<!-- ══════════════════════════════════════════════ MODALS ════ -->
+<!-- ═══════════════ MODALS ═══════════════ -->
 
 <!-- LOGIN -->
 <div class="modal-overlay" id="loginModal" onclick="closeOnOverlay(event,'loginModal')">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
-    <div class="modal-logo">CINE<span>MAX</span></div>
+    <div class="modal-logo">ONYX <span>MOVIE</span></div>
     <h2>تسجيل الدخول</h2>
     <form onsubmit="handleLogin(event)">
       <div class="form-group">
@@ -2068,18 +832,11 @@ body:has(a:hover) #cursor { width: 22px; height: 22px; background: var(--accent2
       </div>
       <div class="form-row">
         <label class="check-label"><input type="checkbox" /> تذكرني</label>
-        <a href="#" class="forgot">نسيت كلمة المرور؟</a>
+        <a class="forgot" href="#">نسيت كلمة المرور؟</a>
       </div>
       <button type="submit" class="btn-submit">دخول</button>
-      <p class="switch-modal">ليس لديك حساب؟ <a href="#" onclick="switchModal('loginModal','registerModal')">أنشئ حساباً</a></p>
+      <p class="switch-modal">ليس لديك حساب؟ <a onclick="switchModal('loginModal','registerModal')">أنشئ حساباً</a></p>
     </form>
-    <div class="social-auth">
-      <p>أو تسجيل الدخول بـ</p>
-      <div class="social-btns">
-        <button class="social-btn google">Google</button>
-        <button class="social-btn facebook">Facebook</button>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -2087,7 +844,7 @@ body:has(a:hover) #cursor { width: 22px; height: 22px; background: var(--accent2
 <div class="modal-overlay" id="registerModal" onclick="closeOnOverlay(event,'registerModal')">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('registerModal')">✕</button>
-    <div class="modal-logo">CINE<span>MAX</span></div>
+    <div class="modal-logo">ONYX <span>MOVIE</span></div>
     <h2>إنشاء حساب جديد</h2>
     <form onsubmit="handleRegister(event)">
       <div class="form-group">
@@ -2104,9 +861,7 @@ body:has(a:hover) #cursor { width: 22px; height: 22px; background: var(--accent2
           <input type="password" id="regPass" placeholder="••••••••" required oninput="checkStrength(this.value)" />
           <button type="button" onclick="togglePass('regPass')">👁</button>
         </div>
-        <div class="pass-strength">
-          <div class="strength-bar" id="strengthBar"></div>
-        </div>
+        <div class="pass-strength"><div class="strength-bar" id="strengthBar"></div></div>
         <small id="strengthText">أدخل كلمة مرور</small>
       </div>
       <div class="form-group">
@@ -2121,9 +876,8 @@ body:has(a:hover) #cursor { width: 22px; height: 22px; background: var(--accent2
           <label class="plan-opt"><input type="radio" name="plan" value="family" /> عائلي</label>
         </div>
       </div>
-      <label class="check-label"><input type="checkbox" required /> أوافق على <a href="#">شروط الاستخدام</a></label>
       <button type="submit" class="btn-submit">إنشاء الحساب</button>
-      <p class="switch-modal">لديك حساب بالفعل؟ <a href="#" onclick="switchModal('registerModal','loginModal')">سجّل دخولك</a></p>
+      <p class="switch-modal">لديك حساب؟ <a onclick="switchModal('registerModal','loginModal')">سجّل دخولك</a></p>
     </form>
   </div>
 </div>
@@ -2141,12 +895,8 @@ body:has(a:hover) #cursor { width: 22px; height: 22px; background: var(--accent2
         </div>
         <input type="file" id="avatarFileInput" accept="image/*" onchange="handleAvatarFile(event)" />
         <div class="avatar-url-row">
-          <input type="text" id="avatarUrlInput" placeholder="الصق رابط الصورة هنا..." />
+          <input type="text" id="avatarUrlInput" placeholder="أو الصق رابط صورة..." />
           <button onclick="applyAvatarUrl()">تطبيق</button>
-        </div>
-        <div class="avatar-upload-actions">
-          <label for="avatarFileInput" class="avatar-btn-file">📁 رفع من الجهاز</label>
-          <button class="avatar-btn-remove" onclick="removeAvatar()">✕ حذف الصورة</button>
         </div>
       </div>
       <div>
@@ -2161,12 +911,8 @@ body:has(a:hover) #cursor { width: 22px; height: 22px; background: var(--accent2
       <button class="tab" onclick="switchTab(this,'tab-fav')">المفضلة</button>
     </div>
     <div id="tab-info" class="tab-content active">
-      <div class="form-group"><label>الاسم</label><input type="text" value="محمد أحمد" /></div>
-      <div class="form-group"><label>البريد</label><input type="email" value="user@email.com" /></div>
-      <div class="form-group"><label>اللغة</label>
-        <select><option>العربية</option><option>English</option></select>
-      </div>
-      <button class="btn-submit">حفظ التغييرات</button>
+      <div class="form-group"><label>الاسم</label><input type="text" id="profNameInput" /></div>
+      <div class="form-group"><label>البريد</label><input type="email" id="profEmailInput" /></div>
     </div>
     <div id="tab-watch" class="tab-content">
       <div class="watch-history" id="watchHistory"></div>
@@ -2177,33 +923,7 @@ body:has(a:hover) #cursor { width: 22px; height: 22px; background: var(--accent2
   </div>
 </div>
 
-<!-- WATCH -->
-<div class="modal-overlay" id="watchModal" onclick="closeOnOverlay(event,'watchModal')">
-  <div class="modal modal-player">
-    <button class="modal-close" onclick="closeModal('watchModal')">✕</button>
-    <div class="player-area">
-      <div class="player-placeholder">
-        <div class="player-icon">▶</div>
-        <p>جارٍ تحميل الفيلم...</p>
-        <div class="player-bar"><div class="player-progress"></div></div>
-      </div>
-    </div>
-    <div class="player-info">
-      <h3>Dune: Part Two</h3>
-      <div class="player-controls">
-        <button>⏮</button><button class="play-btn">⏸</button><button>⏭</button>
-        <div class="vol">🔊 <input type="range" min="0" max="100" value="80" /></div>
-        <span class="time">42:17 / 2:46:00</span>
-        <button class="fullscreen-btn">⛶</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- TOAST -->
-<div id="toast"></div>
-
-<!-- MOVIE DETAIL MODAL -->
+<!-- MOVIE DETAIL -->
 <div class="modal-overlay" id="movieModal" onclick="closeOnOverlay(event,'movieModal')">
   <div class="modal modal-wide">
     <button class="modal-close" onclick="closeModal('movieModal')">✕</button>
@@ -2211,326 +931,418 @@ body:has(a:hover) #cursor { width: 22px; height: 22px; background: var(--accent2
   </div>
 </div>
 
-<script>
+<!-- WATCH -->
+<div class="modal-overlay" id="watchModal" onclick="closeOnOverlay(event,'watchModal')">
+  <div class="modal modal-wide">
+    <button class="modal-close" onclick="closeModal('watchModal')">✕</button>
+    <div id="watchModalContent" style="text-align:center;padding:2rem">
+      <div style="font-size:4rem;margin-bottom:1rem">▶</div>
+      <h2 id="watchTitle">جاري التشغيل...</h2>
+      <p style="color:var(--text2);margin-top:1rem">هذا عرض تجريبي. في النسخة الكاملة سيتم تشغيل الفيديو.</p>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div><script>
 /* ═══════════════════════════════════════════════════════════
-   CINEMAX — APP.JS
+   ONYX MOVIE — APP.JS + TMDB API
    ═══════════════════════════════════════════════════════════ */
 
-/* ── 1. DATA ──────────────────────────────────────────────── */
-const MOVIES = [
-  { id:1,  title:"Dune: Part Two",      year:2024, rating:8.6, duration:"2h 46m", genre:"خيال علمي", poster:"https://image.tmdb.org/t/p/w400/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg", badge:"trending", desc:"يتابع بول أتريدز مسيرته ليتحالف مع شعب فريمن لشنّ حرب ضد القوى التي دمّرت عائلته." },
-  { id:2,  title:"Oppenheimer",         year:2023, rating:8.9, duration:"3h",     genre:"دراما",     poster:"https://image.tmdb.org/t/p/w400/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg", badge:"top",      desc:"قصة روبرت أوبنهايمر وتطوير أول قنبلة نووية في التاريخ." },
-  { id:3,  title:"Barbie",              year:2023, rating:7.0, duration:"1h 54m", genre:"كوميدي",   poster:"https://image.tmdb.org/t/p/w400/iuFNMS8vlphRSKCITYMnGSIWpyQ.jpg", badge:"",         desc:"باربي تسافر إلى العالم الحقيقي في مغامرة كوميدية رائعة." },
-  { id:4,  title:"Killers of the Flower Moon", year:2023, rating:7.7, duration:"3h 26m", genre:"جريمة", poster:"https://image.tmdb.org/t/p/w400/dB6Krk806zeqd1psiEaYGkhCCnj.jpg", badge:"",  desc:"قصة جرائم القتل الغامضة في أوكلاهوما خلال العشرينيات." },
-  { id:5,  title:"Poor Things",         year:2023, rating:8.0, duration:"2h 21m", genre:"خيال",     poster:"https://image.tmdb.org/t/p/w400/kCGlIMHnOm8JPXIf7ggs7RKAKRy.jpg", badge:"",         desc:"مغامرة امرأة شابة تكتشف العالم بعيون جديدة ومختلفة." },
-  { id:6,  title:"Anatomy of a Fall",   year:2023, rating:7.8, duration:"2h 31m", genre:"غموض",    poster:"https://image.tmdb.org/t/p/w400/kQs6keheMwCxJxrzV83VUwFtHkB.jpg", badge:"",         desc:"محاكمة امرأة متهمة بقتل زوجها في قضية مثيرة." },
-  { id:7,  title:"Saltburn",            year:2023, rating:7.3, duration:"2h 11m", genre:"إثارة",    poster:"https://image.tmdb.org/t/p/w400/qitIaEOJHcDRbNbBW5kXXMRBrpQ.jpg", badge:"new",      desc:"طالب يزور منزل صديقه الثري الغامض في الصيف." },
-  { id:8,  title:"Priscilla",           year:2023, rating:7.0, duration:"1h 53m", genre:"دراما",    poster:"https://image.tmdb.org/t/p/w400/rLnDbcBPbvh5Vrj2y7Tka8iJFkh.jpg", badge:"",         desc:"حياة بريسيلا برسلي من منظورها الخاص." },
-  { id:9,  title:"Napoleon",            year:2023, rating:6.9, duration:"2h 38m", genre:"تاريخي",   poster:"https://image.tmdb.org/t/p/w400/jE5o7y9K6pZtWNNMEw3IdpHuncR.jpg", badge:"",         desc:"ملحمة تاريخية حول صعود نابليون بونابرت." },
-  { id:10, title:"The Zone of Interest",year:2023, rating:7.9, duration:"1h 46m", genre:"تاريخي",   poster:"https://image.tmdb.org/t/p/w400/hUu9zyZmKuXuB5MyPh6kkUterqt.jpg", badge:"top",      desc:"الحياة اليومية لعائلة ضابط نازي بجوار معسكر أوشفيتز." },
-  { id:11, title:"May December",        year:2023, rating:6.8, duration:"1h 53m", genre:"دراما",    poster:"https://image.tmdb.org/t/p/w400/oiGnBhJbCZ1lCHAeZ68Oi4PzMkp.jpg", badge:"",         desc:"ممثلة تستعد لدور امرأة تثير جدلاً في الفضاء العام." },
-  { id:12, title:"Wonka",               year:2023, rating:7.1, duration:"1h 56m", genre:"مغامرة",   poster:"https://image.tmdb.org/t/p/w400/qhb1qOilapbapxWQn9jtRkgQ6RM.jpg", badge:"new",      desc:"أصل قصة مصنع الشوكولاتة الساحر ويلي ونكا." },
-  { id:13, title:"Rebel Moon Part One", year:2023, rating:6.0, duration:"2h 15m", genre:"خيال علمي",poster:"https://image.tmdb.org/t/p/w400/ui4DrH1cKk2vkHFcR1zxo2mBPT6.jpg", badge:"",         desc:"محاربة شجاعة تجمع المقاتلين لمواجهة إمبراطورية قاسية." },
-  { id:14, title:"Aquaman 2",           year:2023, rating:5.8, duration:"2h 4m",  genre:"أكشن",    poster:"https://image.tmdb.org/t/p/w400/7lTnXOy0iNtBAdRP3TZvaKJ77F6.jpg", badge:"",         desc:"أكوامان يتحالف مع أخيه لمواجهة خطر جديد يهدد العالمين." },
-  { id:15, title:"Indiana Jones 5",     year:2023, rating:6.9, duration:"2h 34m", genre:"مغامرة",  poster:"https://image.tmdb.org/t/p/w400/Af4bXE63pVsb2FtbW8uYIyPBadD.jpg", badge:"",         desc:"إندیانا جونز في مغامرته الأخيرة الأكثر إثارة وخطورة." },
-  { id:16, title:"Guardians Vol. 3",    year:2023, rating:7.9, duration:"2h 30m", genre:"أكشن",    poster:"https://image.tmdb.org/t/p/w400/r2J02Z2OpNTctfOSN1Ydgii51I3.jpg", badge:"trending", desc:"حراس المجرة في مغامرتهم الأخيرة والأكثر عاطفية." },
-];
+const IMG = 'https://image.tmdb.org/t/p';
 
-const SERIES = [
-  { id:101, title:"The Bear S2",       year:2023, rating:9.0, duration:"30 دق/حلقة", genre:"دراما",    poster:"https://image.tmdb.org/t/p/w400/sHFlbKS3WLqMnp9t2ghADIJFnuQ.jpg", badge:"series", desc:"كارمي يسعى لتحويل مطعم الساندويتش إلى مطعم راقٍ." },
-  { id:102, title:"Succession S4",     year:2023, rating:9.3, duration:"55 دق/حلقة", genre:"دراما",    poster:"https://image.tmdb.org/t/p/w400/y9o0hN0RPF5aFhxCTPyGnLvRnOB.jpg", badge:"series", desc:"الفصل الأخير من الصراع على عرش إمبراطورية روي." },
-  { id:103, title:"The Last of Us",    year:2023, rating:8.8, duration:"60 دق/حلقة", genre:"رعب",     poster:"https://image.tmdb.org/t/p/w400/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg", badge:"series", desc:"جويل يرافق الصغيرة إيلي عبر أمريكا مابعد الوباء." },
-  { id:104, title:"House of the Dragon S2", year:2024, rating:8.1, duration:"65 دق/حلقة", genre:"فانتازيا", poster:"https://image.tmdb.org/t/p/w400/t9nyF3r0WAlJ7Kr6xcRYI4jr9jm.jpg", badge:"series", desc:"حرب العروش تشتعل بين فصيلَي آل تارغاريان." },
-  { id:105, title:"True Detective S4",  year:2024, rating:7.6, duration:"50 دق/حلقة", genre:"جريمة",   poster:"https://image.tmdb.org/t/p/w400/3DGFjXqpDfVkMCCKOZX6FKQRJ09.jpg", badge:"series", desc:"محققة تكشف أسرار مدينة قطبية مجمّدة." },
-  { id:106, title:"The Diplomat",      year:2024, rating:7.5, duration:"45 دق/حلقة", genre:"إثارة",   poster:"https://image.tmdb.org/t/p/w400/3d3wxysNEbkVuKL2a1lbPE0LMxR.jpg", badge:"series", desc:"سفيرة أمريكية تتعامل مع أزمة دبلوماسية حرجة." },
-];
-
-/* ── 2. STATE ─────────────────────────────────────────────── */
+/* ── STATE ─────────────────────────────────────────────── */
 const state = {
-  user: JSON.parse(localStorage.getItem('cmx_user') || 'null'),
-  favorites: JSON.parse(localStorage.getItem('cmx_fav') || '[]'),
-  watchHistory: JSON.parse(localStorage.getItem('cmx_history') || '[]'),
-  heroSlide: 0,
+  user: JSON.parse(localStorage.getItem('onyx_user') || 'null'),
+  favorites: JSON.parse(localStorage.getItem('onyx_fav') || '[]'),
+  watchHistory: JSON.parse(localStorage.getItem('onyx_history') || '[]'),
+  heroMovies: [],
+  heroIndex: 0,
   heroInterval: null,
 };
 
-/* ── 3. DOM READY ─────────────────────────────────────────── */
+/* ── INIT ──────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-  initLoader();
-  initCursor();
-  initNavbar();
-  renderTrending();
-  renderNewMovies();
-  renderTopRated();
-  renderSeries();
-  initSearch();
-  initCounters();
-  initHeroSlider();
-  initScrollEffects();
-  initBackToTop();
-  updateAuthUI();
-  populateWatchHistory();
+  try {
+    initLoader();
+    initCursor();
+    initNavbar();
+    initCounters();
+    updateAuthUI();
+    loadAll();
+    initSearch();
+    initBackToTop();
+  } catch (err) {
+    console.error('Init error:', err);
+    document.getElementById('loader')?.classList.add('hidden');
+  }
 });
 
-/* ── 4. LOADER ────────────────────────────────────────────── */
+/* ── LOADER ────────────────────────────────────────────── */
 function initLoader() {
   setTimeout(() => {
-    document.getElementById('loader').classList.add('hidden');
-  }, 2200);
+    document.getElementById('loader')?.classList.add('hidden');
+  }, 1500);
+  // Fallback إجباري بعد 4 ثواني
+  setTimeout(() => {
+    document.getElementById('loader')?.classList.add('hidden');
+  }, 4000);
 }
 
-/* ── 5. CURSOR ────────────────────────────────────────────── */
+/* ── CURSOR ────────────────────────────────────────────── */
 function initCursor() {
   const cursor = document.getElementById('cursor');
-  const blur   = document.getElementById('cursor-blur');
+  const blur = document.getElementById('cursor-blur');
+  if (!cursor || !blur) return;
   let mx = 0, my = 0, bx = 0, by = 0;
-
   document.addEventListener('mousemove', e => {
     mx = e.clientX; my = e.clientY;
     cursor.style.left = mx + 'px';
-    cursor.style.top  = my + 'px';
+    cursor.style.top = my + 'px';
   });
-
-  function lerp(a, b, t) { return a + (b - a) * t; }
+  const lerp = (a, b, t) => a + (b - a) * t;
   (function loop() {
     bx = lerp(bx, mx, 0.1);
     by = lerp(by, my, 0.1);
     blur.style.left = bx + 'px';
-    blur.style.top  = by + 'px';
+    blur.style.top = by + 'px';
     requestAnimationFrame(loop);
   })();
 }
 
-/* ── 6. NAVBAR ────────────────────────────────────────────── */
+/* ── NAVBAR ────────────────────────────────────────────── */
 function initNavbar() {
-  const nav = document.getElementById('navbar');
   window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 50);
+    document.getElementById('navbar')?.classList.toggle('scrolled', window.scrollY > 50);
   });
 }
 
-/* ── 7. RENDER FUNCTIONS ──────────────────────────────────── */
-function movieCard(m) {
-  const isFav = state.favorites.includes(m.id);
-  const badgeHtml = m.badge ? `<div class="card-badge ${m.badge === 'new' ? 'new' : m.badge === 'series' ? 'series' : ''}">${
-    m.badge === 'trending' ? '🔥 رائج' :
-    m.badge === 'top'      ? '⭐ مميز' :
-    m.badge === 'new'      ? '✨ جديد' :
-    m.badge === 'series'   ? '📺 مسلسل' : ''
-  }</div>` : '';
-
-  return `
-  <div class="movie-card animate-up" onclick="openMovieDetail(${m.id})">
-    <img class="movie-poster" src="${m.poster}" alt="${m.title}" loading="lazy"
-      onerror="this.src='https://via.placeholder.com/400x600/161d30/5a6480?text=🎬'" />
-    ${badgeHtml}
-    <div class="card-overlay">
-      <div class="card-info">
-        <div class="card-title">${m.title}</div>
-        <div class="card-meta">
-          <span>${m.year}</span>
-          <span class="card-rating">⭐ ${m.rating}</span>
-          <span>${m.genre}</span>
-        </div>
-        <div class="card-btns">
-          <button class="card-btn-play" onclick="event.stopPropagation(); watchMovie(${m.id})">▶ شاهد</button>
-          <button class="card-btn-fav ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFav(${m.id}, this)" title="أضف للمفضلة">♥</button>
-        </div>
-      </div>
-    </div>
-  </div>`;
-}
-
-function renderTrending() {
-  const el = document.getElementById('trendingGrid');
-  if (!el) return;
-  el.innerHTML = MOVIES.slice(0, 8).map(movieCard).join('');
-}
-
-function renderNewMovies() {
-  const el = document.getElementById('newGrid');
-  if (!el) return;
-  el.innerHTML = [...MOVIES].reverse().slice(0, 10).map(movieCard).join('');
-}
-
-function renderSeries() {
-  const el = document.getElementById('seriesGrid');
-  if (!el) return;
-  el.innerHTML = SERIES.map(movieCard).join('');
-}
-
-function renderTopRated() {
-  const el = document.getElementById('topList');
-  if (!el) return;
-  const sorted = [...MOVIES].sort((a,b) => b.rating - a.rating).slice(0, 8);
-  el.innerHTML = sorted.map((m, i) => {
-    const pct = Math.round(m.rating * 10);
-    return `
-    <div class="top-item animate-up" onclick="openMovieDetail(${m.id})">
-      <div class="top-rank">${String(i+1).padStart(2,'0')}</div>
-      <img class="top-thumb" src="${m.poster}" alt="${m.title}"
-        onerror="this.src='https://via.placeholder.com/60x85/161d30/5a6480?text=🎬'" />
-      <div class="top-details">
-        <div class="top-title">${m.title}</div>
-        <div class="top-meta">
-          <span>${m.year}</span>
-          <span>${m.duration}</span>
-          <span>${m.genre}</span>
-        </div>
-      </div>
-      <div class="top-score-circle" style="--pct:${pct}">
-        <span>${m.rating}</span>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-/* ── 8. HERO SLIDER ───────────────────────────────────────── */
-const HERO_DATA = [
-  { title: "Dune: Part Two" },
-  { title: "Oppenheimer" },
-  { title: "Guardians Vol. 3" },
-];
-
-function initHeroSlider() {
-  state.heroInterval = setInterval(nextSlide, 6000);
-}
-
-function setHeroSlide(idx) {
-  const slides = document.querySelectorAll('.hero-bg-slide');
-  const dots   = document.querySelectorAll('.hero-dot');
-  slides.forEach(s => s.classList.remove('active'));
-  dots.forEach(d => d.classList.remove('active'));
-  slides[idx]?.classList.add('active');
-  dots[idx]?.classList.add('active');
-  const titleEl = document.getElementById('heroTitle');
-  if (titleEl && HERO_DATA[idx]) {
-    titleEl.style.opacity = '0';
-    setTimeout(() => { titleEl.textContent = HERO_DATA[idx].title; titleEl.style.opacity = '1'; }, 300);
-  }
-  state.heroSlide = idx;
-}
-
-function nextSlide() {
-  const total = document.querySelectorAll('.hero-bg-slide').length;
-  setHeroSlide((state.heroSlide + 1) % total);
-}
-function prevSlide() {
-  const total = document.querySelectorAll('.hero-bg-slide').length;
-  setHeroSlide((state.heroSlide - 1 + total) % total);
-  resetHeroInterval();
-}
-
-function resetHeroInterval() {
-  clearInterval(state.heroInterval);
-  state.heroInterval = setInterval(nextSlide, 6000);
-}
-
-document.querySelectorAll('.hero-dot').forEach((dot, i) => {
-  dot.addEventListener('click', () => { setHeroSlide(i); resetHeroInterval(); });
-});
-
-/* ── 9. COUNTERS ──────────────────────────────────────────── */
+/* ── COUNTERS ──────────────────────────────────────────── */
 function initCounters() {
   const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      const el = entry.target;
-      const target = +el.dataset.target;
-      animateCounter(el, target);
-      observer.unobserve(el);
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      animateCounter(e.target, +e.target.dataset.target);
+      observer.unobserve(e.target);
     });
   }, { threshold: 0.5 });
-
   document.querySelectorAll('.stat-num').forEach(el => observer.observe(el));
 }
 
 function animateCounter(el, target) {
-  const duration = 2000;
-  const step = 16;
-  const inc = target / (duration / step);
+  const duration = 2000, step = 16, inc = target / (duration / step);
   let current = 0;
   const timer = setInterval(() => {
     current += inc;
     if (current >= target) { current = target; clearInterval(timer); }
-    el.textContent = formatNumber(Math.floor(current));
+    el.textContent = formatNum(Math.floor(current));
   }, step);
 }
 
-function formatNumber(n) {
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'م';
-  if (n >= 1_000)     return (n / 1_000).toFixed(0) + 'ك';
-  return n.toString();
+function formatNum(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(1) + 'م';
+  if (n >= 1e3) return (n/1e3).toFixed(0) + 'ك';
+  return n;
 }
 
-/* ── 10. SEARCH ───────────────────────────────────────────── */
-function initSearch() {
-  const input = document.getElementById('searchInput');
-  if (!input) return;
-
-  let overlay = document.createElement('div');
-  overlay.className = 'search-overlay';
-  overlay.id = 'searchOverlay';
-  document.body.appendChild(overlay);
-
-  input.addEventListener('input', debounce(e => {
-    const q = e.target.value.trim().toLowerCase();
-    if (!q) { overlay.classList.remove('active'); return; }
-    const results = [...MOVIES, ...SERIES].filter(m =>
-      m.title.toLowerCase().includes(q) ||
-      m.genre.includes(q) ||
-      m.year.toString().includes(q)
-    );
-    if (!results.length) {
-      overlay.innerHTML = '<p style="color:var(--text2);padding:1rem">لا توجد نتائج</p>';
-    } else {
-      overlay.innerHTML = results.slice(0,6).map(m => `
-        <div class="search-result-item" onclick="openMovieDetail(${m.id}); closeSearch()">
-          <img class="search-result-thumb" src="${m.poster}" alt="${m.title}"
-            onerror="this.src='https://via.placeholder.com/50x70/161d30/5a6480?text=🎬'" />
-          <div>
-            <div class="search-result-title">${m.title}</div>
-            <div class="search-result-meta">${m.year} · ${m.genre} · ⭐ ${m.rating}</div>
-          </div>
-        </div>`).join('');
-    }
-    overlay.classList.add('active');
-  }, 300));
-
-  document.addEventListener('click', e => {
-    if (!e.target.closest('#searchInput') && !e.target.closest('#searchOverlay')) closeSearch();
-  });
-}
-
-function closeSearch() {
-  document.getElementById('searchOverlay')?.classList.remove('active');
-}
-
-function debounce(fn, delay) {
-  let t;
-  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
-}
-
-/* ── 11. SCROLL EFFECTS ───────────────────────────────────── */
-function initScrollEffects() {
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('animate-up'); });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.top-item, .cat-card, .plan-card, .movie-card').forEach(el => io.observe(el));
-}
-
-/* ── 12. BACK TO TOP ──────────────────────────────────────── */
+/* ── BACK TO TOP ───────────────────────────────────────── */
 function initBackToTop() {
   const btn = document.createElement('button');
   btn.id = 'backTop';
   btn.innerHTML = '↑';
-  btn.setAttribute('aria-label', 'العودة للأعلى');
+  btn.style.cssText = 'position:fixed;bottom:2rem;right:2rem;width:44px;height:44px;background:var(--accent);border:none;border-radius:50%;color:#fff;font-size:1.2rem;display:flex;align-items:center;justify-content:center;z-index:800;opacity:0;transform:translateY(20px);transition:all 0.3s;box-shadow:0 4px 20px rgba(229,9,20,0.4);cursor:pointer';
   btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
   document.body.appendChild(btn);
-  window.addEventListener('scroll', () => btn.classList.toggle('visible', window.scrollY > 400));
+  window.addEventListener('scroll', () => {
+    btn.style.opacity = window.scrollY > 400 ? '1' : '0';
+    btn.style.transform = window.scrollY > 400 ? 'translateY(0)' : 'translateY(20px)';
+  });
 }
 
-/* ── 13. MODALS ───────────────────────────────────────────── */
+/* ── LOAD ALL ──────────────────────────────────────────── */
+async function loadAll() {
+  await Promise.all([
+    loadHero(),
+    loadTrending(),
+    loadPopular(),
+    loadTopRated(),
+    loadSeries(),
+  ]);
+}
+
+/* ── HERO ──────────────────────────────────────────────── */
+async function loadHero() {
+  const bg = document.getElementById('heroBg');
+  try {
+    const res = await fetch('/api/trending');
+    const data = await res.json();
+    const results = (data.results || []).filter(m => m.backdrop_path).slice(0, 5);
+    if (!results.length) {
+      bg.innerHTML = '<div class="hero-bg-slide active" style="background:linear-gradient(135deg,#0a0f20,#1a0a0a)"></div>';
+      document.getElementById('heroTitle').textContent = 'ONYX MOVIE';
+      document.getElementById('heroDesc').textContent = 'لا توجد أفلام حالياً. تأكد من إعداد TMDB_API_KEY.';
+      return;
+    }
+    state.heroMovies = results;
+    bg.innerHTML = results.map((m, i) =>
+      `<div class="hero-bg-slide ${i === 0 ? 'active' : ''}" style="background-image:url('${IMG}/original${m.backdrop_path}')"></div>`
+    ).join('');
+    const dots = document.getElementById('heroDots');
+    dots.innerHTML = results.map((_, i) =>
+      `<span class="hero-dot ${i === 0 ? 'active' : ''}" onclick="setSlide(${i})"></span>`
+    ).join('');
+    renderHero(0);
+    state.heroInterval = setInterval(nextSlide, 6000);
+  } catch (e) {
+    console.error('hero:', e);
+    bg.innerHTML = '<div class="hero-bg-slide active" style="background:linear-gradient(135deg,#0a0f20,#1a0a0a)"></div>';
+  }
+}
+
+function renderHero(i) {
+  const m = state.heroMovies[i];
+  if (!m) return;
+  const title = m.title || m.name || '?';
+  const year = (m.release_date || m.first_air_date || '').substring(0, 4);
+  const rating = m.vote_average ? m.vote_average.toFixed(1) : '?';
+  const desc = m.overview || 'لا يوجد وصف';
+  document.getElementById('heroTitle').textContent = title;
+  document.getElementById('heroMeta').innerHTML =
+    `<span>${year}</span><span class="dot">•</span><span class="rating">⭐ ${rating}</span><span class="dot">•</span><span class="genre-tag">${m.media_type === 'tv' ? '📺 مسلسل' : '🎬 فيلم'}</span>`;
+  document.getElementById('heroDesc').textContent = desc.substring(0, 220) + (desc.length > 220 ? '...' : '');
+}
+
+function setSlide(i) {
+  state.heroIndex = i;
+  document.querySelectorAll('.hero-bg-slide').forEach((s, idx) => s.classList.toggle('active', idx === i));
+  document.querySelectorAll('.hero-dot').forEach((d, idx) => d.classList.toggle('active', idx === i));
+  renderHero(i);
+}
+function nextSlide() { if (state.heroMovies.length) setSlide((state.heroIndex + 1) % state.heroMovies.length); resetHeroInterval(); }
+function prevSlide() { if (state.heroMovies.length) setSlide((state.heroIndex - 1 + state.heroMovies.length) % state.heroMovies.length); resetHeroInterval(); }
+function resetHeroInterval() {
+  clearInterval(state.heroInterval);
+  state.heroInterval = setInterval(nextSlide, 6000);
+}
+function watchHero() {
+  const m = state.heroMovies[state.heroIndex];
+  if (m) openMovie(m.id, m.media_type || 'movie');
+}
+function infoHero() { watchHero(); }
+
+/* ── MOVIE CARD ───────────────────────────────────────── */
+function movieCard(m) {
+  const title = m.title || m.name || '?';
+  const year = (m.release_date || m.first_air_date || '').substring(0, 4);
+  const rating = m.vote_average ? m.vote_average.toFixed(1) : '?';
+  const poster = m.poster_path
+    ? `${IMG}/w500${m.poster_path}`
+    : 'https://via.placeholder.com/400x600/161d30/5a6480?text=🎬';
+  const type = m.media_type || 'movie';
+  const isFav = state.favorites.includes(m.id);
+  return `
+    <div class="movie-card" onclick="openMovie(${m.id}, '${type}')">
+      <img class="movie-poster" src="${poster}" alt="${title}" loading="lazy"
+           onerror="this.src='https://via.placeholder.com/400x600/161d30/5a6480?text=🎬'">
+      <div class="card-overlay">
+        <div class="card-info">
+          <div class="card-title">${title}</div>
+          <div class="card-meta">
+            <span>${year}</span>
+            <span class="card-rating">⭐ ${rating}</span>
+          </div>
+          <div class="card-btns">
+            <button class="card-btn-play" onclick="event.stopPropagation(); openMovie(${m.id}, '${type}')">▶ شاهد</button>
+            <button class="card-btn-play" style="max-width:40px;background:${isFav ? 'var(--accent)' : 'rgba(255,255,255,0.1)'}" onclick="event.stopPropagation(); toggleFav(${m.id}, this)">♥</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── TRENDING ──────────────────────────────────────────── */
+async function loadTrending() {
+  const el = document.getElementById('trendingGrid');
+  if (!el) return;
+  el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const res = await fetch('/api/trending');
+    const data = await res.json();
+    const results = (data.results || []).filter(m => m.poster_path).slice(0, 12);
+    el.innerHTML = results.map(movieCard).join('') || '<p class="loading">لا توجد نتائج</p>';
+    const title = document.getElementById('trendingTitle');
+    if (title) title.textContent = '🔥 الأكثر رواجاً';
+  } catch (e) {
+    el.innerHTML = '<p class="loading">❌ خطأ في التحميل</p>';
+  }
+}
+
+/* ── POPULAR ───────────────────────────────────────────── */
+async function loadPopular() {
+  const el = document.getElementById('popularGrid');
+  if (!el) return;
+  try {
+    const res = await fetch('/api/popular/movie');
+    const data = await res.json();
+    const results = (data.results || []).filter(m => m.poster_path).slice(0, 12);
+    el.innerHTML = results.map(movieCard).join('');
+  } catch (e) { el.innerHTML = '<p class="loading">❌</p>'; }
+}
+
+/* ── TOP RATED ─────────────────────────────────────────── */
+async function loadTopRated() {
+  const el = document.getElementById('topList');
+  if (!el) return;
+  try {
+    const res = await fetch('/api/popular/movie');
+    const data = await res.json();
+    const results = (data.results || [])
+      .filter(m => m.poster_path)
+      .sort((a, b) => b.vote_average - a.vote_average)
+      .slice(0, 8);
+    el.innerHTML = results.map((m, i) => {
+      const title = m.title || m.name || '?';
+      const year = (m.release_date || '').substring(0, 4);
+      const rating = m.vote_average ? m.vote_average.toFixed(1) : '?';
+      const poster = `${IMG}/w200${m.poster_path}`;
+      return `
+        <div class="top-item" onclick="openMovie(${m.id}, 'movie')">
+          <div class="top-rank">${String(i+1).padStart(2, '0')}</div>
+          <img class="top-thumb" src="${poster}" alt="${title}">
+          <div class="top-details">
+            <div class="top-title">${title}</div>
+            <div class="top-meta"><span>${year}</span><span class="rating">⭐ ${rating}</span></div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch (e) { el.innerHTML = '<p class="loading">❌</p>'; }
+}
+
+/* ── SERIES ────────────────────────────────────────────── */
+async function loadSeries() {
+  const el = document.getElementById('seriesGrid');
+  if (!el) return;
+  try {
+    const res = await fetch('/api/popular/tv');
+    const data = await res.json();
+    const results = (data.results || []).filter(m => m.poster_path).slice(0, 12);
+    el.innerHTML = results.map(movieCard).join('');
+  } catch (e) { el.innerHTML = '<p class="loading">❌</p>'; }
+}
+
+/* ── GENRE FILTER ──────────────────────────────────────── */
+async function filterGenre(genreId) {
+  const el = document.getElementById('trendingGrid');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const res = await fetch(`/api/genre?type=movie&id=${genreId}`);
+    const data = await res.json();
+    const results = (data.results || []).filter(m => m.poster_path).slice(0, 12);
+    el.innerHTML = results.map(movieCard).join('') || '<p class="loading">لا توجد نتائج</p>';
+    document.getElementById('movies').scrollIntoView({ behavior: 'smooth' });
+  } catch (e) { el.innerHTML = '<p class="loading">❌</p>'; }
+}
+
+/* ── SEARCH ────────────────────────────────────────────── */
+function initSearch() {
+  const input = document.getElementById('searchInput');
+  if (input) input.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+}
+
+async function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return;
+  const el = document.getElementById('trendingGrid');
+  const title = document.getElementById('trendingTitle');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  if (title) title.textContent = `🔍 نتائج البحث: ${q}`;
+  document.getElementById('movies').scrollIntoView({ behavior: 'smooth' });
+  try {
+    const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+    const results = (data.results || []).filter(m => m.poster_path).slice(0, 20);
+    el.innerHTML = results.map(movieCard).join('') || '<p class="loading">لا توجد نتائج</p>';
+  } catch (e) { el.innerHTML = '<p class="loading">❌</p>'; }
+}
+
+/* ── MOVIE DETAIL ──────────────────────────────────────── */
+async function openMovie(id, type) {
+  const modal = document.getElementById('movieModal');
+  const content = document.getElementById('movieModalContent');
+  content.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  modal.classList.add('active');
+  try {
+    const res = await fetch(`/api/${type}/${id}`);
+    const m = await res.json();
+    const title = m.title || m.name || '?';
+    const year = (m.release_date || m.first_air_date || '').substring(0, 4);
+    const rating = m.vote_average ? m.vote_average.toFixed(1) : '?';
+    const runtime = m.runtime || (m.episode_run_time && m.episode_run_time[0]) || '?';
+    const poster = m.poster_path ? `${IMG}/w500${m.poster_path}` : '';
+    const genres = (m.genres || []).map(g => g.name).join(' • ');
+    const isFav = state.favorites.includes(id);
+    content.innerHTML = `
+      <div class="movie-detail">
+        <div class="movie-detail-poster">
+          <img src="${poster}" alt="${title}">
+        </div>
+        <div class="movie-detail-info">
+          <h2>${title}</h2>
+          <div class="movie-detail-meta">
+            <span class="rating">⭐ ${rating}/10</span>
+            <span>📅 ${year}</span>
+            <span>⏱️ ${runtime} دقيقة</span>
+            <span>${type === 'tv' ? '📺 مسلسل' : '🎬 فيلم'}</span>
+          </div>
+          <p style="color:var(--text2);margin-bottom:1rem;font-size:0.85rem">${genres}</p>
+          <p class="movie-detail-desc">${m.overview || 'لا يوجد وصف'}</p>
+          <div class="movie-detail-btns">
+            <button class="btn-watch" onclick="watchMovie(${id}, '${title.replace(/'/g, "\\'")}')">▶ شاهد الآن</button>
+            <button class="btn-info" onclick="toggleFav(${id}, this)">${isFav ? '❤️ في المفضلة' : '🤍 أضف للمفضلة'}</button>
+          </div>
+        </div>
+      </div>`;
+  } catch (e) {
+    content.innerHTML = '<p class="loading">❌ خطأ في التحميل</p>';
+  }
+}
+
+/* ── WATCH ─────────────────────────────────────────────── */
+function watchMovie(id, title) {
+  if (!state.user) {
+    showToast('يرجى تسجيل الدخول أولاً', 'error');
+    setTimeout(() => openModal('loginModal'), 500);
+    return;
+  }
+  const now = new Date().toLocaleDateString('ar-EG');
+  state.watchHistory = state.watchHistory.filter(h => h.id !== id);
+  state.watchHistory.unshift({ id, title, date: now });
+  if (state.watchHistory.length > 50) state.watchHistory = state.watchHistory.slice(0, 50);
+  localStorage.setItem('onyx_history', JSON.stringify(state.watchHistory));
+  document.getElementById('watchTitle').textContent = title;
+  openModal('watchModal');
+}
+
+/* ── FAVORITES ─────────────────────────────────────────── */
+function toggleFav(id, btn) {
+  const idx = state.favorites.indexOf(id);
+  if (idx === -1) {
+    state.favorites.push(id);
+    if (btn) btn.classList.add('active');
+    showToast('❤️ أضيف للمفضلة', 'success');
+  } else {
+    state.favorites.splice(idx, 1);
+    if (btn) btn.classList.remove('active');
+    showToast('💔 حُذف من المفضلة');
+  }
+  localStorage.setItem('onyx_fav', JSON.stringify(state.favorites));
+  if (btn && btn.textContent) {
+    if (btn.textContent.includes('في المفضلة')) btn.textContent = '🤍 أضف للمفضلة';
+    else if (btn.textContent.includes('أضف للمفضلة')) btn.textContent = '❤️ في المفضلة';
+  }
+}
+
+/* ── MODALS ────────────────────────────────────────────── */
 function openModal(id) {
   document.getElementById(id)?.classList.add('active');
   document.body.style.overflow = 'hidden';
@@ -2546,17 +1358,21 @@ function switchModal(closeId, openId) {
   closeModal(closeId);
   setTimeout(() => openModal(openId), 200);
 }
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.active').forEach(m => closeModal(m.id));
+  }
+});
 
-/* ── 14. AUTH ─────────────────────────────────────────────── */
+/* ── AUTH ──────────────────────────────────────────────── */
 function handleLogin(e) {
   e.preventDefault();
   const email = document.getElementById('loginEmail').value;
-  const pass  = document.getElementById('loginPass').value;
-  if (!email || !pass) return showToast('يرجى ملء جميع الحقول', 'error');
-
+  const pass = document.getElementById('loginPass').value;
+  if (!email || !pass) return showToast('املأ جميع الحقول', 'error');
   const user = { name: email.split('@')[0], email, plan: 'premium', avatar: '' };
   state.user = user;
-  localStorage.setItem('cmx_user', JSON.stringify(user));
+  localStorage.setItem('onyx_user', JSON.stringify(user));
   updateAuthUI();
   closeModal('loginModal');
   showToast(`مرحباً بك، ${user.name}! 👋`, 'success');
@@ -2564,44 +1380,54 @@ function handleLogin(e) {
 
 function handleRegister(e) {
   e.preventDefault();
-  const name  = document.getElementById('regName').value;
+  const name = document.getElementById('regName').value;
   const email = document.getElementById('regEmail').value;
-  const pass  = document.getElementById('regPass').value;
+  const pass = document.getElementById('regPass').value;
   const pass2 = document.getElementById('regPass2').value;
-  const plan  = document.querySelector('[name=plan]:checked')?.value || 'free';
-
-  if (!name || !email || !pass) return showToast('يرجى ملء جميع الحقول', 'error');
+  const plan = document.querySelector('[name=plan]:checked')?.value || 'free';
+  if (!name || !email || !pass) return showToast('املأ جميع الحقول', 'error');
   if (pass !== pass2) return showToast('كلمتا المرور غير متطابقتين', 'error');
-  if (pass.length < 6) return showToast('كلمة المرور قصيرة جداً', 'error');
-
+  if (pass.length < 6) return showToast('كلمة المرور قصيرة', 'error');
   const user = { name, email, plan, avatar: '' };
   state.user = user;
-  localStorage.setItem('cmx_user', JSON.stringify(user));
+  localStorage.setItem('onyx_user', JSON.stringify(user));
   updateAuthUI();
   closeModal('registerModal');
-  showToast(`تم إنشاء حسابك بنجاح! 🎉`, 'success');
+  showToast(`🎉 تم إنشاء حسابك!`, 'success');
 }
 
 function logout() {
   state.user = null;
-  localStorage.removeItem('cmx_user');
+  localStorage.removeItem('onyx_user');
   updateAuthUI();
-  showToast('تم تسجيل الخروج', '');
+  showToast('تم تسجيل الخروج');
 }
 
 function updateAuthUI() {
-  const avatar   = document.getElementById('userAvatar');
+  const avatar = document.getElementById('userAvatar');
   const loginBtn = document.querySelector('.btn-login');
-  const regBtn   = document.querySelector('.btn-register');
-
+  const regBtn = document.querySelector('.btn-register');
   if (state.user) {
     avatar?.classList.remove('hidden');
     loginBtn?.classList.add('hidden');
     regBtn?.classList.add('hidden');
-    document.getElementById('profileName').textContent  = state.user.name;
-    document.getElementById('profileEmail').textContent = state.user.email;
+    const profileName = document.getElementById('profileName');
+    const profileEmail = document.getElementById('profileEmail');
+    if (profileName) profileName.textContent = state.user.name;
+    if (profileEmail) profileEmail.textContent = state.user.email;
     const planMap = { free: 'مجاني', premium: 'بريميوم', family: 'عائلي' };
-    document.getElementById('profilePlan').textContent  = planMap[state.user.plan] || 'بريميوم';
+    const profilePlan = document.getElementById('profilePlan');
+    if (profilePlan) profilePlan.textContent = planMap[state.user.plan] || 'بريميوم';
+    const profName = document.getElementById('profNameInput');
+    const profEmail = document.getElementById('profEmailInput');
+    if (profName) profName.value = state.user.name;
+    if (profEmail) profEmail.value = state.user.email;
+    const savedAvatar = localStorage.getItem('onyx_avatar');
+    const avUrl = savedAvatar || `https://ui-avatars.com/api/?background=e50914&color=fff&size=200&name=${encodeURIComponent(state.user.name)}`;
+    const navImg = document.getElementById('avatarImg');
+    if (navImg) navImg.src = avUrl;
+    const profImg = document.getElementById('profileAvatarImg');
+    if (profImg) profImg.src = avUrl;
   } else {
     avatar?.classList.add('hidden');
     loginBtn?.classList.remove('hidden');
@@ -2609,758 +1435,144 @@ function updateAuthUI() {
   }
 }
 
-/* ── 15. PASSWORD ─────────────────────────────────────────── */
 function togglePass(id) {
   const el = document.getElementById(id);
   el.type = el.type === 'password' ? 'text' : 'password';
 }
 
 function checkStrength(val) {
-  const bar  = document.getElementById('strengthBar');
+  const bar = document.getElementById('strengthBar');
   const text = document.getElementById('strengthText');
   if (!bar || !text) return;
   let score = 0;
-  if (val.length >= 8)            score++;
-  if (/[A-Z]/.test(val))          score++;
-  if (/[0-9]/.test(val))          score++;
-  if (/[^A-Za-z0-9]/.test(val))  score++;
-
+  if (val.length >= 8) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
   const levels = [
-    { w: '25%',  bg: '#ef4444', label: 'ضعيفة جداً' },
-    { w: '50%',  bg: '#f97316', label: 'ضعيفة' },
-    { w: '75%',  bg: '#eab308', label: 'متوسطة' },
+    { w: '25%', bg: '#ef4444', label: 'ضعيفة' },
+    { w: '50%', bg: '#f97316', label: 'ضعيفة' },
+    { w: '75%', bg: '#eab308', label: 'متوسطة' },
     { w: '100%', bg: '#22c55e', label: 'قوية ✓' },
   ];
   const lvl = levels[Math.max(0, score - 1)] || levels[0];
-  bar.style.width      = val ? lvl.w  : '0';
+  bar.style.width = val ? lvl.w : '0';
   bar.style.background = lvl.bg;
-  text.textContent     = val ? lvl.label : 'أدخل كلمة مرور';
-  text.style.color     = val ? lvl.bg  : 'var(--text3)';
+  text.textContent = val ? lvl.label : 'أدخل كلمة مرور';
+  text.style.color = val ? lvl.bg : 'var(--text3)';
 }
 
-/* ── 16. FAVORITES ────────────────────────────────────────── */
-function toggleFav(id, btn) {
-  const idx = state.favorites.indexOf(id);
-  if (idx === -1) {
-    state.favorites.push(id);
-    btn.classList.add('active');
-    showToast('أضيف إلى المفضلة ♥', 'success');
-  } else {
-    state.favorites.splice(idx, 1);
-    btn.classList.remove('active');
-    showToast('حُذف من المفضلة');
-  }
-  localStorage.setItem('cmx_fav', JSON.stringify(state.favorites));
-}
-
-/* ── 17. WATCH MOVIE ──────────────────────────────────────── */
-function watchMovie(id) {
-  if (!state.user) {
-    showToast('يرجى تسجيل الدخول أولاً', 'error');
-    setTimeout(() => openModal('loginModal'), 500);
-    return;
-  }
-  const movie = [...MOVIES, ...SERIES].find(m => m.id === id);
-  if (!movie) return;
-
-  // Add to watch history
-  const now = new Date().toLocaleDateString('ar-SA');
-  const existing = state.watchHistory.findIndex(h => h.id === id);
-  if (existing === -1) state.watchHistory.unshift({ id, date: now });
-  localStorage.setItem('cmx_history', JSON.stringify(state.watchHistory));
-
-  openModal('watchModal');
-}
-
-/* ── 18. MOVIE DETAIL ─────────────────────────────────────── */
-function openMovieDetail(id) {
-  const m = [...MOVIES, ...SERIES].find(m => m.id === id);
-  if (!m) return;
-
-  const stars = '★'.repeat(Math.round(m.rating/2)) + '☆'.repeat(5 - Math.round(m.rating/2));
-  document.getElementById('movieModalContent').innerHTML = `
-    <div class="movie-detail">
-      <div class="movie-detail-poster">
-        <img src="${m.poster}" alt="${m.title}"
-          onerror="this.src='https://via.placeholder.com/400x600/161d30/5a6480?text=🎬'" />
-      </div>
-      <div class="movie-detail-info">
-        <h2>${m.title}</h2>
-        <div class="movie-detail-meta">
-          <span class="text-gold">${stars}</span>
-          <span>⭐ ${m.rating}/10</span>
-          <span>${m.year}</span>
-          <span>${m.duration}</span>
-          <span>${m.genre}</span>
-        </div>
-        <p class="movie-detail-desc">${m.desc}</p>
-        <div class="movie-detail-btns">
-          <button class="btn-watch" onclick="closeModal('movieModal'); watchMovie(${m.id})">▶ شاهد الآن</button>
-          <button class="btn-info" onclick="toggleFav(${m.id}, this)">♥ أضف للمفضلة</button>
-        </div>
-      </div>
-    </div>`;
-  openModal('movieModal');
-}
-
-/* ── 19. CATEGORY FILTER ──────────────────────────────────── */
-function filterCategory(genre) {
-  const grid = document.getElementById('trendingGrid');
-  if (!grid) return;
-  const header = document.querySelector('#movies .section-title');
-  if (header) header.textContent = `🔍 نتائج: ${genre}`;
-  const filtered = MOVIES.filter(m => m.genre === genre);
-  if (!filtered.length) {
-    grid.innerHTML = '<p style="color:var(--text2);padding:1rem;grid-column:1/-1">لا توجد أفلام في هذا التصنيف.</p>';
-  } else {
-    grid.innerHTML = filtered.map(movieCard).join('');
-  }
-  document.getElementById('movies')?.scrollIntoView({ behavior: 'smooth' });
-}
-
-/* ── 20. WATCH HISTORY DISPLAY ────────────────────────────── */
-function populateWatchHistory() {
-  const container = document.getElementById('watchHistory');
-  const favList   = document.getElementById('favList');
-  if (!container) return;
-
-  const history = state.watchHistory.map(h => {
-    const m = [...MOVIES, ...SERIES].find(x => x.id === h.id);
-    if (!m) return '';
-    return `
-    <div class="watch-item">
-      <img class="watch-thumb" src="${m.poster}" alt="${m.title}"
-        onerror="this.src='https://via.placeholder.com/45x64/161d30/5a6480?text=🎬'" />
-      <div class="watch-details">
-        <div class="watch-title">${m.title}</div>
-        <div class="watch-date">شاهدت في ${h.date}</div>
-      </div>
-    </div>`;
-  }).join('');
-  container.innerHTML = history || '<p style="color:var(--text2)">لا يوجد سجل مشاهدة بعد.</p>';
-
-  if (!favList) return;
-  const favs = state.favorites.map(id => {
-    const m = [...MOVIES, ...SERIES].find(x => x.id === id);
-    if (!m) return '';
-    return `
-    <div class="watch-item">
-      <img class="watch-thumb" src="${m.poster}" alt="${m.title}"
-        onerror="this.src='https://via.placeholder.com/45x64/161d30/5a6480?text=🎬'" />
-      <div class="watch-details">
-        <div class="watch-title">${m.title}</div>
-        <div class="watch-date">⭐ ${m.rating} · ${m.genre}</div>
-      </div>
-    </div>`;
-  }).join('');
-  favList.innerHTML = favs || '<p style="color:var(--text2)">لا توجد مفضلات بعد.</p>';
-}
-
-/* ── 21. PROFILE TABS ──────────────────────────────────────── */
+/* ── PROFILE ───────────────────────────────────────────── */
 function switchTab(btn, tabId) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
-  const tab = document.getElementById(tabId);
-  tab?.classList.add('active');
-  if (tabId === 'tab-watch' || tabId === 'tab-fav') populateWatchHistory();
-}
-
-/* ── 22. TOAST ─────────────────────────────────────────────── */
-function showToast(msg, type = '') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className   = type ? `show ${type}` : 'show';
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.className = '', 3000);
-}
-
-/* ── 23. PARTICLES ─────────────────────────────────────────── */
-(function initParticles() {
-  const canvas = document.createElement('canvas');
-  canvas.id = 'particles';
-  document.body.prepend(canvas);
-  const ctx = canvas.getContext('2d');
-  let W, H, particles = [];
-
-  function resize() {
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  for (let i = 0; i < 60; i++) {
-    particles.push({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      r: Math.random() * 1.5 + 0.3,
-      dx: (Math.random() - 0.5) * 0.3,
-      dy: -Math.random() * 0.4 - 0.1,
-      alpha: Math.random() * 0.5 + 0.1,
-    });
-  }
-
-  function drawParticles() {
-    ctx.clearRect(0, 0, W, H);
-    particles.forEach(p => {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(229,9,20,${p.alpha})`;
-      ctx.fill();
-      p.x += p.dx; p.y += p.dy;
-      if (p.y < -5)  p.y = H + 5;
-      if (p.x < -5)  p.x = W + 5;
-      if (p.x > W+5) p.x = -5;
-    });
-    requestAnimationFrame(drawParticles);
-  }
-  drawParticles();
-})();
-
-/* ── 24. KEYBOARD SHORTCUTS ────────────────────────────────── */
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    document.querySelectorAll('.modal-overlay.active').forEach(m => {
-      closeModal(m.id);
-    });
-    closeSearch();
-  }
-  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-    e.preventDefault();
-    document.getElementById('searchInput')?.focus();
-  }
-});
-
-/* ── 25. GENRE FILTER BAR ──────────────────────────────────── */
-(function buildGenreBar() {
-  const bar = document.createElement('div');
-  bar.className = 'genre-filter-bar';
-  const genres = ['الكل', 'أكشن', 'دراما', 'خيال علمي', 'رعب', 'كوميدي', 'مغامرة', 'تاريخي', 'إثارة', 'غموض', 'جريمة', 'رومانسي'];
-  genres.forEach(g => {
-    const pill = document.createElement('button');
-    pill.className = 'genre-pill';
-    pill.textContent = g;
-    if (g === 'الكل') pill.classList.add('active');
-    pill.addEventListener('click', () => {
-      document.querySelectorAll('.genre-pill').forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      if (g === 'الكل') {
-        const grid = document.getElementById('trendingGrid');
-        const header = document.querySelector('#movies .section-title');
-        if (header) header.textContent = '🔥 الأكثر رواجاً';
-        if (grid) grid.innerHTML = MOVIES.slice(0,8).map(movieCard).join('');
-      } else {
-        filterCategory(g);
-      }
-    });
-    bar.appendChild(pill);
-  });
-
-  const moviesSection = document.getElementById('movies');
-  moviesSection?.insertBefore(bar, moviesSection.querySelector('.movies-grid'));
-})();
-
-
-
-/* ══ IMAGE EDITOR ════════════════════════════════════════ */
-
-const ORIGINAL_HERO = [
-  'https://image.tmdb.org/t/p/original/628Dep6AxEtDxjZoGP78TsOxYbK.jpg',
-  'https://image.tmdb.org/t/p/original/9n2tJBplPbgR2ca05hS5CKXwP2c.jpg',
-  'https://image.tmdb.org/t/p/original/hv7o3VgfsairBoQFAawgaQ4cR1m.jpg',
-];
-const ORIGINAL_FEATURED = 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg';
-
-let editorOpen = false;
-let heroImages = [...ORIGINAL_HERO];
-let movieImageOverrides = {};
-
-function toggleEditor() {
-  editorOpen = !editorOpen;
-  document.getElementById('editorPanel').classList.toggle('open', editorOpen);
-  if (editorOpen) {
-    buildHeroSlots();
-    buildMovieEditList();
-  }
-}
-
-/* ── EP TABS ── */
-function switchEpTab(btn, tabId) {
-  document.querySelectorAll('.ep-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.ep-tab-content').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
   document.getElementById(tabId)?.classList.add('active');
-  if (tabId === 'ep-movies') buildMovieEditList();
+  if (tabId === 'tab-watch') populateHistory();
+  if (tabId === 'tab-fav') populateFavs();
 }
 
-/* ── HERO SLOTS ── */
-function buildHeroSlots() {
-  const c = document.getElementById('heroSlotsContainer');
-  if (!c) return;
-  const slides = document.querySelectorAll('.hero-bg-slide');
-  c.innerHTML = '';
-  slides.forEach((slide, i) => {
-    const url = heroImages[i] || '';
-    const div = document.createElement('div');
-    div.className = 'hero-slot';
-    div.innerHTML = `
-      <div class="hero-slot-header">
-        <div class="hero-slot-num">${i+1}</div>
-        <span>صورة الشريحة ${i+1}</span>
-      </div>
-      <img class="hero-slot-preview" id="heroPreview${i}" src="${url}" onerror="this.style.opacity=0.2" />
-      <div class="hero-slot-input">
-        <input type="text" id="heroUrl${i}" placeholder="https://..." value="${url}" oninput="liveHeroPreview(${i},this.value)" />
-        <button onclick="applyHeroSlide(${i})">تطبيق</button>
-      </div>`;
-    c.appendChild(div);
-
-    // File upload per slot
-    const uploadWrap = document.createElement('div');
-    uploadWrap.style.cssText = 'padding:0.5rem 0.85rem;border-top:1px solid var(--border)';
-    uploadWrap.innerHTML = `
-      <input type="file" id="heroFile${i}" accept="image/*" style="display:none" onchange="handleHeroSlotFile(event,${i})" />
-      <label for="heroFile${i}" style="font-size:0.72rem;color:var(--text3);cursor:pointer;display:flex;align-items:center;gap:0.4rem">
-        <span>📁</span> رفع من الجهاز للشريحة ${i+1}
-      </label>`;
-    div.appendChild(uploadWrap);
-  });
-}
-
-function liveHeroPreview(i, url) {
-  const prev = document.getElementById(`heroPreview${i}`);
-  if (prev) { prev.src = url; prev.style.opacity = 1; }
-}
-
-function applyHeroSlide(i) {
-  const url = document.getElementById(`heroUrl${i}`)?.value?.trim();
-  if (!url) return showToast('أدخل رابط URL', 'error');
-  const slides = document.querySelectorAll('.hero-bg-slide');
-  if (slides[i]) {
-    slides[i].style.backgroundImage = `url('${url}')`;
-    heroImages[i] = url;
-    showToast(`✓ تم تحديث صورة الشريحة ${i+1}`, 'success');
+async function populateHistory() {
+  const container = document.getElementById('watchHistory');
+  if (!state.watchHistory.length) {
+    container.innerHTML = '<p style="color:var(--text2)">لا يوجد سجل مشاهدة بعد.</p>';
+    return;
   }
-}
-
-function handleHeroSlotFile(e, i) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const url = ev.target.result;
-    const slides = document.querySelectorAll('.hero-bg-slide');
-    if (slides[i]) slides[i].style.backgroundImage = `url('${url}')`;
-    heroImages[i] = url;
-    const prev = document.getElementById(`heroPreview${i}`);
-    const inp  = document.getElementById(`heroUrl${i}`);
-    if (prev) { prev.src = url; prev.style.opacity = 1; }
-    if (inp) inp.value = '(صورة محلية مرفوعة)';
-    showToast(`✓ تم رفع صورة الشريحة ${i+1}`, 'success');
-  };
-  reader.readAsDataURL(file);
-}
-
-function handleHeroFileUpload(e) { handleHeroSlotFile(e, state.heroSlide); }
-
-function resetHeroImages() {
-  const slides = document.querySelectorAll('.hero-bg-slide');
-  ORIGINAL_HERO.forEach((url, i) => {
-    if (slides[i]) slides[i].style.backgroundImage = `url('${url}')`;
-    heroImages[i] = url;
-  });
-  buildHeroSlots();
-  showToast('↺ تم استعادة صور الهيرو', 'success');
-}
-
-/* ── MOVIE EDIT LIST ── */
-function buildMovieEditList() {
-  const c = document.getElementById('movieEditList');
-  if (!c) return;
-  const all = [...MOVIES, ...SERIES];
-  c.innerHTML = all.map(m => {
-    const currentPoster = movieImageOverrides[m.id] || m.poster;
-    return `
-    <div class="movie-edit-card">
-      <img class="movie-edit-thumb" id="meThumb${m.id}" src="${currentPoster}" alt="${m.title}"
-        onerror="this.src='https://via.placeholder.com/44x62/161d30/5a6480?text=🎬'" />
-      <div class="movie-edit-info">
-        <div class="movie-edit-title">${m.title}</div>
-        <input class="movie-edit-url" id="meUrl${m.id}"
-          placeholder="رابط الصورة الجديدة..."
-          value="${movieImageOverrides[m.id] || ''}"
-          oninput="liveMoviePreview(${m.id}, this.value)" />
-        <div class="movie-edit-actions">
-          <button class="movie-edit-apply" onclick="applyMovieImage(${m.id})">✓ تطبيق</button>
-          <button class="movie-edit-reset" onclick="resetMovieImage(${m.id})">↺</button>
-          <input type="file" id="meFile${m.id}" accept="image/*" style="display:none" onchange="handleMovieFile(event,${m.id})" />
-          <label for="meFile${m.id}" style="font-size:0.68rem;color:var(--text3);cursor:pointer;padding:0.25rem 0.4rem;background:var(--surface2);border-radius:4px;border:1px solid var(--border)">📁</label>
-        </div>
+  const poster = 'https://via.placeholder.com/45x64/161d30/5a6480?text=🎬';
+  container.innerHTML = state.watchHistory.map(h => `
+    <div class="watch-item">
+      <img class="watch-thumb" src="${poster}" alt="">
+      <div class="watch-details">
+        <div class="watch-title">${h.title || 'فيلم'}</div>
+        <div class="watch-date">شوهد في ${h.date}</div>
       </div>
-    </div>`;
-  }).join('');
+    </div>`).join('');
 }
 
-function liveMoviePreview(id, url) {
-  if (!url) return;
-  const thumb = document.getElementById(`meThumb${id}`);
-  if (thumb) thumb.src = url;
+async function populateFavs() {
+  const container = document.getElementById('favList');
+  if (!state.favorites.length) {
+    container.innerHTML = '<p style="color:var(--text2)">لا توجد مفضلات بعد.</p>';
+    return;
+  }
+  container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const items = await Promise.all(state.favorites.map(async id => {
+    try {
+      const res = await fetch(`/api/movie/${id}`);
+      const m = await res.json();
+      const title = m.title || m.name || '?';
+      const poster = m.poster_path ? `${IMG}/w200${m.poster_path}` : '';
+      return `
+        <div class="watch-item" onclick="closeModal('profileModal'); openMovie(${id}, 'movie')" style="cursor:pointer">
+          <img class="watch-thumb" src="${poster}" alt="${title}">
+          <div class="watch-details">
+            <div class="watch-title">${title}</div>
+            <div class="watch-date">⭐ ${m.vote_average?.toFixed(1) || '?'}</div>
+          </div>
+        </div>`;
+    } catch (e) { return ''; }
+  }));
+  container.innerHTML = items.join('') || '<p style="color:var(--text2)">خطأ في التحميل.</p>';
 }
 
-function applyMovieImage(id) {
-  const url = document.getElementById(`meUrl${id}`)?.value?.trim();
-  if (!url) return showToast('أدخل رابط URL', 'error');
-  applyMovieImageTo(id, url);
-  showToast('✓ تم تحديث صورة الفيلم', 'success');
+function showFavs() {
+  openModal('profileModal');
+  setTimeout(() => {
+    const favTab = document.querySelectorAll('.tab')[2];
+    if (favTab) switchTab(favTab, 'tab-fav');
+  }, 100);
 }
 
-function applyMovieImageTo(id, url) {
-  movieImageOverrides[id] = url;
-  // Update all visible posters for this movie
-  document.querySelectorAll(`.movie-card`).forEach(card => {
-    const playBtn = card.querySelector('.card-btn-play');
-    if (playBtn && playBtn.getAttribute('onclick')?.includes(`watchMovie(${id})`)) {
-      const img = card.querySelector('.movie-poster');
-      if (img) img.src = url;
-    }
-  });
-  // Update top list thumbs
-  document.querySelectorAll('.top-thumb').forEach(img => {
-    if (img.alt === [...MOVIES,...SERIES].find(m => m.id === id)?.title) img.src = url;
-  });
-  const thumb = document.getElementById(`meThumb${id}`);
-  if (thumb) thumb.src = url;
-  // Rebuild grids with overrides
-  rebuildGrids();
+function showHistory() {
+  openModal('profileModal');
+  setTimeout(() => {
+    const watchTab = document.querySelectorAll('.tab')[1];
+    if (watchTab) switchTab(watchTab, 'tab-watch');
+  }, 100);
 }
 
-function handleMovieFile(e, id) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const url = ev.target.result;
-    const inp = document.getElementById(`meUrl${id}`);
-    if (inp) inp.value = '(صورة محلية)';
-    applyMovieImageTo(id, url);
-    showToast('✓ تم رفع الصورة', 'success');
-  };
-  reader.readAsDataURL(file);
-}
-
-function resetMovieImage(id) {
-  delete movieImageOverrides[id];
-  const m = [...MOVIES,...SERIES].find(x => x.id === id);
-  if (m) applyMovieImageTo(id, m.poster);
-  const inp = document.getElementById(`meUrl${id}`);
-  if (inp) inp.value = '';
-  const thumb = document.getElementById(`meThumb${id}`);
-  if (thumb) thumb.src = m?.poster || '';
-  showToast('↺ تم استعادة الصورة الأصلية');
-}
-
-function resetMovieImages() {
-  movieImageOverrides = {};
-  rebuildGrids();
-  buildMovieEditList();
-  showToast('↺ تم استعادة جميع الصور الأصلية', 'success');
-}
-
-/* Patch movieCard to respect overrides */
-const _origMovieCard = movieCard;
-window.movieCard = function(m) {
-  const patched = movieImageOverrides[m.id]
-    ? { ...m, poster: movieImageOverrides[m.id] }
-    : m;
-  return _origMovieCard(patched);
-};
-
-function rebuildGrids() {
-  const tg = document.getElementById('trendingGrid');
-  const ng = document.getElementById('newGrid');
-  const sg = document.getElementById('seriesGrid');
-  if (tg) tg.innerHTML = MOVIES.slice(0,8).map(movieCard).join('');
-  if (ng) ng.innerHTML = [...MOVIES].reverse().slice(0,10).map(movieCard).join('');
-  if (sg) sg.innerHTML = SERIES.map(movieCard).join('');
-  renderTopRated();
-}
-
-/* ── FEATURED IMAGE ── */
-function applyFeaturedImage() {
-  const url = document.getElementById('featuredUrlInput')?.value?.trim();
-  if (!url) return showToast('أدخل رابط URL', 'error');
-  const img = document.querySelector('.featured-image img');
-  if (img) img.src = url;
-  document.getElementById('epFeaturedPreview').src = url;
-  showToast('✓ تم تحديث صورة البانر', 'success');
-}
-
-function handleFeaturedFile(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const url = ev.target.result;
-    const img = document.querySelector('.featured-image img');
-    if (img) img.src = url;
-    document.getElementById('epFeaturedPreview').src = url;
-    showToast('✓ تم رفع صورة البانر', 'success');
-  };
-  reader.readAsDataURL(file);
-}
-
-function resetFeaturedImage() {
-  const img = document.querySelector('.featured-image img');
-  if (img) img.src = ORIGINAL_FEATURED;
-  document.getElementById('epFeaturedPreview').src = ORIGINAL_FEATURED;
-  document.getElementById('featuredUrlInput').value = '';
-  showToast('↺ تم استعادة صورة البانر');
-}
-
-function applyFeaturedText() {
-  const title = document.getElementById('featuredTitleInput')?.value;
-  const desc  = document.getElementById('featuredDescInput')?.value;
-  const fh2 = document.querySelector('.featured-content h2');
-  const fp  = document.querySelector('.featured-content p');
-  if (fh2 && title) fh2.textContent = title;
-  if (fp  && desc)  fp.textContent  = desc;
-  showToast('✓ تم تحديث نص البانر', 'success');
-}
-
-/* ── THEME ── */
-function applyAccent(swatch) {
-  document.querySelectorAll('#accentSwatches .swatch').forEach(s => s.classList.remove('active'));
-  swatch.classList.add('active');
-  const accent  = swatch.dataset.accent;
-  const accent2 = swatch.dataset.accent2;
-  document.documentElement.style.setProperty('--accent',  accent);
-  document.documentElement.style.setProperty('--accent2', accent2);
-  document.getElementById('customAccent').value = accent;
-  showToast('✓ تم تغيير اللون', 'success');
-}
-
-function applyCustomAccent(val) {
-  document.documentElement.style.setProperty('--accent',  val);
-  document.documentElement.style.setProperty('--accent2', val + 'cc');
-  document.querySelectorAll('#accentSwatches .swatch').forEach(s => s.classList.remove('active'));
-}
-
-function applyBg(bg, bg2, bg3) {
-  document.documentElement.style.setProperty('--bg',  bg);
-  document.documentElement.style.setProperty('--bg2', bg2);
-  document.documentElement.style.setProperty('--bg3', bg3);
-  showToast('✓ تم تغيير خلفية الموقع', 'success');
-}
-
-function resetTheme() {
-  document.documentElement.style.setProperty('--accent',  '#e50914');
-  document.documentElement.style.setProperty('--accent2', '#ff4c54');
-  document.documentElement.style.setProperty('--bg',  '#080b14');
-  document.documentElement.style.setProperty('--bg2', '#0d1117');
-  document.documentElement.style.setProperty('--bg3', '#12172a');
-  document.getElementById('customAccent').value = '#e50914';
-  showToast('↺ تم استعادة الألوان الأصلية', 'success');
-}
-
-
-
-/* ══ AVATAR MANAGEMENT ══════════════════════════════════ */
-
-const DEFAULT_AVATAR_BASE = 'https://ui-avatars.com/api/?background=e50914&color=fff&size=200&name=';
-
-function getAvatarUrl() {
-  return localStorage.getItem('cmx_avatar') || '';
-}
-
-function setAvatarEverywhere(url) {
-  // Nav bar small img
-  const navImg = document.getElementById('avatarImg');
-  if (navImg) { navImg.src = url; navImg.style.display = 'block'; }
-  // Profile modal big img
-  const profImg = document.getElementById('profileAvatarImg');
-  if (profImg) profImg.src = url;
-  // Save
-  localStorage.setItem('cmx_avatar', url);
-  if (state.user) { state.user.avatar = url; localStorage.setItem('cmx_user', JSON.stringify(state.user)); }
-}
-
+/* ── AVATAR ────────────────────────────────────────────── */
 function handleAvatarFile(e) {
   const file = e.target.files[0];
   if (!file) return;
-  if (file.size > 5 * 1024 * 1024) return showToast('الصورة أكبر من 5 ميغابايت!', 'error');
+  if (file.size > 5 * 1024 * 1024) return showToast('الصورة كبيرة (أقصى 5MB)', 'error');
   const reader = new FileReader();
   reader.onload = ev => {
-    setAvatarEverywhere(ev.target.result);
-    showToast('✓ تم تحديث الصورة الشخصية!', 'success');
+    localStorage.setItem('onyx_avatar', ev.target.result);
+    const navImg = document.getElementById('avatarImg');
+    const profImg = document.getElementById('profileAvatarImg');
+    if (navImg) navImg.src = ev.target.result;
+    if (profImg) profImg.src = ev.target.result;
+    showToast('✓ تم تحديث الصورة', 'success');
   };
   reader.readAsDataURL(file);
 }
 
 function applyAvatarUrl() {
-  const url = document.getElementById('avatarUrlInput')?.value?.trim();
-  if (!url) return showToast('أدخل رابط الصورة', 'error');
-  // Quick validate: test the image loads
-  const testImg = new Image();
-  testImg.onload  = () => { setAvatarEverywhere(url); showToast('✓ تم تحديث الصورة الشخصية!', 'success'); };
-  testImg.onerror = () => showToast('تعذّر تحميل الصورة، تحقق من الرابط', 'error');
-  testImg.src = url;
-}
-
-function removeAvatar() {
-  const name = state.user?.name || 'User';
-  const url = DEFAULT_AVATAR_BASE + encodeURIComponent(name);
-  setAvatarEverywhere(url);
-  localStorage.removeItem('cmx_avatar');
-  const inp = document.getElementById('avatarUrlInput');
-  if (inp) inp.value = '';
-  showToast('↺ تم حذف الصورة الشخصية');
-}
-
-/* Patch updateAuthUI to also restore avatar */
-const _origUpdateAuthUI = updateAuthUI;
-window.updateAuthUI = function() {
-  _origUpdateAuthUI();
-  if (state.user) {
-    const saved = getAvatarUrl();
-    const name  = state.user.name || 'User';
-    const url   = saved || (DEFAULT_AVATAR_BASE + encodeURIComponent(name));
-    setAvatarEverywhere(url);
-    // Sync url input
-    const inp = document.getElementById('avatarUrlInput');
-    if (inp && saved) inp.value = saved;
-    // Set profile name/email displayed
-    const profImg = document.getElementById('profileAvatarImg');
-    if (profImg) profImg.src = url;
-  }
-};
-
-// Load saved avatar on page ready
-document.addEventListener('DOMContentLoaded', () => {
-  const saved = getAvatarUrl();
-  if (saved) {
+  const url = document.getElementById('avatarUrlInput').value.trim();
+  if (!url) return showToast('أدخل رابط', 'error');
+  const test = new Image();
+  test.onload = () => {
+    localStorage.setItem('onyx_avatar', url);
     const navImg = document.getElementById('avatarImg');
-    if (navImg) navImg.src = saved;
-  }
-});
+    const profImg = document.getElementById('profileAvatarImg');
+    if (navImg) navImg.src = url;
+    if (profImg) profImg.src = url;
+    showToast('✓ تم تحديث الصورة', 'success');
+  };
+  test.onerror = () => showToast('الرابط غير صحيح', 'error');
+  test.src = url;
+}
 
+/* ── TOAST ─────────────────────────────────────────────── */
+function showToast(msg, type = '') {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = type ? `show ${type}` : 'show';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = '', 3000);
+}
 </script>
-
-<!-- ══════════ IMAGE EDITOR PANEL ══════════ -->
-<button id="editorToggle" onclick="toggleEditor()" title="محرر الصور">🎨</button>
-
-<div id="editorPanel">
-  <div class="ep-header">
-    <div>
-      <h3>🎨 محرر الصور</h3>
-      <span>تخصيص كل صور الموقع</span>
-    </div>
-    <button class="ep-close" onclick="toggleEditor()">✕</button>
-  </div>
-
-  <div class="ep-tabs">
-    <button class="ep-tab active" onclick="switchEpTab(this,'ep-hero')">الهيرو</button>
-    <button class="ep-tab" onclick="switchEpTab(this,'ep-movies')">الأفلام</button>
-    <button class="ep-tab" onclick="switchEpTab(this,'ep-featured')">البانر</button>
-    <button class="ep-tab" onclick="switchEpTab(this,'ep-theme')">الألوان</button>
-  </div>
-
-  <div class="ep-body">
-
-    <!-- ── HERO TAB ── -->
-    <div id="ep-hero" class="ep-tab-content active">
-      <div class="ep-section">
-        <div class="ep-section-title">صور الخلفية (Hero Slider)</div>
-        <div id="heroSlotsContainer"></div>
-        <div class="upload-area" id="heroUploadArea">
-          <input type="file" id="heroFileInput" accept="image/*" onchange="handleHeroFileUpload(event)" />
-          <label for="heroFileInput">
-            <span class="upload-icon">📁</span>
-            <span>اختر صورة من جهازك</span>
-            <small style="color:var(--text3)">أو الصق رابط URL أعلاه</small>
-          </label>
-        </div>
-        <button class="ep-reset-all" onclick="resetHeroImages()">↺ استعادة صور الهيرو الأصلية</button>
-      </div>
-    </div>
-
-    <!-- ── MOVIES TAB ── -->
-    <div id="ep-movies" class="ep-tab-content">
-      <div class="ep-section">
-        <div class="ep-section-title">أغلفة الأفلام</div>
-        <div id="movieEditList"></div>
-        <button class="ep-reset-all" onclick="resetMovieImages()">↺ استعادة الصور الأصلية</button>
-      </div>
-    </div>
-
-    <!-- ── FEATURED TAB ── -->
-    <div id="ep-featured" class="ep-tab-content">
-      <div class="ep-section">
-        <div class="ep-section-title">البانر المميز (Oppenheimer)</div>
-        <img id="epFeaturedPreview" class="ep-featured-preview"
-          src="https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg" alt="preview" />
-        <div class="ep-input-group">
-          <label>رابط صورة البانر</label>
-          <input type="text" id="featuredUrlInput" placeholder="https://..." />
-        </div>
-        <div class="upload-area">
-          <input type="file" id="featuredFileInput" accept="image/*" onchange="handleFeaturedFile(event)" />
-          <label for="featuredFileInput">
-            <span class="upload-icon">📁</span>
-            <span>أو ارفع صورة من جهازك</span>
-          </label>
-        </div>
-        <button class="ep-apply-btn" onclick="applyFeaturedImage()">✓ تطبيق الصورة</button>
-        <button class="ep-reset-all" onclick="resetFeaturedImage()">↺ استعادة الصورة الأصلية</button>
-      </div>
-      <div class="ep-section">
-        <div class="ep-section-title">عنوان البانر</div>
-        <div class="ep-input-group">
-          <label>العنوان الرئيسي</label>
-          <input type="text" id="featuredTitleInput" placeholder="Oppenheimer" value="Oppenheimer" />
-        </div>
-        <div class="ep-input-group">
-          <label>الوصف</label>
-          <input type="text" id="featuredDescInput" placeholder="وصف الفيلم..." value="القنبلة التي غيّرت العالم" />
-        </div>
-        <button class="ep-apply-btn" onclick="applyFeaturedText()">✓ تطبيق النص</button>
-      </div>
-    </div>
-
-    <!-- ── THEME TAB ── -->
-    <div id="ep-theme" class="ep-tab-content">
-      <div class="ep-section">
-        <div class="ep-section-title">لون التمييز الرئيسي</div>
-        <div class="theme-swatches" id="accentSwatches">
-          <div class="swatch active" style="background:#e50914" data-accent="#e50914" data-accent2="#ff4c54" onclick="applyAccent(this)" title="أحمر Netflix"></div>
-          <div class="swatch" style="background:#0070f3" data-accent="#0070f3" data-accent2="#339dff" onclick="applyAccent(this)" title="أزرق"></div>
-          <div class="swatch" style="background:#7928ca" data-accent="#7928ca" data-accent2="#a855f7" onclick="applyAccent(this)" title="بنفسجي"></div>
-          <div class="swatch" style="background:#f5a623" data-accent="#f5a623" data-accent2="#ffc45a" onclick="applyAccent(this)" title="ذهبي"></div>
-          <div class="swatch" style="background:#00d2c8" data-accent="#00d2c8" data-accent2="#2dfff9" onclick="applyAccent(this)" title="فيروزي"></div>
-          <div class="swatch" style="background:#22c55e" data-accent="#22c55e" data-accent2="#4ade80" onclick="applyAccent(this)" title="أخضر"></div>
-          <div class="swatch" style="background:#f43f5e" data-accent="#f43f5e" data-accent2="#fb7185" onclick="applyAccent(this)" title="وردي"></div>
-          <div class="swatch" style="background:#ff6b35" data-accent="#ff6b35" data-accent2="#ff8f65" onclick="applyAccent(this)" title="برتقالي"></div>
-        </div>
-        <div class="ep-input-group">
-          <label>أو أدخل لون مخصص</label>
-          <input type="color" id="customAccent" value="#e50914" style="width:100%;height:36px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer" onchange="applyCustomAccent(this.value)" />
-        </div>
-      </div>
-      <div class="ep-section">
-        <div class="ep-section-title">خلفية الموقع</div>
-        <div class="theme-swatches">
-          <div class="swatch active" style="background:#080b14" onclick="applyBg('#080b14','#0d1117','#12172a')" title="أزرق داكن"></div>
-          <div class="swatch" style="background:#0a0a0a" onclick="applyBg('#0a0a0a','#111','#1a1a1a')" title="أسود خالص"></div>
-          <div class="swatch" style="background:#0d1f0d" onclick="applyBg('#0d1f0d','#0f2510','#142d14')" title="أخضر داكن"></div>
-          <div class="swatch" style="background:#1a0828" onclick="applyBg('#1a0828','#200d30','#27123a')" title="بنفسجي داكن"></div>
-          <div class="swatch" style="background:#0d0a1a" onclick="applyBg('#0d0a1a','#120f22','#19162a')" title="نيلي داكن"></div>
-        </div>
-        <button class="ep-reset-all" onclick="resetTheme()">↺ استعادة الألوان الأصلية</button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
 </body>
 </html>
