@@ -1,5 +1,5 @@
 # -*- -*- coding: utf-8 -*-
-"""ONYX MOVIE — Flask + TMDB + Bilingual UI (AR/EN)"""
+"""ONYX MOVIE — Flask + TMDB + Episodes & Movie Collection Images"""
 
 from flask import Flask, jsonify, request
 import os
@@ -8,7 +8,7 @@ import urllib.parse
 import json
 
 app = Flask(__name__)
-TMDB_API_KEY = os.getenv("TMDB_API_KEY", "")
+TMDB_API_KEY = os.getenv("a6288fc42fb7de2837e2756a101397e5", "")
 TMDB_BASE = "https://api.themoviedb.org/3"
 IMG_BASE = "https://image.tmdb.org/t/p"
 
@@ -162,13 +162,25 @@ html[dir="ltr"] .modal-close { left: auto; right: 1.2rem; }
 .cast-name { font-size: 0.8rem; font-weight: 700; margin-top: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 0.3rem; }
 .cast-role { font-size: 0.7rem; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 0.3rem; }
 
+/* SEASONS & EPISODES WITH IMAGES */
 .seasons-section { margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 2rem; }
-.seasons-section h3 { font-size: 1.2rem; margin-bottom: 1rem; }
-.season-selector { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
-.season-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text2); padding: 0.5rem 1.1rem; border-radius: 4px; font-size: 0.9rem; }
-.season-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-.episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; }
-.episode-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text2); padding: 0.75rem 1rem; border-radius: 4px; font-size: 0.85rem; }
+.seasons-section h3 { font-size: 1.3rem; margin-bottom: 1.2rem; font-weight: 700; }
+.season-selector { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.season-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text2); padding: 0.6rem 1.2rem; border-radius: var(--radius); font-size: 0.9rem; font-weight: 700; transition: all 0.2s; }
+.season-btn.active, .season-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1.2rem; }
+.episode-card { background: var(--surface); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; }
+.episode-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+.episode-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: var(--surface2); }
+.episode-details { padding: 0.75rem; }
+.episode-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.episode-num { font-size: 0.75rem; color: var(--accent); font-weight: 700; margin-bottom: 0.3rem; }
+
+/* MOVIE COLLECTION / PARTS SECTION */
+.collection-section { margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 2rem; }
+.collection-section h3 { font-size: 1.3rem; margin-bottom: 1.2rem; font-weight: 700; }
+.parts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
 </style>
 </head>
 <body>
@@ -245,14 +257,14 @@ const I18N = {
     searchPh: "ابحث عن فيلم أو مسلسل...", searchBtn: "بحث",
     badge: "الأكثر رواجاً — جودة 4K", watchNow: "مشاهدة الآن",
     trending: "الأكثر رواجاً", popular: "الأفلام الشائعة", topTitle: "الأعلى تقييماً", seriesTitle: "المسلسلات الشائعة",
-    rating: "تقييم", castTitle: "طاقم التمثيل", seasonsTitle: "المواسم والحلقات", season: "الموسم", episode: "حلقة"
+    rating: "تقييم", castTitle: "طاقم التمثيل", seasonsTitle: "المواسم والحلقات", partsTitle: "سلسلة الأجزاء المرتبطة", season: "الموسم", episode: "حلقة"
   },
   en: {
     home: "Home", movies: "Movies", series: "TV Series", top: "Top Rated",
     searchPh: "Search movies or shows...", searchBtn: "Search",
     badge: "Trending — 4K Quality", watchNow: "Watch Now",
     trending: "Trending Now", popular: "Popular Movies", topTitle: "Top Rated", seriesTitle: "Popular TV Series",
-    rating: "Rating", castTitle: "Cast & Characters", seasonsTitle: "Seasons & Episodes", season: "Season", episode: "Episode"
+    rating: "Rating", castTitle: "Cast & Characters", seasonsTitle: "Seasons & Episodes", partsTitle: "Movie Collection / Parts", season: "Season", episode: "Episode"
   }
 };
 
@@ -367,6 +379,7 @@ async function openMovie(id, type) {
     html += '<button class="btn-watch-now" onclick="startStreaming(0, 1, 1)">' + t.watchNow + '</button>';
     html += '</div></div>';
 
+    // Cast Section
     if (credits.cast && credits.cast.length) {
       html += '<div class="cast-section"><h3>' + t.castTitle + '</h3><div class="cast-grid">';
       credits.cast.slice(0, 8).forEach(c => {
@@ -376,16 +389,72 @@ async function openMovie(id, type) {
       html += '</div></div>';
     }
 
-    if (type === 'tv' && m.seasons) {
+    // Movie Collection Parts (أجزاء الفيلم السابقة والقادمة مع صورها)
+    if (type === 'movie' && m.belongs_to_collection) {
+      const colRes = await fetch('/api/collection/' + m.belongs_to_collection.id + '?lang=' + currentLang);
+      const colData = await colRes.json();
+      if (colData.parts && colData.parts.length) {
+        html += '<div class="collection-section"><h3>' + t.partsTitle + '</h3><div class="parts-grid">';
+        colData.parts.forEach(p => {
+          html += movieCard(p);
+        });
+        html += '</div></div>';
+      }
+    }
+
+    // TV Seasons & Episodes Section WITH IMAGES
+    if (type === 'tv' && m.seasons && m.seasons.length) {
       html += '<div class="seasons-section"><h3>' + t.seasonsTitle + '</h3><div class="season-selector">';
-      m.seasons.filter(s => s.season_number > 0).forEach(s => {
-        html += '<button class="season-btn" onclick="changeSeason(this, ' + id + ', ' + s.season_number + ')">' + t.season + ' ' + s.season_number + '</button>';
+      const seasonsList = m.seasons.filter(s => s.season_number > 0);
+      seasonsList.forEach((s, i) => {
+        html += '<button class="season-btn' + (i === 0 ? ' active' : '') + '" onclick="changeSeason(this, ' + id + ', ' + s.season_number + ')">' + t.season + ' ' + s.season_number + '</button>';
       });
       html += '</div><div class="episodes-grid" id="episodesGrid"></div></div>';
     }
 
     content.innerHTML = html;
+
+    // جلب حلقات الموسم الأول مع صورها تلقائياً للمسلسلات
+    if (type === 'tv' && m.seasons && m.seasons.length) {
+      const firstSeason = m.seasons.filter(s => s.season_number > 0)[0];
+      if (firstSeason) loadEpisodes(id, firstSeason.season_number);
+    }
+
   } catch (e) {}
+}
+
+async function loadEpisodes(tvId, seasonNum) {
+  const el = document.getElementById('episodesGrid');
+  if (!el) return;
+  el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const t = I18N[currentLang];
+  try {
+    const res = await fetch('/api/tv/' + tvId + '/season/' + seasonNum + '?lang=' + currentLang);
+    const data = await res.json();
+    const episodes = data.episodes || [];
+    if (!episodes.length) { el.innerHTML = '<div class="loading">No episodes found</div>'; return; }
+    
+    el.innerHTML = episodes.map(ep => {
+      const still = ep.still_path ? IMG + '/w300' + ep.still_path : 'https://via.placeholder.com/300x169/242424/aaaaaa?text=Episode+' + ep.episode_number;
+      return '<div class="episode-card" onclick="playEpisode(' + tvId + ', ' + seasonNum + ', ' + ep.episode_number + ')">' +
+        '<img class="episode-thumb" src="' + still + '" alt="' + ep.name + '" loading="lazy">' +
+        '<div class="episode-details">' +
+          '<div class="episode-num">' + t.episode + ' ' + ep.episode_number + '</div>' +
+          '<div class="episode-title">' + (ep.name || ('Episode ' + ep.episode_number)) + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch (e) { el.innerHTML = '<div class="loading">Error loading episodes</div>'; }
+}
+
+function changeSeason(btn, tvId, seasonNum) {
+  document.querySelectorAll('.season-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadEpisodes(tvId, seasonNum);
+}
+
+function playEpisode(tvId, season, episode) {
+  startStreaming(0, season, episode);
 }
 
 function startStreaming(idx, season, episode) {
@@ -456,7 +525,7 @@ PLAYER_HTML = PLAYER_HTML.replace('__SOURCES__', SOURCES_JSON)
 
 
 # ══════════════════════════════════════════════════════════
-# ROUTES (Backend Handling Both AR and EN)
+# ROUTES
 # ══════════════════════════════════════════════════════════
 
 @app.route("/")
@@ -473,7 +542,6 @@ def tmdb_get(endpoint, params=None):
     params = params or {}
     params["api_key"] = TMDB_API_KEY
     
-    # تحديد اللغة بناءً على خيار المستخدم
     lang = request.args.get("lang", "ar")
     params["language"] = "en-US" if lang == "en" else "ar"
     
@@ -499,6 +567,14 @@ def api_movie(movie_id):
 @app.route("/api/tv/<int:tv_id>")
 def api_tv(tv_id):
     return jsonify(tmdb_get(f"/tv/{tv_id}"))
+
+@app.route("/api/tv/<int:tv_id>/season/<int:season_num>")
+def api_tv_season(tv_id, season_num):
+    return jsonify(tmdb_get(f"/tv/{tv_id}/season/{season_num}"))
+
+@app.route("/api/collection/<int:col_id>")
+def api_collection(col_id):
+    return jsonify(tmdb_get(f"/collection/{col_id}"))
 
 @app.route("/api/<media_type>/<int:item_id>/credits")
 def api_credits(media_type, item_id):
