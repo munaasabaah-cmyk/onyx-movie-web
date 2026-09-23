@@ -8,7 +8,7 @@ import urllib.parse
 import json
 
 app = Flask(__name__)
-TMDB_API_KEY = os.getenv("a6288fc42fb7de2837e2756a101397e5", "")
+TMDB_API_KEY = os.getenv("TMDB_API_KEY", "")
 TMDB_BASE = "https://api.themoviedb.org/3"
 IMG_BASE = "https://image.tmdb.org/t/p"
 
