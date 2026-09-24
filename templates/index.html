@@ -1,889 +1,269 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CineAra Pro</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #0a0a0f;
-      --surface: #12121a;
-      --surface2: #1a1a26;
-      --border: rgba(255,255,255,.07);
-      --accent: #e8b84b;
-      --accent2: #c0392b;
-      --text: #e8e8f0;
-      --muted: #7a7a9a;
-      --radius: 12px;
-      --radius-lg: 20px;
-      --shadow: 0 8px 32px rgba(0,0,0,.6);
-      --font-ar: 'Cairo', sans-serif;
-      --font-display: 'Bebas Neue', sans-serif;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
+<meta name="theme-color" content="#0a0a0f">
+<title>ONYX CINEMA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0a0f;--bg2:#12121a;--surface:#16161f;--surface2:#1f1f2e;
+  --accent:#e8b84b;--accent2:#c0392b;--gold:#f5c518;--green:#22c55e;
+  --text:#e8e8f0;--text2:#a0a0b8;--text3:#5a5a72;
+  --border:rgba(255,255,255,0.08);
+  --radius:12px;--radius-lg:20px;
+  --shadow:0 8px 32px rgba(0,0,0,0.6);
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--bg);color:var(--text);font-family:'Cairo',sans-serif;overflow-x:hidden;min-height:100vh}
+a{text-decoration:none;color:inherit}
+img{max-width:100%;display:block}
+button{cursor:pointer;font-family:'Cairo',sans-serif;border:none;background:none;color:inherit}
+input,textarea,select{font-family:'Cairo',sans-serif;color:inherit}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: var(--font-ar);
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    a { color: inherit; text-decoration: none; }
-    button { cursor: pointer; border: none; background: none; font-family: inherit; }
-    input, textarea { font-family: inherit; }
+/* NAVBAR */
+#navbar{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 3%;background:linear-gradient(180deg,rgba(10,10,15,0.98) 0%,transparent 100%);transition:.3s}
+#navbar.scrolled{background:rgba(10,10,15,0.98);border-bottom:1px solid var(--border);backdrop-filter:blur(20px)}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:3px;color:var(--accent);flex-shrink:0}
+.nav-links{display:flex;gap:32px}
+.nav-links a{font-size:.88rem;font-weight:600;color:var(--text2);transition:.2s;cursor:pointer;padding:.3rem 0}
+.nav-links a:hover,.nav-links a.active{color:var(--accent)}
+.nav-actions{display:flex;align-items:center;gap:12px}
+.btn-icon{width:40px;height:40px;border-radius:10px;background:var(--surface2);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;transition:.2s;border:1px solid var(--border);cursor:pointer}
+.btn-icon:hover{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.user-profile{display:flex;align-items:center;gap:9px;padding:5px 14px;border-radius:20px;background:rgba(232,184,75,.08);cursor:pointer;transition:.2s;border:1px solid rgba(232,184,75,.2)}
+.user-profile:hover{background:rgba(232,184,75,.16)}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#d35400);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--bg);font-size:.85rem}
+.user-name{font-size:.83rem;color:var(--accent);font-weight:600}
 
-    /* SCROLLBAR */
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+/* HERO */
+#hero{height:100vh;min-height:580px;position:relative;overflow:hidden;display:flex;align-items:flex-end;padding-bottom:88px}
+#hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;transition:opacity .6s}
+#hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,var(--bg) 0%,rgba(10,10,15,0.65) 42%,rgba(10,10,15,0.15) 100%)}
+.hero-content{position:relative;z-index:2;padding:0 60px;max-width:700px}
+.hero-eyebrow{font-size:.76rem;font-weight:700;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.hero-eyebrow::before{content:'';display:block;width:24px;height:2px;background:var(--accent)}
+#hero-title{font-size:clamp(2.2rem,5vw,4rem);font-weight:900;line-height:1.12;margin-bottom:14px}
+#hero-meta{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:.85rem;color:var(--text2)}
+#hero-meta .accent{color:var(--accent);font-weight:700}
+#hero-meta .sep{color:var(--border)}
+#hero-desc{font-size:.94rem;color:#a0a0be;line-height:1.8;max-width:520px;margin-bottom:30px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap}
+.btn-primary{display:flex;align-items:center;gap:10px;background:var(--accent);color:var(--bg);font-weight:700;font-size:.94rem;padding:13px 30px;border-radius:8px;transition:.2s;cursor:pointer;border:none}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(232,184,75,.35)}
+.play-arrow{width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:10px solid var(--bg)}
+.btn-ghost{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.08);color:var(--text);font-weight:600;font-size:.94rem;padding:13px 28px;border-radius:8px;border:1px solid rgba(255,255,255,.15);transition:.2s;cursor:pointer}
+.btn-ghost:hover{background:rgba(255,255,255,.16)}
 
-    /* AUTH MODAL */
-    #auth-modal {
-      position: fixed; inset: 0; z-index: 9000;
-      background: rgba(0,0,0,.97);
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.3s;
-    }
-    #auth-modal.open { opacity: 1; pointer-events: all; }
-    .auth-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 40px;
-      max-width: 450px; width: 90vw;
-      box-shadow: var(--shadow);
-    }
-    .auth-logo {
-      font-family: var(--font-display);
-      font-size: 2.4rem;
-      color: var(--accent);
-      margin-bottom: 6px;
-      letter-spacing: 2px;
-    }
-    .auth-subtitle {
-      color: var(--muted);
-      font-size: .88rem;
-      margin-bottom: 30px;
-    }
-    .auth-tabs {
-      display: flex;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 24px;
-    }
-    .auth-tab {
-      flex: 1;
-      padding: 12px;
-      background: none;
-      border: none;
-      color: var(--muted);
-      font-weight: 600;
-      font-size: .88rem;
-      border-bottom: 2px solid transparent;
-      cursor: pointer;
-      transition: all 0.22s;
-      font-family: var(--font-ar);
-    }
-    .auth-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-    .auth-content { display: none; }
-    .auth-content.active { display: block; }
-    .auth-input {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 12px 14px;
-      border-radius: 8px;
-      font-size: .93rem;
-      margin-bottom: 12px;
-      transition: border-color 0.22s;
-      font-family: var(--font-ar);
-    }
-    .auth-input:focus { outline: none; border-color: var(--accent); }
-    .auth-btn {
-      width: 100%;
-      background: var(--accent);
-      color: var(--bg);
-      font-weight: 700;
-      padding: 12px;
-      border-radius: 8px;
-      margin-bottom: 14px;
-      transition: all 0.22s;
-      cursor: pointer;
-      font-family: var(--font-ar);
-      font-size: .93rem;
-    }
-    .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,184,75,.35); }
-    .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .google-btn {
-      width: 100%;
-      background: var(--surface2);
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 12px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      font-weight: 600;
-      margin-bottom: 14px;
-      transition: all 0.22s;
-      cursor: pointer;
-      font-family: var(--font-ar);
-    }
-    .google-btn:hover { background: var(--surface); border-color: var(--accent); }
-    .google-letter {
-      width: 22px; height: 22px;
-      border-radius: 50%;
-      background: white;
-      color: #333;
-      font-weight: 900;
-      font-size: .85rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+/* SECTIONS */
+section{padding:50px 40px;max-width:1900px;margin:0 auto}
+.sec-title{font-size:1.35rem;font-weight:900;margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.sec-title::before{content:'';display:block;width:4px;height:24px;background:var(--accent);border-radius:2px}
 
-    /* OTP */
-    .otp-inputs {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      margin: 16px 0;
-    }
-    .otp-input {
-      width: 46px; height: 46px;
-      font-size: 1.2rem; font-weight: 700;
-      text-align: center;
-      background: var(--surface2);
-      border: 2px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      transition: all 0.22s;
-      font-family: var(--font-ar);
-    }
-    .otp-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 10px rgba(232,184,75,.2); }
-    .otp-timer { text-align: center; color: var(--muted); font-size: .82rem; margin-top: 10px; }
-    .otp-timer.warning { color: var(--accent2); }
+/* CARDS ROW */
+.cards-row{display:flex;gap:18px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none;scroll-snap-type:x mandatory}
+.cards-row::-webkit-scrollbar{display:none}
 
-    /* NAVBAR */
-    #navbar {
-      position: fixed; top: 0; inset-inline: 0; z-index: 1000;
-      height: 68px;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 32px;
-      background: linear-gradient(to bottom, rgba(10,10,15,.98) 0%, rgba(10,10,15,0) 100%);
-      transition: background 0.22s;
-    }
-    #navbar.scrolled {
-      background: rgba(10,10,15,.97);
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-logo {
-      font-family: var(--font-display);
-      font-size: 1.85rem;
-      letter-spacing: 3px;
-      color: var(--accent);
-    }
-    .nav-links { display: flex; gap: 32px; }
-    .nav-links a {
-      font-size: .88rem; font-weight: 600; color: var(--muted);
-      transition: color 0.22s;
-    }
-    .nav-links a:hover, .nav-links a.active { color: var(--accent); }
-    .nav-actions { display: flex; align-items: center; gap: 12px; }
+/* MOVIE CARD */
+.movie-card{flex:0 0 180px;scroll-snap-align:start;cursor:pointer;transition:transform .25s;position:relative}
+.movie-card:hover{transform:translateY(-8px)}
+.card-poster{width:100%;aspect-ratio:2/3;border-radius:12px;object-fit:cover;background:var(--surface2);margin-bottom:10px;position:relative;overflow:hidden;border:1px solid var(--border)}
+.card-poster img{width:100%;height:100%;object-fit:cover;transition:transform .4s;display:block}
+.movie-card:hover .card-poster img{transform:scale(1.06)}
+.card-rating{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.82);color:var(--accent);font-size:.72rem;font-weight:700;padding:4px 9px;border-radius:5px;letter-spacing:.3px;backdrop-filter:blur(8px)}
+.card-fav{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;font-size:.9rem;color:var(--text2);z-index:2;transition:.2s;cursor:pointer;border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(8px)}
+.card-fav.active{background:var(--accent2);border-color:var(--accent2);color:white}
+.card-fav:hover{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.card-info{padding:0 4px}
+.card-title{font-size:.87rem;font-weight:700;line-height:1.3;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.4em}
+.card-year{font-size:.74rem;color:var(--text2)}
 
-    .btn-icon {
-      width: 38px; height: 38px; border-radius: 8px;
-      background: var(--surface2); color: var(--muted);
-      display: flex; align-items: center; justify-content: center;
-      font-size: .75rem; font-weight: 700;
-      transition: all 0.22s;
-      border: 1px solid var(--border);
-      letter-spacing: .5px;
-    }
-    .btn-icon:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+/* GRID */
+#browse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:22px}
+#browse-grid .movie-card{flex:none;width:100%}
 
-    .user-profile {
-      display: flex; align-items: center; gap: 9px;
-      padding: 5px 14px;
-      border-radius: 20px;
-      background: rgba(232,184,75,.08);
-      cursor: pointer;
-      transition: background 0.22s;
-      border: 1px solid rgba(232,184,75,.2);
-    }
-    .user-profile:hover { background: rgba(232,184,75,.16); }
-    .user-avatar {
-      width: 30px; height: 30px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), #d35400);
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; color: var(--bg); font-size: .85rem;
-    }
-    .user-name { font-size: .82rem; color: var(--accent); }
+/* GENRE STRIP */
+.genre-strip{display:flex;gap:10px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none;margin-bottom:28px;flex-wrap:wrap}
+.genre-strip::-webkit-scrollbar{display:none}
+.genre-chip{flex:0 0 auto;padding:8px 20px;border-radius:6px;border:1px solid var(--border);font-size:.82rem;font-weight:600;color:var(--text2);background:var(--surface2);cursor:pointer;transition:.2s}
+.genre-chip:hover{border-color:var(--accent);color:var(--accent)}
+.genre-chip.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}
 
-    /* PROFILE MODAL */
-    #profile-modal {
-      position: fixed; inset: 0; z-index: 8000;
-      background: rgba(0,0,0,.92);
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.3s;
-    }
-    #profile-modal.open { opacity: 1; pointer-events: all; }
-    .profile-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 40px;
-      max-width: 500px; width: 90vw;
-      box-shadow: var(--shadow);
-    }
-    .profile-header { text-align: center; margin-bottom: 28px; }
-    .profile-avatar-wrap {
-      position: relative; width: 110px; height: 110px;
-      margin: 0 auto 14px; cursor: pointer;
-    }
-    .profile-avatar-img {
-      width: 100%; height: 100%; border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), #d35400);
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 2.4rem; color: var(--bg);
-      border: 3px solid var(--accent); overflow: hidden;
-    }
-    .profile-avatar-img img { width: 100%; height: 100%; object-fit: cover; }
-    .profile-avatar-badge {
-      position: absolute; bottom: 2px; right: 2px;
-      width: 32px; height: 32px;
-      background: var(--accent); border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: .75rem; font-weight: 900; color: var(--bg);
-      border: 2px solid var(--surface);
-    }
-    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-    .form-group label { font-size: .8rem; font-weight: 600; color: var(--muted); }
-    .form-group input, .form-group textarea {
-      background: var(--surface2); border: 1px solid var(--border);
-      color: var(--text); padding: 10px 12px; border-radius: 8px;
-      font-size: .9rem; transition: border-color 0.22s; font-family: var(--font-ar);
-    }
-    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
-    .form-actions { display: flex; gap: 12px; margin-top: 8px; }
-    .btn-save {
-      flex: 1; background: var(--accent); color: var(--bg);
-      padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer;
-      transition: all 0.22s; font-family: var(--font-ar);
-    }
-    .btn-save:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(232,184,75,.3); }
-    .btn-cancel {
-      flex: 1; background: var(--surface2); color: var(--text);
-      border: 1px solid var(--border); padding: 10px; border-radius: 8px;
-      font-weight: 600; cursor: pointer; transition: all 0.22s; font-family: var(--font-ar);
-    }
-    .btn-cancel:hover { border-color: var(--accent); }
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);display:flex;align-items:flex-start;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s;overflow-y:auto}
+.modal-overlay.open{opacity:1;pointer-events:all}
+#modal{width:min(1100px,96vw);background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);transform:translateY(24px) scale(.97);transition:transform .35s;margin:auto;overflow:hidden}
+.modal-overlay.open #modal{transform:translateY(0) scale(1)}
+.modal-backdrop{width:100%;height:280px;background-size:cover;background-position:center;position:relative;background-repeat:no-repeat;background-color:var(--surface2)}
+.modal-backdrop::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,var(--surface) 0%,transparent 70%)}
+.modal-close{position:absolute;top:16px;left:16px;z-index:3;width:38px;height:38px;border-radius:10px;background:rgba(0,0,0,.75);color:white;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;transition:.2s;cursor:pointer;border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(8px)}
+.modal-close:hover{background:var(--accent2);border-color:var(--accent2)}
+.modal-body{padding:26px 34px 36px}
+.modal-title{font-size:2rem;font-weight:900;line-height:1.2;margin-bottom:12px}
+.modal-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.85rem;color:var(--text2);margin-bottom:18px}
+.modal-meta .accent{color:var(--accent);font-weight:700}
+.modal-meta .sep{color:var(--surface2)}
+.modal-desc{font-size:.92rem;color:#a8a8c4;line-height:1.85;margin-bottom:24px}
 
-    /* SEARCH */
-    #search-overlay {
-      position: fixed; inset: 0; z-index: 2000;
-      background: rgba(0,0,0,.88);
-      backdrop-filter: blur(14px);
-      display: flex; align-items: flex-start; justify-content: center;
-      padding-top: 120px;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.22s;
-    }
-    #search-overlay.open { opacity: 1; pointer-events: all; }
-    .search-box {
-      width: min(640px, 92vw);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      overflow: hidden; box-shadow: var(--shadow);
-    }
-    .search-input-row {
-      display: flex; align-items: center; gap: 14px;
-      padding: 18px 20px; border-bottom: 1px solid var(--border);
-    }
-    .search-icon {
-      width: 18px; height: 18px; flex-shrink: 0;
-      border: 2px solid var(--muted); border-radius: 50%; position: relative;
-    }
-    .search-icon::after {
-      content: '';
-      position: absolute; bottom: -5px; right: -5px;
-      width: 6px; height: 2px;
-      background: var(--muted); border-radius: 1px;
-      transform: rotate(45deg);
-    }
-    #search-input {
-      flex: 1; background: none; border: none; outline: none;
-      font-size: 1.05rem; color: var(--text); font-family: var(--font-ar);
-    }
-    #search-input::placeholder { color: var(--muted); }
-    .search-close-btn {
-      background: var(--surface2); border: 1px solid var(--border);
-      color: var(--muted); width: 28px; height: 28px;
-      border-radius: 6px; font-size: .75rem; font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: all 0.22s;
-    }
-    .search-close-btn:hover { background: var(--accent2); color: white; border-color: var(--accent2); }
-    #search-results-list { max-height: 380px; overflow-y: auto; }
-    .search-result-item {
-      display: flex; align-items: center; gap: 14px;
-      padding: 12px 20px; cursor: pointer; transition: background 0.22s;
-      border-bottom: 1px solid rgba(255,255,255,.025);
-    }
-    .search-result-item:hover { background: var(--surface2); }
-    .search-result-item img {
-      width: 40px; height: 58px; object-fit: cover;
-      border-radius: 6px; flex-shrink: 0; background: var(--surface2);
-    }
-    .search-result-info strong { display: block; font-size: .93rem; margin-bottom: 2px; }
-    .search-result-info span { font-size: .76rem; color: var(--muted); }
+/* PLAYER */
+.player-container{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;margin-bottom:18px;position:relative;box-shadow:0 15px 50px rgba(0,0,0,.9)}
+.player-container iframe{width:100%;height:100%;border:none;display:block}
+.player-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1a2e,#0a0a15);color:var(--text2);flex-direction:column;gap:14px}
+.player-placeholder-icon{width:70px;height:70px;border-radius:50%;background:rgba(232,184,75,.15);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:.7}}
 
-    /* HERO */
-    #hero {
-      height: 100vh; min-height: 580px;
-      position: relative; overflow: hidden;
-      display: flex; align-items: flex-end; padding-bottom: 88px;
-    }
-    #hero-bg {
-      position: absolute; inset: 0;
-      background-size: cover; background-position: center;
-      background-repeat: no-repeat;
-    }
-    #hero-bg::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(
-        to top,
-        var(--bg) 0%,
-        rgba(10,10,15,.65) 42%,
-        rgba(10,10,15,.15) 100%
-      );
-    }
-    .hero-content { position: relative; z-index: 1; padding: 0 60px; max-width: 680px; }
-    .hero-eyebrow {
-      font-size: .75rem; font-weight: 700; letter-spacing: 2px;
-      color: var(--accent); text-transform: uppercase;
-      margin-bottom: 14px;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .hero-eyebrow::before {
-      content: ''; display: block; width: 24px; height: 2px;
-      background: var(--accent);
-    }
-    #hero-title {
-      font-size: clamp(2.4rem, 5vw, 4rem);
-      font-weight: 900; line-height: 1.12;
-      margin-bottom: 14px;
-    }
-    #hero-meta {
-      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-      margin-bottom: 16px; font-size: .82rem; color: var(--muted);
-    }
-    #hero-meta .accent { color: var(--accent); font-weight: 700; }
-    #hero-meta .sep { color: var(--border); }
-    #hero-desc {
-      font-size: .93rem; color: #a0a0be; line-height: 1.8;
-      max-width: 500px; margin-bottom: 30px;
-    }
-    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
-    .btn-primary {
-      display: flex; align-items: center; gap: 10px;
-      background: var(--accent); color: var(--bg);
-      font-weight: 700; font-size: .92rem;
-      padding: 13px 30px; border-radius: 6px;
-      transition: all 0.22s; cursor: pointer; border: none;
-      font-family: var(--font-ar);
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,184,75,.35); }
-    .play-arrow {
-      width: 0; height: 0;
-      border-top: 6px solid transparent;
-      border-bottom: 6px solid transparent;
-      border-left: 10px solid var(--bg);
-    }
-    .btn-ghost {
-      display: flex; align-items: center; gap: 9px;
-      background: rgba(255,255,255,.08); color: var(--text);
-      font-weight: 600; font-size: .92rem;
-      padding: 13px 28px; border-radius: 6px;
-      border: 1px solid rgba(255,255,255,.15);
-      transition: all 0.22s; cursor: pointer; font-family: var(--font-ar);
-    }
-    .btn-ghost:hover { background: rgba(255,255,255,.16); }
+/* QUALITY INFO */
+.quality-info{display:flex;align-items:center;gap:.8rem;padding:12px 16px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);margin-bottom:18px;flex-wrap:wrap}
+.quality-badge{padding:5px 14px;border-radius:6px;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.quality-badge.q4k{background:linear-gradient(135deg,#f5c518,#ff9800);color:#000}
+.quality-badge.qhd{background:var(--green);color:#000}
+.quality-badge.qsd{background:var(--surface);color:var(--text2)}
+.quality-info-text{color:var(--text2);font-size:.85rem;font-weight:600}
 
-    /* SECTIONS */
-    section { padding: 60px 40px; }
-    .sec-title {
-      font-size: 1.3rem; font-weight: 900; margin-bottom: 28px;
-      display: flex; align-items: center; gap: 12px;
-    }
-    .sec-title::before {
-      content: ''; display: block; width: 4px; height: 22px;
-      background: var(--accent); border-radius: 2px;
-    }
+/* ACTIONS */
+.modal-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
 
-    /* CARDS ROW */
-    .cards-row {
-      display: flex; gap: 18px; overflow-x: auto; padding-bottom: 12px;
-      scrollbar-width: none;
-    }
-    .cards-row::-webkit-scrollbar { display: none; }
+/* CAST */
+.cast-section{margin-bottom:24px}
+.cast-section h4{font-size:.82rem;color:var(--text2);margin-bottom:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.cast-list{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
+.cast-list::-webkit-scrollbar{display:none}
+.cast-item{flex:0 0 auto;width:100px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 10px;text-align:center;cursor:pointer;transition:.2s}
+.cast-item:hover{border-color:var(--accent);transform:translateY(-3px)}
+.cast-avatar{width:56px;height:56px;margin:0 auto 9px;background:linear-gradient(135deg,var(--accent),#d35400);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.4rem;color:var(--bg);overflow:hidden}
+.cast-avatar img{width:100%;height:100%;object-fit:cover}
+.cast-name{font-size:.76rem;font-weight:700;margin-bottom:3px;line-height:1.2}
+.cast-role{font-size:.66rem;color:var(--text2)}
 
-    /* MOVIE CARD */
-    .movie-card {
-      flex: 0 0 auto; width: 178px;
-      cursor: pointer; transition: transform 0.22s; position: relative;
-    }
-    .movie-card:hover { transform: translateY(-8px); }
-    .card-poster {
-      width: 100%; aspect-ratio: 2/3; border-radius: var(--radius);
-      object-fit: cover; background: var(--surface2);
-      margin-bottom: 10px; position: relative; overflow: hidden;
-      border: 1px solid var(--border);
-    }
-    .card-poster img {
-      width: 100%; height: 100%; object-fit: cover;
-      transition: transform 0.4s ease;
-      display: block;
-    }
-    .movie-card:hover .card-poster img { transform: scale(1.06); }
-    .card-rating {
-      position: absolute; top: 8px; left: 8px;
-      background: rgba(0,0,0,.82); color: var(--accent);
-      font-size: .72rem; font-weight: 700; padding: 4px 9px;
-      border-radius: 5px; letter-spacing: .3px;
-    }
-    .card-fav {
-      position: absolute; top: 8px; right: 8px;
-      width: 30px; height: 30px; border-radius: 50%;
-      background: rgba(0,0,0,.72);
-      display: flex; align-items: center; justify-content: center;
-      font-size: .75rem; font-weight: 700; color: var(--muted);
-      z-index: 2; transition: all 0.22s; cursor: pointer;
-      border: 1px solid rgba(255,255,255,.1);
-      letter-spacing: 0;
-    }
-    .card-fav.active { background: var(--accent2); border-color: var(--accent2); color: white; }
-    .card-fav:hover { background: var(--accent); border-color: var(--accent); color: var(--bg); }
-    .card-info { padding: 0 2px; }
-    .card-title {
-      font-size: .85rem; font-weight: 700; line-height: 1.3;
-      margin-bottom: 4px;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-    }
-    .card-year { font-size: .73rem; color: var(--muted); }
+/* STARS */
+.stars-row{display:flex;gap:8px;margin:16px 0}
+.star-btn{font-size:1.4rem;cursor:pointer;transition:.18s;color:var(--text2);background:none;border:none}
+.star-btn:hover,.star-btn.lit{color:var(--accent);transform:scale(1.18)}
 
-    /* MATCH CARD */
-    .match-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      width: 240px;
-      flex: 0 0 auto;
-      cursor: pointer;
-      transition: all 0.22s;
-    }
-    .match-card:hover { border-color: var(--accent); transform: translateY(-4px); }
-    .match-league {
-      font-size: .7rem; font-weight: 700; color: var(--accent);
-      text-transform: uppercase; letter-spacing: 1px;
-      margin-bottom: 12px; padding-bottom: 10px;
-      border-bottom: 1px solid var(--border);
-    }
-    .match-teams { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
-    .match-team {
-      display: flex; align-items: center;
-      justify-content: space-between; gap: 10px;
-    }
-    .match-team-logo {
-      width: 28px; height: 28px; border-radius: 50%;
-      background: var(--surface2); border: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: center;
-      font-size: .65rem; font-weight: 900; color: var(--accent);
-      flex-shrink: 0;
-    }
-    .match-team-name { flex: 1; font-size: .87rem; font-weight: 600; }
-    .match-score {
-      font-family: var(--font-display);
-      font-size: 1.3rem; color: var(--accent); min-width: 28px; text-align: center;
-    }
-    .match-footer {
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: .72rem; color: var(--muted);
-    }
-    .status-live {
-      background: rgba(192,57,43,.15); color: var(--accent2);
-      border: 1px solid rgba(192,57,43,.3);
-      padding: 3px 10px; border-radius: 20px;
-      font-weight: 700; font-size: .7rem;
-      display: flex; align-items: center; gap: 5px;
-    }
-    .live-dot {
-      width: 5px; height: 5px; border-radius: 50%;
-      background: var(--accent2); animation: pulse 1s infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-    .status-upcoming { color: var(--muted); font-weight: 600; }
-    .status-finished { color: #4a4a6a; font-weight: 600; }
+/* AUTH MODAL */
+#auth-modal{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.97);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;padding:20px}
+#auth-modal.open{opacity:1;pointer-events:all}
+.auth-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;max-width:440px;width:100%;box-shadow:var(--shadow)}
+.auth-logo{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;color:var(--accent);margin-bottom:8px;letter-spacing:2px;text-align:center}
+.auth-subtitle{color:var(--text2);font-size:.88rem;margin-bottom:30px;text-align:center}
+.auth-input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:10px;font-size:.93rem;margin-bottom:12px;transition:.2s;outline:none}
+.auth-input:focus{border-color:var(--accent)}
+.auth-btn{width:100%;background:var(--accent);color:var(--bg);font-weight:700;padding:12px;border-radius:10px;margin-bottom:14px;transition:.2s;cursor:pointer;font-size:.94rem}
+.auth-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(232,184,75,.35)}
+.auth-close{position:absolute;top:20px;right:20px;width:36px;height:36px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text2);cursor:pointer;font-size:.9rem}
 
-    /* GENRE STRIP */
-    .genre-strip {
-      display: flex; gap: 10px; overflow-x: auto;
-      padding-bottom: 12px; scrollbar-width: none;
-      margin-bottom: 28px; flex-wrap: wrap;
-    }
-    .genre-chip {
-      flex: 0 0 auto; padding: 8px 20px; border-radius: 4px;
-      border: 1px solid var(--border); font-size: .8rem; font-weight: 600;
-      color: var(--muted); background: var(--surface2);
-      cursor: pointer; transition: all 0.22s; font-family: var(--font-ar);
-    }
-    .genre-chip:hover { border-color: var(--accent); color: var(--accent); }
-    .genre-chip.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+/* PROFILE MODAL */
+#profile-modal{position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;padding:20px}
+#profile-modal.open{opacity:1;pointer-events:all}
+.profile-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;max-width:520px;width:100%;box-shadow:var(--shadow);max-height:90vh;overflow-y:auto}
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.form-group label{font-size:.82rem;font-weight:600;color:var(--text2)}
+.form-group input,.form-group textarea{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:10px;font-size:.9rem;transition:.2s;outline:none}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--accent)}
+.form-actions{display:flex;gap:12px;margin-top:12px}
+.btn-save{flex:1;background:var(--accent);color:var(--bg);padding:11px;border-radius:10px;font-weight:700;cursor:pointer;transition:.2s}
+.btn-save:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(232,184,75,.3)}
+.btn-cancel{flex:1;background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:11px;border-radius:10px;font-weight:600;cursor:pointer;transition:.2s}
+.btn-cancel:hover{border-color:var(--accent)}
 
-    /* GRID */
-    #browse-grid, #matches-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(178px, 1fr));
-      gap: 22px;
-    }
-    #matches-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+/* SEARCH */
+#search-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.88);backdrop-filter:blur(14px);display:flex;align-items:flex-start;justify-content:center;padding-top:120px;opacity:0;pointer-events:none;transition:opacity .22s;padding-left:20px;padding-right:20px}
+#search-overlay.open{opacity:1;pointer-events:all}
+.search-box{width:min(680px,96vw);background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}
+.search-input-row{display:flex;align-items:center;gap:14px;padding:18px 22px;border-bottom:1px solid var(--border)}
+#search-input{flex:1;background:none;border:none;outline:none;font-size:1.05rem;color:var(--text)}
+#search-input::placeholder{color:var(--text3)}
+.search-close-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);width:32px;height:32px;border-radius:8px;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s}
+.search-close-btn:hover{background:var(--accent2);color:white;border-color:var(--accent2)}
+#search-results-list{max-height:420px;overflow-y:auto}
+.search-result-item{display:flex;align-items:center;gap:14px;padding:12px 22px;cursor:pointer;transition:.2s;border-bottom:1px solid rgba(255,255,255,.025)}
+.search-result-item:hover{background:var(--surface2)}
+.search-result-item img{width:44px;height:64px;object-fit:cover;border-radius:6px;flex-shrink:0;background:var(--surface2)}
+.search-result-info strong{display:block;font-size:.93rem;margin-bottom:3px}
+.search-result-info span{font-size:.76rem;color:var(--text2)}
 
-    /* MODAL */
-    #modal-overlay {
-      position: fixed; inset: 0; z-index: 3000;
-      background: rgba(0,0,0,.9);
-      display: flex; align-items: center; justify-content: center;
-      padding: 20px;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.22s;
-    }
-    #modal-overlay.open { opacity: 1; pointer-events: all; }
-    #modal {
-      width: min(820px, 96vw); max-height: 90vh; overflow-y: auto;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); box-shadow: var(--shadow);
-      transform: translateY(24px) scale(.97);
-      transition: transform 0.25s;
-    }
-    #modal-overlay.open #modal { transform: translateY(0) scale(1); }
-    .modal-backdrop {
-      width: 100%; height: 250px;
-      background-size: cover; background-position: center;
-      position: relative; background-repeat: no-repeat;
-    }
-    .modal-backdrop::after {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(to top, var(--surface) 0%, transparent 60%);
-    }
-    .modal-close {
-      position: absolute; top: 14px; left: 14px; z-index: 1;
-      width: 34px; height: 34px; border-radius: 6px;
-      background: rgba(0,0,0,.75); color: white;
-      display: flex; align-items: center; justify-content: center;
-      font-size: .7rem; font-weight: 700;
-      transition: all 0.22s; cursor: pointer;
-      border: 1px solid rgba(255,255,255,.15);
-      letter-spacing: .5px;
-    }
-    .modal-close:hover { background: var(--accent2); border-color: var(--accent2); }
-    .modal-body { padding: 26px 32px 36px; }
-    .modal-title { font-size: 1.9rem; font-weight: 900; line-height: 1.2; margin-bottom: 10px; }
-    .modal-meta {
-      display: flex; gap: 6px; align-items: center;
-      flex-wrap: wrap; font-size: .8rem; color: var(--muted); margin-bottom: 18px;
-    }
-    .modal-meta .accent { color: var(--accent); font-weight: 700; }
-    .modal-meta .sep { color: var(--surface2); }
-    .modal-desc { font-size: .9rem; color: #a8a8c4; line-height: 1.85; margin-bottom: 26px; }
+/* TOAST */
+#toast{position:fixed;bottom:28px;left:50%;z-index:9999;transform:translateX(-50%) translateY(60px);background:var(--surface2);color:var(--text);padding:12px 26px;border-radius:10px;font-size:.86rem;font-weight:600;border:1px solid var(--border);box-shadow:var(--shadow);transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s;opacity:0;max-width:90vw;white-space:nowrap}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
-    /* PLAYER SECTION */
-    .player-section {
-      background: var(--surface2); border-radius: 10px;
-      padding: 18px; margin-bottom: 24px;
-      border: 1px solid var(--border);
-    }
-    .player-section h4 {
-      font-size: .82rem; color: var(--muted); margin-bottom: 14px;
-      font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-    }
-    .player-controls { display: flex; gap: 12px; flex-wrap: wrap; }
-    .player-select {
-      background: var(--surface); border: 1px solid var(--border);
-      color: var(--text); padding: 9px 14px; border-radius: 6px;
-      font-size: .83rem; cursor: pointer; transition: all 0.22s;
-      font-family: var(--font-ar);
-    }
-    .player-select:hover { border-color: var(--accent); }
-    .player-select:focus { outline: none; border-color: var(--accent); }
+/* LOADING */
+.loading{text-align:center;padding:50px 20px;color:var(--text2);grid-column:1/-1}
+.spinner{display:inline-block;width:40px;height:40px;border:3px solid var(--surface2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-    /* CAST */
-    .cast-section { margin-bottom: 24px; }
-    .cast-section h4 {
-      font-size: .8rem; color: var(--muted); margin-bottom: 14px;
-      font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-    }
-    .cast-list {
-      display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px;
-      scrollbar-width: none;
-    }
-    .cast-item {
-      flex: 0 0 auto; width: 96px;
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 8px; padding: 14px 10px; text-align: center;
-      cursor: pointer; transition: all 0.22s;
-    }
-    .cast-item:hover { border-color: var(--accent); transform: translateY(-3px); }
-    .cast-avatar {
-      width: 52px; height: 52px; margin: 0 auto 9px;
-      background: linear-gradient(135deg, var(--accent), #d35400);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 1.3rem; color: var(--bg);
-    }
-    .cast-name { font-size: .75rem; font-weight: 700; margin-bottom: 3px; line-height: 1.2; }
-    .cast-role { font-size: .65rem; color: var(--muted); }
+/* FOOTER */
+footer{background:var(--surface);border-top:1px solid var(--border);padding:40px;text-align:center;color:var(--text2);font-size:.82rem}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--accent);margin-bottom:10px;letter-spacing:3px}
 
-    /* STARS */
-    .stars-row { display: flex; gap: 8px; margin: 16px 0; }
-    .star-btn {
-      font-size: 1.3rem; cursor: pointer;
-      transition: all 0.18s; color: var(--muted); background: none; border: none;
-    }
-    .star-btn:hover, .star-btn.lit { color: var(--accent); transform: scale(1.18); }
-
-    /* TOAST */
-    #toast {
-      position: fixed; bottom: 28px; left: 50%; z-index: 9999;
-      transform: translateX(-50%) translateY(60px);
-      background: var(--surface2); color: var(--text);
-      padding: 11px 24px; border-radius: 6px;
-      font-size: .83rem; font-weight: 600;
-      border: 1px solid var(--border); box-shadow: var(--shadow);
-      transition: transform 0.3s cubic-bezier(.4,0,.2,1), opacity 0.3s;
-      opacity: 0; max-width: 90vw; white-space: nowrap;
-    }
-    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-
-    /* MODAL ACTIONS */
-    .modal-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
-
-    /* AI CHAT */
-    #ai-page { display: none; }
-    .ai-chat-wrap {
-      max-width: 820px; margin: 0 auto;
-    }
-    .ai-chat-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-    }
-    .ai-chat-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface2);
-      display: flex; align-items: center; gap: 14px;
-    }
-    .ai-avatar-icon {
-      width: 42px; height: 42px; border-radius: 8px;
-      background: linear-gradient(135deg, var(--accent), #d35400);
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--font-display); font-size: 1.4rem;
-      color: var(--bg); letter-spacing: 1px;
-    }
-    .ai-chat-messages {
-      height: 420px; overflow-y: auto;
-      padding: 24px; display: flex; flex-direction: column; gap: 16px;
-    }
-    .msg { display: flex; gap: 12px; max-width: 78%; }
-    .msg.user { align-self: flex-end; flex-direction: row-reverse; }
-    .msg.ai { align-self: flex-start; }
-    .msg-av {
-      width: 34px; height: 34px; border-radius: 7px;
-      flex-shrink: 0; display: flex; align-items: center;
-      justify-content: center; font-size: .7rem; font-weight: 800;
-      letter-spacing: .5px;
-    }
-    .msg-av.ai-av { background: linear-gradient(135deg, var(--accent), #d35400); color: var(--bg); }
-    .msg-av.user-av { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
-    .msg-bubble {
-      padding: 12px 16px; border-radius: 12px;
-      line-height: 1.75; font-size: .9rem;
-    }
-    .msg.ai .msg-bubble {
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 4px 12px 12px 12px;
-    }
-    .msg.user .msg-bubble {
-      background: var(--accent); color: var(--bg);
-      border-radius: 12px 4px 12px 12px; font-weight: 600;
-    }
-    .typing { display: flex; gap: 5px; align-items: center; padding: 6px 0; }
-    .typing-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--accent); animation: bounce 1.2s infinite;
-    }
-    .typing-dot:nth-child(2) { animation-delay: .2s; }
-    .typing-dot:nth-child(3) { animation-delay: .4s; }
-    @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-8px)} }
-    .ai-input-area {
-      padding: 16px 20px;
-      border-top: 1px solid var(--border);
-      background: var(--surface2);
-      display: flex; gap: 10px; align-items: flex-end;
-    }
-    .ai-input {
-      flex: 1; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 8px; padding: 11px 16px; color: var(--text);
-      font-family: var(--font-ar); font-size: .9rem;
-      resize: none; outline: none; min-height: 44px; max-height: 110px;
-      line-height: 1.5; transition: border-color 0.22s;
-    }
-    .ai-input:focus { border-color: var(--accent); }
-    .ai-input::placeholder { color: var(--muted); }
-    .send-btn {
-      width: 44px; height: 44px; border-radius: 8px;
-      background: var(--accent); border: none;
-      color: var(--bg); cursor: pointer; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      transition: opacity 0.2s;
-    }
-    .send-btn:hover { opacity: .85; }
-    .send-btn:disabled { opacity: .4; cursor: not-allowed; }
-    .send-arrow {
-      width: 0; height: 0;
-      border-top: 5px solid transparent;
-      border-bottom: 5px solid transparent;
-      border-left: 9px solid var(--bg);
-    }
-    .quick-chips { display: flex; gap: 8px; flex-wrap: wrap; padding: 14px 20px 0; }
-    .quick-chip {
-      padding: 7px 14px; border-radius: 4px;
-      border: 1px solid var(--border); background: var(--surface2);
-      color: var(--muted); font-family: var(--font-ar); font-size: .78rem;
-      cursor: pointer; transition: all 0.22s;
-    }
-    .quick-chip:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* RESPONSIVE */
-    @media (max-width: 768px) {
-      .hero-content { padding: 0 20px; }
-      #navbar { padding: 0 16px; }
-      .nav-links { display: none; }
-      section { padding: 40px 16px; }
-      .modal-body { padding: 16px 18px 26px; }
-      .auth-box, .profile-box { padding: 24px 20px; }
-      #browse-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
-    }
-  </style>
-</head>
-<body>
+/* RESPONSIVE */
+@media(max-width:900px){
+  #navbar{padding:0 16px;height:60px}
+  .nav-links{display:none}
+  .nav-logo{font-size:1.5rem}
+  section{padding:35px 16px}
+  .hero-content{padding:0 20px}
+  #hero-title{font-size:2rem}
+  #hero-desc{font-size:.85rem}
+  #modal{width:100%;border-radius:16px}
+  .modal-body{padding:20px}
+  .modal-title{font-size:1.5rem}
+  #browse-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
+  .movie-card{flex:0 0 145px}
+  .cast-item{width:88px}
+}
+@media(max-width:500px){
+  .movie-card{flex:0 0 130px}
+  .user-name{display:none}
+  .btn-primary,.btn-ghost{padding:11px 20px;font-size:.85rem}
+}
+</style>
+</head><body>
 
 <div id="toast"></div>
 
 <!-- AUTH MODAL -->
-<div id="auth-modal" class="open">
+<div id="auth-modal">
+  <button class="auth-close" onclick="closeAuth()">✕</button>
   <div class="auth-box">
     <div class="auth-logo">CINEARA</div>
-    <p class="auth-subtitle">منصة أفلام وكرة قدم — سجّل دخولك للمتابعة</p>
-
-    <div class="auth-tabs">
-      <button class="auth-tab active" onclick="switchAuthTab('email', this)">البريد الإلكتروني</button>
-      <button class="auth-tab" onclick="switchAuthTab('phone', this)">رقم الهاتف</button>
-    </div>
-
-    <div id="email-content" class="auth-content active">
-      <input class="auth-input" type="email" id="email-input" placeholder="بريدك الإلكتروني" />
-      <button class="auth-btn" onclick="sendEmailOTP()">إرسال رمز التحقق</button>
-
-      <div id="email-otp-section" style="display:none;">
-        <p style="font-size:.83rem;color:var(--muted);margin-bottom:10px;">أدخل الرمز المرسل إلى بريدك</p>
-        <div class="otp-inputs" id="email-otp-inputs">
-          <input class="otp-input" type="text" maxlength="1" />
-          <input class="otp-input" type="text" maxlength="1" />
-          <input class="otp-input" type="text" maxlength="1" />
-          <input class="otp-input" type="text" maxlength="1" />
-          <input class="otp-input" type="text" maxlength="1" />
-          <input class="otp-input" type="text" maxlength="1" />
-        </div>
-        <div class="otp-timer" id="email-timer"></div>
-        <button class="auth-btn" style="margin-top:14px;" onclick="verifyEmailOTP()">تحقق الآن</button>
-      </div>
-    </div>
-
-    <div id="phone-content" class="auth-content">
-      <input class="auth-input" type="tel" id="phone-input" placeholder="+966501234567" />
-      <button class="auth-btn" onclick="sendPhoneOTP()">إرسال رمز OTP</button>
-
-      <div id="phone-otp-section" style="display:none;">
-        <p style="font-size:.83rem;color:var(--muted);margin-bottom:10px;">أدخل الرمز المرسل برسالة نصية</p>
-        <div class="otp-inputs" id="phone-otp-inputs">
-          <input class="otp-input" type="text" maxlength="1" />
-          <input class="otp-input" type="text" maxlength="1" />
-          <input class="otp-input" type="text" maxlength="1" />
-          <input class="otp-input" type="text" maxlength="1" />
-          <input class="otp-input" type="text" maxlength="1" />
-          <input class="otp-input" type="text" maxlength="1" />
-        </div>
-        <div class="otp-timer" id="phone-timer"></div>
-        <button class="auth-btn" style="margin-top:14px;" onclick="verifyPhoneOTP()">تحقق الآن</button>
-      </div>
-    </div>
-
-    <div style="margin-top:20px;">
-      <div style="text-align:center;color:var(--muted);font-size:.78rem;margin-bottom:12px;letter-spacing:.5px;">أو</div>
-      <button class="google-btn" onclick="googleAuth()">
-        <div class="google-letter">G</div>
-        المتابعة بحساب Google
-      </button>
-    </div>
+    <p class="auth-subtitle">سجّل دخولك للمتابعة</p>
+    <input class="auth-input" type="email" id="email-input" placeholder="بريدك الإلكتروني" />
+    <input class="auth-input" type="password" id="pass-input" placeholder="كلمة المرور" />
+    <button class="auth-btn" onclick="doLogin()">دخول</button>
+    <div style="text-align:center;color:var(--text3);font-size:.78rem;margin:14px 0">أو</div>
+    <button class="auth-btn" style="background:var(--surface2);color:var(--text)" onclick="googleAuth()">
+      المتابعة بـ Google
+    </button>
+    <p style="text-align:center;color:var(--text2);font-size:.82rem;margin-top:14px">
+      ليس لديك حساب؟ <a onclick="guestLogin()" style="color:var(--accent);cursor:pointer;font-weight:700">تابع كزائر</a>
+    </p>
   </div>
 </div>
 
 <!-- PROFILE MODAL -->
 <div id="profile-modal">
   <div class="profile-box">
-    <div class="profile-header">
-      <h3 style="font-size:1.1rem;margin-bottom:20px;">تحرير البروفايل</h3>
-      <div class="profile-avatar-wrap" onclick="document.getElementById('avatar-input').click()">
-        <div class="profile-avatar-img" id="profile-avatar-display">
-          <span id="profile-avatar-text">A</span>
-        </div>
-        <div class="profile-avatar-badge">+</div>
-      </div>
-      <input type="file" id="avatar-input" accept="image/*" style="display:none;" onchange="handleAvatarUpload(this)" />
-      <p style="font-size:.76rem;color:var(--muted);margin-top:8px;">انقر لتغيير الصورة</p>
-    </div>
-
+    <h3 style="font-size:1.2rem;margin-bottom:24px;text-align:center">الملف الشخصي</h3>
     <div class="form-group">
-      <label>الاسم الكامل</label>
-      <input type="text" id="profile-name" placeholder="أدخل اسمك الكامل" />
+      <label>الاسم</label>
+      <input type="text" id="profile-name" />
     </div>
     <div class="form-group">
-      <label>البريد الإلكتروني</label>
-      <input type="email" id="profile-email" placeholder="بريدك الإلكتروني" />
+      <label>البريد</label>
+      <input type="email" id="profile-email" />
     </div>
     <div class="form-group">
-      <label>رقم الهاتف</label>
-      <input type="tel" id="profile-phone" placeholder="+966501234567" />
-    </div>
-    <div class="form-group">
-      <label>نبذة عنك</label>
-      <textarea id="profile-bio" placeholder="أخبرنا عن نفسك..." rows="3"></textarea>
+      <label>نبذة</label>
+      <textarea id="profile-bio" rows="3"></textarea>
     </div>
     <div class="form-actions">
-      <button class="btn-save" onclick="saveProfile()">حفظ التغييرات</button>
+      <button class="btn-save" onclick="saveProfile()">حفظ</button>
       <button class="btn-cancel" onclick="closeProfileModal()">إلغاء</button>
     </div>
   </div>
@@ -893,14 +273,13 @@
 <nav id="navbar">
   <div class="nav-logo">CINEARA</div>
   <div class="nav-links">
-    <a href="#" class="active" onclick="switchPage('movies', event)">الأفلام</a>
-    <a href="#" onclick="switchPage('matches', event)">كرة القدم</a>
-    <a href="#" onclick="switchPage('ai', event)">المساعد الذكي</a>
+    <a class="active" onclick="switchPage('movies', event)">الأفلام</a>
+    <a onclick="switchPage('matches', event)">كرة القدم</a>
   </div>
   <div class="nav-actions">
-    <button class="btn-icon" id="btn-search" title="بحث">بحث</button>
+    <button class="btn-icon" onclick="openSearch()" title="بحث">🔍</button>
     <div class="user-profile" onclick="openProfileModal()">
-      <div class="user-avatar" id="user-avatar">A</div>
+      <div class="user-avatar" id="user-avatar">U</div>
       <span class="user-name" id="user-name">المستخدم</span>
     </div>
   </div>
@@ -910,57 +289,62 @@
 <div id="search-overlay">
   <div class="search-box">
     <div class="search-input-row">
-      <div class="search-icon"></div>
-      <input id="search-input" type="text" placeholder="ابحث عن فيلم أو مباراة..." />
-      <button class="search-close-btn" id="search-close">ESC</button>
+      <span style="color:var(--text2);font-size:1.1rem">🔍</span>
+      <input id="search-input" type="text" placeholder="ابحث عن فيلم أو مسلسل..." />
+      <button class="search-close-btn" onclick="closeSearch()">ESC</button>
     </div>
     <div id="search-results-list"></div>
   </div>
 </div>
 
 <!-- MOVIE MODAL -->
-<div id="modal-overlay">
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target.id==='modal-overlay')closeModal()">
   <div id="modal">
     <div class="modal-backdrop" id="modal-backdrop">
-      <button class="modal-close" id="modal-close">ESC</button>
+      <button class="modal-close" onclick="closeModal()">ESC</button>
     </div>
     <div class="modal-body">
       <h2 class="modal-title" id="modal-title"></h2>
       <div class="modal-meta" id="modal-meta"></div>
       <p class="modal-desc" id="modal-desc"></p>
 
-      <div class="player-section">
-        <h4>خيارات التشغيل</h4>
-        <div class="player-controls">
-          <select class="player-select" id="quality-select" onchange="updateQuality()">
-            <option value="480p">480P</option>
-            <option value="720p" selected>720P HD</option>
-            <option value="1080p">1080P Full HD</option>
-            <option value="4k">4K Ultra HD</option>
-          </select>
-          <select class="player-select" id="subtitle-select" onchange="updateSubtitle()">
-            <option value="off">بدون ترجمة</option>
-            <option value="ar" selected>ترجمة عربي</option>
-            <option value="en">ترجمة إنجليزي</option>
-            <option value="fr">ترجمة فرنسي</option>
-          </select>
+      <!-- PLAYER -->
+      <div class="player-container" id="player-container">
+        <div class="player-placeholder" id="player-placeholder">
+          <div class="player-placeholder-icon">▶</div>
+          <div style="font-size:.9rem;font-weight:600">جارٍ تحميل الفيديو...</div>
         </div>
+        <iframe id="pframe" 
+                src="" 
+                allowfullscreen 
+                allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                referrerpolicy="origin"
+                style="display:none"></iframe>
       </div>
 
-      <div class="cast-section" id="cast-section"></div>
-
-      <div>
-        <p style="font-size:.76rem;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">تقييمك</p>
-        <div class="stars-row" id="stars-row"></div>
+      <!-- QUALITY INFO -->
+      <div class="quality-info" id="quality-info">
+        <span class="quality-badge" id="quality-badge">HD</span>
+        <span class="quality-info-text">📺 يتم التشغيل تلقائياً بأفضل جودة</span>
       </div>
 
+      <!-- ACTIONS -->
       <div class="modal-actions">
         <button class="btn-primary" onclick="playNow()">
           <div class="play-arrow"></div>
           مشاهدة الآن
         </button>
-        <button class="btn-ghost" id="fav-btn">المفضّلة</button>
-        <button class="btn-ghost" onclick="shareMovie()">مشاركة</button>
+        <button class="btn-ghost" id="fav-btn" onclick="toggleFavCurrent()">🤍 المفضّلة</button>
+        <button class="btn-ghost" onclick="shareMovie()">🔗 مشاركة</button>
+      </div>
+
+      <!-- CAST -->
+      <div class="cast-section" id="cast-section" style="margin-top:24px"></div>
+
+      <!-- STARS -->
+      <div style="margin-top:24px">
+        <p style="font-size:.8rem;color:var(--text2);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">تقييمك</p>
+        <div class="stars-row" id="stars-row"></div>
       </div>
     </div>
   </div>
@@ -969,9 +353,8 @@
 <!-- MAIN -->
 <main>
 
-  <!-- MOVIES PAGE -->
   <div id="movies-page">
-    <section id="hero" style="padding:0;">
+    <section id="hero" style="padding:0;max-width:none">
       <div id="hero-bg"></div>
       <div class="hero-content">
         <div class="hero-eyebrow">الأفلام المميزة</div>
@@ -979,342 +362,308 @@
         <div id="hero-meta"></div>
         <p id="hero-desc"></p>
         <div class="hero-actions">
-          <button class="btn-primary" onclick="playCurrentMovie()">
+          <button class="btn-primary" onclick="playHero()">
             <div class="play-arrow"></div>
             مشاهدة الآن
           </button>
-          <button class="btn-ghost" onclick="addCurrentToFav()">أضف للمفضّلة</button>
+          <button class="btn-ghost" onclick="addHeroToFav()">🤍 أضف للمفضّلة</button>
         </div>
       </div>
     </section>
 
-    <section style="background:var(--surface);padding:56px 40px;">
-      <h2 class="sec-title">رائج الآن</h2>
-      <div class="cards-row" id="trending-row"></div>
+    <section>
+      <h2 class="sec-title">🔥 رائج الآن</h2>
+      <div class="cards-row" id="trending-row">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
     </section>
 
     <section>
-      <h2 class="sec-title">تصفّح الأفلام</h2>
+      <h2 class="sec-title">🎬 أفلام شائعة</h2>
+      <div class="cards-row" id="popular-row">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="sec-title">📺 مسلسلات</h2>
+      <div class="cards-row" id="series-row">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="sec-title">🎭 تصفّح الأفلام</h2>
       <div class="genre-strip" id="genre-strip"></div>
-      <div id="browse-grid"></div>
+      <div id="browse-grid">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
     </section>
   </div>
 
-  <!-- MATCHES PAGE -->
-  <div id="matches-page" style="display:none;">
+  <div id="matches-page" style="display:none">
     <section>
-      <h2 class="sec-title">مباريات كرة القدم</h2>
-      <div class="genre-strip" id="league-filter">
-        <button class="genre-chip active" onclick="filterMatches('الكل', this)">جميع الدوريات</button>
-        <button class="genre-chip" onclick="filterMatches('الدوري السعودي', this)">السعودي</button>
-        <button class="genre-chip" onclick="filterMatches('الدوري المصري', this)">المصري</button>
-        <button class="genre-chip" onclick="filterMatches('الدوري الإسباني', this)">الإسباني</button>
-        <button class="genre-chip" onclick="filterMatches('دوري الأمير محمد', this)">الإماراتي</button>
-        <button class="genre-chip" onclick="filterMatches('دوري أبطال أوروبا', this)">أبطال أوروبا</button>
-      </div>
-      <div id="matches-grid"></div>
-    </section>
-  </div>
-
-  <!-- AI PAGE -->
-  <div id="ai-page">
-    <section>
-      <div class="ai-chat-wrap">
-        <h2 class="sec-title" style="margin-bottom:24px;">المساعد الذكي</h2>
-        <div class="ai-chat-box">
-          <div class="ai-chat-header">
-            <div class="ai-avatar-icon">AI</div>
-            <div>
-              <div style="font-weight:700;font-size:.98rem;">مساعد CineAra</div>
-              <div style="font-size:.75rem;color:var(--accent);margin-top:2px;">متصل الآن</div>
-            </div>
-          </div>
-          <div class="quick-chips">
-            <button class="quick-chip" onclick="sendQuick('اقترح لي أفضل 5 أفلام أكشن 2024')">أفضل أفلام الأكشن</button>
-            <button class="quick-chip" onclick="sendQuick('من هو أفضل لاعب كرة قدم الآن؟')">أفضل لاعب الآن</button>
-            <button class="quick-chip" onclick="sendQuick('ما أفضل مسلسلات 2024؟')">مسلسلات 2024</button>
-            <button class="quick-chip" onclick="sendQuick('اقترح فيلم كوميدي عربي')">فيلم كوميدي عربي</button>
-          </div>
-          <div class="ai-chat-messages" id="ai-messages">
-            <div class="msg ai">
-              <div class="msg-av ai-av">AI</div>
-              <div class="msg-bubble">
-                أهلاً بك في CineAra.<br><br>
-                أنا هنا لمساعدتك في اكتشاف الأفلام، متابعة نتائج المباريات، والإجابة على أسئلتك الترفيهية.<br><br>
-                بماذا أقدر أساعدك اليوم؟
-              </div>
-            </div>
-          </div>
-          <div class="ai-input-area">
-            <textarea class="ai-input" id="ai-input" placeholder="اكتب سؤالك هنا..." rows="1"
-              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI()}"
-              oninput="autoResize(this)"></textarea>
-            <button class="send-btn" id="send-btn" onclick="sendAI()">
-              <div class="send-arrow"></div>
-            </button>
-          </div>
-        </div>
-      </div>
+      <h2 class="sec-title">⚽ مباريات كرة القدم</h2>
+      <div class="genre-strip" id="league-filter"></div>
+      <div id="matches-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px"></div>
     </section>
   </div>
 
 </main>
 
-<!-- FOOTER -->
-<footer style="background:var(--surface);border-top:1px solid var(--border);padding:40px;text-align:center;color:var(--muted);font-size:.78rem;">
-  <div style="font-family:var(--font-display);font-size:1.7rem;color:var(--accent);margin-bottom:10px;letter-spacing:3px;">CINEARA PRO</div>
+<footer>
+  <div class="footer-logo">CINEARA PRO</div>
   <p>منصة أفلام وكرة قدم — جميع الحقوق محفوظة 2025</p>
 </footer>
 
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════════ -->
 <script>
-const TMDB_KEY = '4ef0d7355d9ffb5151e987764708ce96';
-const TMDB = 'https://api.themoviedb.org/3';
+/* ═══════════════════════════════════════════════════════════
+   CONFIG + SOURCES من Flask
+   ═══════════════════════════════════════════════════════════ */
 const IMG_W = 'https://image.tmdb.org/t/p/w500';
 const IMG_O = 'https://image.tmdb.org/t/p/original';
-const GEMINI_KEY = 'AIzaSyAb8RN6KapD_-X1OZtA-IAXseW2adZtAITZXWiWUj4SoCKpL1NA';
+const SOURCES = __SOURCES__;
 
-// ============ STATE ============
-let currentUser = null;
-let isLoggedIn = false;
-let favorites = JSON.parse(localStorage.getItem('ca_favs') || '[]');
-let ratings = JSON.parse(localStorage.getItem('ca_ratings') || '{}');
-let otpCode = '';
-let otpTimer = 0;
-let currentModal = null;
-let aiHistory = [];
-let tmdbMovies = [];
+/* ═══════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════ */
+const S = {
+  user: JSON.parse(localStorage.getItem('ca_user') || 'null'),
+  fav: JSON.parse(localStorage.getItem('ca_favs') || '[]'),
+  ratings: JSON.parse(localStorage.getItem('ca_ratings') || '{}'),
+  tmdbMovies: [],
+  currentMovie: null,
+  currentSourceIdx: 0,
+};
 
-// ============ MATCHES ============
-const MATCHES = [
-  { id:1, date:'2025-09-19', time:'20:00', league:'الدوري السعودي', team1:'النصر', team2:'الهلال', s1:'2', s2:'1', status:'live', ch:'SSC Sports' },
-  { id:2, date:'2025-09-19', time:'19:00', league:'الدوري المصري', team1:'الأهلي', team2:'الزمالك', s1:'0', s2:'0', status:'upcoming', ch:'ON TV' },
-  { id:3, date:'2025-09-18', time:'21:00', league:'الدوري الإسباني', team1:'ريال مدريد', team2:'برشلونة', s1:'3', s2:'2', status:'finished', ch:'beIN Sports' },
-  { id:4, date:'2025-09-20', time:'18:00', league:'دوري الأمير محمد', team1:'الاتحاد', team2:'شباب الأهلي', s1:'-', s2:'-', status:'upcoming', ch:'SSC Sports' },
-  { id:5, date:'2025-09-19', time:'22:00', league:'دوري أبطال أوروبا', team1:'مانشستر سيتي', team2:'ريال مدريد', s1:'1', s2:'1', status:'live', ch:'beIN Sports' },
-  { id:6, date:'2025-09-18', time:'20:00', league:'الدوري الإسباني', team1:'أتلتيكو مدريد', team2:'أشبيلية', s1:'2', s2:'0', status:'finished', ch:'beIN Sports' }
-];
-let filteredMatches = [...MATCHES];
+const genreMap = {28:'أكشن',12:'مغامرة',16:'أنيميشن',35:'كوميديا',80:'جريمة',99:'وثائقي',18:'دراما',10751:'عائلي',14:'خيال',36:'تاريخي',27:'رعب',9648:'غموض',10749:'رومانسي',878:'خيال علمي',53:'إثارة'};
 
-// ============ AUTH ============
-function switchAuthTab(tab, btn) {
-  document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.auth-content').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById(tab + '-content').classList.add('active');
-}
-
-function setupOTPInputs(containerId) {
-  const inputs = document.querySelectorAll('#' + containerId + ' .otp-input');
-  inputs.forEach((input, idx) => {
-    input.addEventListener('keyup', (e) => {
-      if (/^[0-9]$/.test(e.key)) {
-        input.value = e.key;
-        if (idx < inputs.length - 1) inputs[idx + 1].focus();
-      } else if (e.key === 'Backspace') {
-        input.value = '';
-        if (idx > 0) inputs[idx - 1].focus();
-      }
-    });
+/* ═══════════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  if (S.user) {
+    document.getElementById('auth-modal').classList.remove('open');
+    updateUserUI();
+    init();
+  } else {
+    document.getElementById('auth-modal').classList.add('open');
+  }
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
   });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeModal();
+      closeSearch();
+      closeProfileModal();
+    }
+  });
+});
+
+function closeAuth() {
+  document.getElementById('auth-modal').classList.remove('open');
 }
 
-function sendEmailOTP() {
+/* ═══════════════════════════════════════════════════════════
+   AUTH
+   ═══════════════════════════════════════════════════════════ */
+function doLogin() {
   const email = document.getElementById('email-input').value.trim();
-  if (!email || !email.includes('@')) return showToast('أدخل بريد إلكتروني صحيح');
-  otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-  document.getElementById('email-otp-section').style.display = 'block';
-  setupOTPInputs('email-otp-inputs');
-  startTimer('email');
-  showToast('الرمز التجريبي: ' + otpCode);
-}
-
-function sendPhoneOTP() {
-  const ph = document.getElementById('phone-input').value.trim();
-  if (!ph || ph.length < 10) return showToast('أدخل رقم هاتف صحيح');
-  otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-  document.getElementById('phone-otp-section').style.display = 'block';
-  setupOTPInputs('phone-otp-inputs');
-  startTimer('phone');
-  showToast('الرمز التجريبي: ' + otpCode);
-}
-
-function startTimer(type) {
-  let t = 60;
-  const el = document.getElementById(type + '-timer');
-  const iv = setInterval(() => {
-    t--;
-    el.textContent = t > 0 ? 'إعادة الإرسال خلال ' + t + 'ث' : 'انقر لإعادة الإرسال';
-    el.classList.toggle('warning', t <= 10 && t > 0);
-    if (t <= 0) clearInterval(iv);
-  }, 1000);
-}
-
-function getOTP(cid) {
-  return Array.from(document.querySelectorAll('#' + cid + ' .otp-input')).map(i => i.value).join('');
-}
-
-function verifyEmailOTP() {
-  const v = getOTP('email-otp-inputs');
-  if (v.length !== 6) return showToast('أدخل الرمز كاملاً');
-  if (v === otpCode) loginUser(document.getElementById('email-input').value, 'email');
-  else showToast('الرمز غير صحيح');
-}
-
-function verifyPhoneOTP() {
-  const v = getOTP('phone-otp-inputs');
-  if (v.length !== 6) return showToast('أدخل الرمز كاملاً');
-  if (v === otpCode) loginUser(document.getElementById('phone-input').value, 'phone');
-  else showToast('الرمز غير صحيح');
-}
-
-function googleAuth() { loginUser('user@gmail.com', 'google'); }
-
-function loginUser(id, method) {
-  currentUser = {
-    id: Math.random().toString(36).substr(2, 9),
-    identifier: id,
-    name: id.split('@')[0] || 'مستخدم',
-    method, avatar: '', bio: '', phone: ''
+  const pass = document.getElementById('pass-input').value.trim();
+  if (!email || !email.includes('@')) return showToast('أدخل بريداً صحيحاً');
+  if (!pass || pass.length < 3) return showToast('كلمة المرور قصيرة');
+  
+  const user = {
+    id: Date.now().toString(36),
+    name: email.split('@')[0],
+    email: email,
+    bio: '',
+    avatar: '',
   };
-  isLoggedIn = true;
-  localStorage.setItem('ca_user', JSON.stringify(currentUser));
+  S.user = user;
+  localStorage.setItem('ca_user', JSON.stringify(user));
   document.getElementById('auth-modal').classList.remove('open');
   updateUserUI();
-  showToast('تم تسجيل الدخول بنجاح');
+  showToast('✅ تم تسجيل الدخول');
+  init();
+}
+
+function guestLogin() {
+  const user = {
+    id: 'guest_' + Date.now(),
+    name: 'زائر',
+    email: 'guest@local',
+    bio: '',
+    avatar: '',
+  };
+  S.user = user;
+  localStorage.setItem('ca_user', JSON.stringify(user));
+  document.getElementById('auth-modal').classList.remove('open');
+  updateUserUI();
+  showToast('✅ دخلت كزائر');
+  init();
+}
+
+function googleAuth() {
+  const name = prompt('اسمك:');
+  if (!name) return;
+  const user = {
+    id: 'google_' + Date.now(),
+    name: name,
+    email: name.toLowerCase().replace(/\s/g, '') + '@gmail.com',
+    bio: '',
+    avatar: '',
+  };
+  S.user = user;
+  localStorage.setItem('ca_user', JSON.stringify(user));
+  document.getElementById('auth-modal').classList.remove('open');
+  updateUserUI();
+  showToast('✅ دخلت عبر Google');
   init();
 }
 
 function updateUserUI() {
-  if (!currentUser) return;
-  const init = currentUser.name[0].toUpperCase();
-  document.getElementById('user-avatar').textContent = init;
-  document.getElementById('user-name').textContent = currentUser.name;
-  document.getElementById('profile-name').value = currentUser.name;
-  document.getElementById('profile-email').value = currentUser.identifier;
-  document.getElementById('profile-phone').value = currentUser.phone || '';
-  document.getElementById('profile-bio').value = currentUser.bio || '';
-  document.getElementById('profile-avatar-text').textContent = init;
-  if (currentUser.avatar) {
-    document.getElementById('profile-avatar-display').innerHTML = '<img src="' + currentUser.avatar + '" />';
-  }
+  if (!S.user) return;
+  const initial = (S.user.name || 'U')[0].toUpperCase();
+  document.getElementById('user-avatar').textContent = initial;
+  document.getElementById('user-name').textContent = S.user.name;
 }
 
-function handleAvatarUpload(input) {
-  if (!input.files || !input.files[0]) return;
-  const r = new FileReader();
-  r.onload = (e) => {
-    currentUser.avatar = e.target.result;
-    document.getElementById('profile-avatar-display').innerHTML = '<img src="' + e.target.result + '" />';
-  };
-  r.readAsDataURL(input.files[0]);
+function openProfileModal() {
+  if (!S.user) return;
+  document.getElementById('profile-name').value = S.user.name || '';
+  document.getElementById('profile-email').value = S.user.email || '';
+  document.getElementById('profile-bio').value = S.user.bio || '';
+  document.getElementById('profile-modal').classList.add('open');
+}
+
+function closeProfileModal() {
+  document.getElementById('profile-modal').classList.remove('open');
 }
 
 function saveProfile() {
-  currentUser.name = document.getElementById('profile-name').value || currentUser.name;
-  currentUser.phone = document.getElementById('profile-phone').value;
-  currentUser.bio = document.getElementById('profile-bio').value;
-  localStorage.setItem('ca_user', JSON.stringify(currentUser));
+  if (!S.user) return;
+  S.user.name = document.getElementById('profile-name').value || S.user.name;
+  S.user.bio = document.getElementById('profile-bio').value || '';
+  localStorage.setItem('ca_user', JSON.stringify(S.user));
   updateUserUI();
   closeProfileModal();
-  showToast('تم حفظ التغييرات');
+  showToast('✅ تم حفظ البيانات');
 }
 
-// ============ MODALS ============
-function openProfileModal() { document.getElementById('profile-modal').classList.add('open'); }
-function closeProfileModal() { document.getElementById('profile-modal').classList.remove('open'); }
-function openSearch() { document.getElementById('search-overlay').classList.add('open'); document.getElementById('search-input').focus(); }
-function closeSearch() { document.getElementById('search-overlay').classList.remove('open'); document.getElementById('search-input').value = ''; document.getElementById('search-results-list').innerHTML = ''; }
-
-async function openModal(id) {
-  currentModal = tmdbMovies.find(m => m.id === id);
-  if (!currentModal) return;
-
-  document.getElementById('modal-backdrop').style.backgroundImage = "url('" + (IMG_O + currentModal.backdrop_path) + "')";
-  document.getElementById('modal-title').textContent = currentModal.title;
-  document.getElementById('modal-meta').innerHTML =
-    '<span class="accent">★ ' + (currentModal.vote_average?.toFixed(1) || 'N/A') + '</span>' +
-    '<span class="sep">|</span><span>' + (currentModal.release_date?.slice(0,4) || '') + '</span>' +
-    '<span class="sep">|</span><span>' + (currentModal.genre_ids?.slice(0,2).map(g => genreMap[g] || '').filter(Boolean).join(' · ') || '') + '</span>';
-  document.getElementById('modal-desc').textContent = currentModal.overview || 'لا يوجد وصف متاح';
-
-  // Cast
-  try {
-    const cr = await fetch(TMDB + '/movie/' + id + '/credits?api_key=' + TMDB_KEY + '&language=ar-SA');
-    const cd = await cr.json();
-    const cast = cd.cast?.slice(0,8) || [];
-    document.getElementById('cast-section').innerHTML = cast.length ? '<h4>أبرز الممثلين</h4><div class="cast-list">' +
-      cast.map(c => '<div class="cast-item"><div class="cast-avatar">' + c.name[0] + '</div><div class="cast-name">' + c.name + '</div><div class="cast-role">' + (c.character || '') + '</div></div>').join('') +
-      '</div>' : '';
-  } catch(e) {}
-
-  // Stars
-  const ur = ratings[id];
-  document.getElementById('stars-row').innerHTML = [1,2,3,4,5].map(n =>
-    '<button class="star-btn' + (ur && n <= ur ? ' lit' : '') + '" onclick="rateMovie(' + id + ',' + n + ')">★</button>'
-  ).join('');
-
-  // Fav btn
-  const fb = document.getElementById('fav-btn');
-  fb.textContent = favorites.includes(id) ? 'إزالة من المفضّلة' : 'إضافة للمفضّلة';
-  fb.onclick = () => { toggleFav(id); fb.textContent = favorites.includes(id) ? 'إزالة من المفضّلة' : 'إضافة للمفضّلة'; };
-
-  document.getElementById('modal-overlay').classList.add('open');
-}
-
-function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
-
-// ============ MOVIES (TMDB) ============
-const genreMap = {28:'أكشن',12:'مغامرة',16:'أنيميشن',35:'كوميديا',80:'جريمة',99:'وثائقي',18:'دراما',10751:'عائلي',14:'خيال',36:'تاريخي',27:'رعب',10402:'موسيقى',9648:'غموض',10749:'رومانسي',878:'خيال علمي',10770:'تلفزيوني',53:'إثارة',10752:'حرب',37:'غرب أمريكي'};
-
+/* ═══════════════════════════════════════════════════════════
+   TMDB API
+   ═══════════════════════════════════════════════════════════ */
 async function fetchMovies(type = 'popular', genreId = null) {
   try {
     let url = genreId
-      ? TMDB + '/discover/movie?api_key=' + TMDB_KEY + '&with_genres=' + genreId + '&language=ar-SA&sort_by=popularity.desc'
-      : TMDB + '/movie/' + type + '?api_key=' + TMDB_KEY + '&language=ar-SA';
+      ? `/api/genre/movie/${genreId}`
+      : `/api/${type === 'popular' ? 'popular/movie' : type === 'top_rated' ? 'top_rated/movie' : 'trending'}`;
     const r = await fetch(url);
+    const d = await r.json();
+    return d.results || [];
+  } catch(e) {
+    console.error(e);
+    return [];
+  }
+}
+
+async function fetchSeries() {
+  try {
+    const r = await fetch('/api/popular/tv');
     const d = await r.json();
     return d.results || [];
   } catch(e) { return []; }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   CARDS
+   ═══════════════════════════════════════════════════════════ */
 function buildCard(m) {
   const div = document.createElement('div');
   div.className = 'movie-card';
+  const type = m.media_type || (m.name ? 'tv' : 'movie');
+  const title = m.title || m.name || '?';
+  const year = (m.release_date || m.first_air_date || '').substring(0, 4);
+  const rating = m.vote_average ? m.vote_average.toFixed(1) : '?';
+  const isFav = S.fav.includes(m.id);
+  
   div.innerHTML =
     '<div class="card-poster">' +
-      (m.poster_path ? '<img src="' + IMG_W + m.poster_path + '" loading="lazy" alt="' + m.title + '" />' : '<div style="width:100%;height:100%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--muted);">لا تتوفر صورة</div>') +
-      '<button class="card-fav' + (favorites.includes(m.id) ? ' active' : '') + '" onclick="event.stopPropagation();toggleFav(' + m.id + ',this)">♥</button>' +
-      '<div class="card-rating">★ ' + (m.vote_average?.toFixed(1) || 'N/A') + '</div>' +
+      (m.poster_path 
+        ? '<img src="' + IMG_W + m.poster_path + '" loading="lazy" alt="' + title + '" />' 
+        : '<div style="width:100%;height:100%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--text3)">لا صورة</div>') +
+      '<button class="card-fav' + (isFav ? ' active' : '') + '" onclick="event.stopPropagation();toggleFav(' + m.id + ',this)">♥</button>' +
+      '<div class="card-rating">★ ' + rating + '</div>' +
     '</div>' +
-    '<div class="card-info"><div class="card-title">' + m.title + '</div><div class="card-year">' + (m.release_date?.slice(0,4) || '') + '</div></div>';
-  div.onclick = () => openModal(m.id);
+    '<div class="card-info">' +
+      '<div class="card-title">' + title + '</div>' +
+      '<div class="card-year">' + year + '</div>' +
+    '</div>';
+  
+  div.onclick = () => openModal(m.id, type);
   return div;
 }
 
-async function renderHero(movies) {
+/* ═══════════════════════════════════════════════════════════
+   INIT CONTENT
+   ═══════════════════════════════════════════════════════════ */
+async function init() {
+  const trending = await fetchMovies('trending');
+  const popular = await fetchMovies('popular');
+  const series = await fetchSeries();
+  
+  S.tmdbMovies = [...trending, ...popular, ...series];
+  
+  renderHero(trending);
+  renderRow('trending-row', trending);
+  renderRow('popular-row', popular);
+  renderRow('series-row', series);
+  renderGenres();
+  renderGrid(popular);
+  renderMatches();
+}
+
+function renderHero(movies) {
   const m = movies.find(x => x.backdrop_path) || movies[0];
   if (!m) return;
+  S.currentMovie = m;
   document.getElementById('hero-bg').style.backgroundImage = "url('" + IMG_O + m.backdrop_path + "')";
-  document.getElementById('hero-title').textContent = m.title;
+  document.getElementById('hero-title').textContent = m.title || m.name || '?';
   document.getElementById('hero-meta').innerHTML =
-    '<span class="accent">★ ' + m.vote_average?.toFixed(1) + '</span>' +
-    '<span class="sep">|</span><span>' + (m.release_date?.slice(0,4) || '') + '</span>' +
-    '<span class="sep">|</span><span>' + (m.genre_ids?.slice(0,3).map(g => genreMap[g] || '').filter(Boolean).join(' · ') || '') + '</span>';
+    '<span class="accent">★ ' + (m.vote_average?.toFixed(1) || 'N/A') + '</span>' +
+    '<span class="sep">|</span>' +
+    '<span>' + (m.release_date || m.first_air_date || '').substring(0, 4) + '</span>' +
+    '<span class="sep">|</span>' +
+    '<span>' + (m.media_type === 'tv' ? 'مسلسل' : 'فيلم') + '</span>';
   document.getElementById('hero-desc').textContent = m.overview || '';
 }
 
-function renderTrending(movies) {
-  const row = document.getElementById('trending-row');
+function renderRow(id, movies) {
+  const row = document.getElementById(id);
   row.innerHTML = '';
-  movies.slice(0,12).forEach(m => row.appendChild(buildCard(m)));
+  movies.slice(0, 15).forEach(m => row.appendChild(buildCard(m)));
+}
+
+function renderGrid(movies) {
+  const grid = document.getElementById('browse-grid');
+  grid.innerHTML = '';
+  movies.slice(0, 20).forEach(m => grid.appendChild(buildCard(m)));
 }
 
 function renderGenres() {
   const strip = document.getElementById('genre-strip');
-  const genres = ['الكل','أكشن','دراما','كوميديا','خيال علمي','رعب','رومانسي','مغامرة'];
-  const gids = {الكل:null,أكشن:28,دراما:18,كوميديا:35,'خيال علمي':878,رعب:27,رومانسي:10749,مغامرة:12};
-  strip.innerHTML = genres.map((g,i) =>
-    '<button class="genre-chip' + (i===0?' active':'') + '" onclick="filterGenre(' + (gids[g] || 'null') + ',this)">' + g + '</button>'
+  const genres = [
+    {name:'الكل', id:null}, {name:'أكشن', id:28}, {name:'دراما', id:18},
+    {name:'كوميديا', id:35}, {name:'خيال علمي', id:878}, {name:'رعب', id:27},
+    {name:'رومانسي', id:10749}, {name:'مغامرة', id:12},
+  ];
+  strip.innerHTML = genres.map((g, i) =>
+    '<button class="genre-chip' + (i === 0 ? ' active' : '') + '" onclick="filterGenre(' + (g.id || 'null') + ', this)">' + g.name + '</button>'
   ).join('');
 }
 
@@ -1322,212 +671,324 @@ async function filterGenre(gid, btn) {
   document.querySelectorAll('#genre-strip .genre-chip').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   const grid = document.getElementById('browse-grid');
-  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);">جاري التحميل...</div>';
-  const movies = await fetchMovies('popular', gid);
-  grid.innerHTML = '';
-  movies.slice(0,20).forEach(m => { tmdbMovies.push(m); grid.appendChild(buildCard(m)); });
+  grid.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  const movies = gid ? await fetchMovies('popular', gid) : await fetchMovies('popular');
+  renderGrid(movies);
 }
 
-function renderGrid(movies) {
-  const grid = document.getElementById('browse-grid');
-  grid.innerHTML = '';
-  movies.slice(0,20).forEach(m => grid.appendChild(buildCard(m)));
+/* ═══════════════════════════════════════════════════════════
+   SEARCH
+   ═══════════════════════════════════════════════════════════ */
+function openSearch() {
+  document.getElementById('search-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('search-input').focus(), 100);
 }
 
-function toggleFav(id, btn) {
-  if (favorites.includes(id)) { favorites = favorites.filter(x => x !== id); showToast('تمت الإزالة من المفضّلة'); }
-  else { favorites.push(id); showToast('تمت الإضافة للمفضّلة'); }
-  localStorage.setItem('ca_favs', JSON.stringify(favorites));
-  if (btn) btn.classList.toggle('active', favorites.includes(id));
+function closeSearch() {
+  document.getElementById('search-overlay').classList.remove('open');
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-results-list').innerHTML = '';
 }
 
-function rateMovie(id, val) {
-  ratings[id] = val;
-  localStorage.setItem('ca_ratings', JSON.stringify(ratings));
-  document.querySelectorAll('#stars-row .star-btn').forEach((b, i) => b.classList.toggle('lit', i < val));
-  showToast('تم التقييم ' + val + ' من 5');
-}
-
-function playNow() { showToast('جاري تشغيل الفيلم...'); }
-function updateQuality() { showToast('الجودة: ' + document.getElementById('quality-select').value); }
-function updateSubtitle() {
-  const m = {'off':'بدون ترجمة','ar':'عربي','en':'إنجليزي','fr':'فرنسي'};
-  showToast('الترجمة: ' + m[document.getElementById('subtitle-select').value]);
-}
-function shareMovie() { navigator.clipboard.writeText(window.location.href).catch(()=>{}); showToast('تم نسخ الرابط'); }
-function playCurrentMovie() { if (!isLoggedIn) return showToast('يجب تسجيل الدخول'); openModal(tmdbMovies[0]?.id); }
-function addCurrentToFav() { if (!isLoggedIn) return showToast('يجب تسجيل الدخول'); toggleFav(tmdbMovies[0]?.id); }
-
-// ============ MATCHES ============
-function buildMatchCard(m) {
-  const statusEl = m.status === 'live'
-    ? '<div class="status-live"><div class="live-dot"></div>مباشر</div>'
-    : m.status === 'upcoming'
-    ? '<span class="status-upcoming">' + m.time + '</span>'
-    : '<span class="status-finished">انتهت</span>';
-
-  const t1init = m.team1.slice(0,2);
-  const t2init = m.team2.slice(0,2);
-
-  const div = document.createElement('div');
-  div.className = 'match-card';
-  div.innerHTML =
-    '<div class="match-league">' + m.league + ' — ' + m.date + '</div>' +
-    '<div class="match-teams">' +
-      '<div class="match-team"><div class="match-team-logo">' + t1init + '</div><span class="match-team-name">' + m.team1 + '</span><span class="match-score">' + m.s1 + '</span></div>' +
-      '<div class="match-team"><div class="match-team-logo">' + t2init + '</div><span class="match-team-name">' + m.team2 + '</span><span class="match-score">' + m.s2 + '</span></div>' +
-    '</div>' +
-    '<div class="match-footer">' + statusEl + '<span>' + m.ch + '</span></div>';
-  return div;
-}
-
-function renderMatches() {
-  const grid = document.getElementById('matches-grid');
-  grid.innerHTML = '';
-  filteredMatches.forEach(m => grid.appendChild(buildMatchCard(m)));
-}
-
-function filterMatches(league, btn) {
-  document.querySelectorAll('#league-filter .genre-chip').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  filteredMatches = league === 'الكل' ? [...MATCHES] : MATCHES.filter(m => m.league === league);
-  renderMatches();
-}
-
-// ============ SEARCH ============
-document.getElementById('search-input').addEventListener('input', async (e) => {
+document.getElementById('search-input')?.addEventListener('input', async (e) => {
   const q = e.target.value.trim();
   const list = document.getElementById('search-results-list');
   if (!q) { list.innerHTML = ''; return; }
+  
+  list.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  
   try {
-    const r = await fetch(TMDB + '/search/movie?api_key=' + TMDB_KEY + '&query=' + encodeURIComponent(q) + '&language=ar-SA');
+    const r = await fetch('/api/search?q=' + encodeURIComponent(q));
     const d = await r.json();
-    const results = (d.results || []).slice(0, 8);
-    results.forEach(m => { if (!tmdbMovies.find(x => x.id === m.id)) tmdbMovies.push(m); });
-    list.innerHTML = !results.length
-      ? '<div style="padding:20px;text-align:center;color:var(--muted);">لا توجد نتائج</div>'
-      : results.map(m =>
-          '<div class="search-result-item" onclick="closeSearch();openModal(' + m.id + ')">' +
-          (m.poster_path ? '<img src="' + IMG_W + m.poster_path + '" />' : '<div style="width:40px;height:58px;background:var(--surface2);border-radius:6px;"></div>') +
-          '<div class="search-result-info"><strong>' + m.title + '</strong><span>' + (m.release_date?.slice(0,4) || '') + '</span></div></div>'
-        ).join('');
-  } catch(e) {}
+    const results = (d.results || []).slice(0, 10);
+    
+    if (!results.length) {
+      list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text2)">لا توجد نتائج</div>';
+      return;
+    }
+    
+    list.innerHTML = results.map(m => {
+      const type = m.media_type || 'movie';
+      const title = m.title || m.name || '?';
+      return '<div class="search-result-item" onclick="closeSearch();openModal(' + m.id + ',\'' + type + '\')">' +
+        (m.poster_path 
+          ? '<img src="' + IMG_W + m.poster_path + '" />' 
+          : '<div style="width:44px;height:64px;background:var(--surface2);border-radius:6px"></div>') +
+        '<div class="search-result-info">' +
+          '<strong>' + title + '</strong>' +
+          '<span>' + (m.release_date || m.first_air_date || '').substring(0, 4) + ' • ★ ' + (m.vote_average?.toFixed(1) || 'N/A') + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--accent2)">خطأ في البحث</div>';
+  }
 });
 
-// ============ AI CHAT ============
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 110) + 'px';
-}
-
-function addMsg(role, text) {
-  const wrap = document.getElementById('ai-messages');
-  const div = document.createElement('div');
-  div.className = 'msg ' + role;
-  div.innerHTML =
-    '<div class="msg-av ' + (role === 'ai' ? 'ai-av' : 'user-av') + '">' + (role === 'ai' ? 'AI' : 'أنت') + '</div>' +
-    '<div class="msg-bubble">' + text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>') + '</div>';
-  wrap.appendChild(div);
-  wrap.scrollTop = wrap.scrollHeight;
-  return div;
-}
-
-function addTyping() {
-  const wrap = document.getElementById('ai-messages');
-  const id = 'typing-' + Date.now();
-  const div = document.createElement('div');
-  div.id = id; div.className = 'msg ai';
-  div.innerHTML = '<div class="msg-av ai-av">AI</div><div class="msg-bubble"><div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>';
-  wrap.appendChild(div);
-  wrap.scrollTop = wrap.scrollHeight;
-  return id;
-}
-
-async function sendAI() {
-  const input = document.getElementById('ai-input');
-  const msg = input.value.trim();
-  if (!msg) return;
-  addMsg('user', msg);
-  input.value = ''; input.style.height = 'auto';
-  const btn = document.getElementById('send-btn');
-  btn.disabled = true;
-  const tid = addTyping();
-  aiHistory.push({ role: 'user', parts: [{ text: msg }] });
-  try {
-    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + GEMINI_KEY, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: aiHistory,
-        systemInstruction: { parts: [{ text: 'أنت مساعد ذكي في منصة CineAra للأفلام وكرة القدم. ردودك باللغة العربية الفصحى، مختصرة ومفيدة.' }] },
-        generationConfig: { temperature: 0.8, maxOutputTokens: 600 }
-      })
-    });
-    const data = await res.json();
-    document.getElementById(tid)?.remove();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (reply) { aiHistory.push({ role: 'model', parts: [{ text: reply }] }); addMsg('ai', reply); }
-    else addMsg('ai', 'عذراً، تعذر الرد. حاول مرة أخرى.');
-  } catch(e) {
-    document.getElementById(tid)?.remove();
-    addMsg('ai', 'تعذر الاتصال. تحقق من اتصالك بالإنترنت.');
+/* ═══════════════════════════════════════════════════════════
+   MODAL + PLAYER
+   ═══════════════════════════════════════════════════════════ */
+async function openModal(id, type = 'movie') {
+  const m = S.tmdbMovies.find(x => x.id === id);
+  S.currentMovie = { id: id, type: type };
+  
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  
+  // Reset player
+  const pframe = document.getElementById('pframe');
+  const placeholder = document.getElementById('player-placeholder');
+  pframe.style.display = 'none';
+  pframe.src = 'about:blank';
+  placeholder.style.display = 'flex';
+  
+  // Fill basic info from cache
+  if (m) {
+    document.getElementById('modal-title').textContent = m.title || m.name || '?';
+    document.getElementById('modal-meta').innerHTML = 
+      '<span class="accent">★ ' + (m.vote_average?.toFixed(1) || 'N/A') + '</span>' +
+      '<span class="sep">|</span>' +
+      '<span>' + (m.release_date || m.first_air_date || '').substring(0, 4) + '</span>';
+    document.getElementById('modal-desc').textContent = m.overview || 'لا يوجد وصف متاح';
+    if (m.backdrop_path) {
+      document.getElementById('modal-backdrop').style.backgroundImage = "url('" + IMG_O + m.backdrop_path + "')";
+    }
   }
-  btn.disabled = false;
+  
+  // Get full details
+  try {
+    const r = await fetch('/api/' + type + '/' + id);
+    const full = await r.json();
+    
+    document.getElementById('modal-title').textContent = full.title || full.name || '?';
+    document.getElementById('modal-meta').innerHTML =
+      '<span class="accent">★ ' + (full.vote_average?.toFixed(1) || 'N/A') + '</span>' +
+      '<span class="sep">|</span>' +
+      '<span>' + (full.release_date || full.first_air_date || '').substring(0, 4) + '</span>' +
+      '<span class="sep">|</span>' +
+      '<span>⏱ ' + (full.runtime || '?') + ' د</span>';
+    document.getElementById('modal-desc').textContent = full.overview || 'لا يوجد وصف متاح';
+    
+    // Choose quality
+    const best = pickBestSource(full, type);
+    S.currentSourceIdx = best.idx;
+    
+    // Show quality badge
+    const qb = document.getElementById('quality-badge');
+    qb.textContent = best.quality;
+    qb.className = 'quality-badge ' + (best.quality === '4K' ? 'q4k' : best.quality === 'HD' ? 'qhd' : 'qsd');
+    
+    // Load cast
+    const cast = full.credits?.cast?.slice(0, 8) || [];
+    const castSection = document.getElementById('cast-section');
+    if (cast.length) {
+      castSection.innerHTML = '<h4>طاقم التمثيل</h4><div class="cast-list">' +
+        cast.map(c => {
+          const avatar = c.profile_path 
+            ? '<img src="https://image.tmdb.org/t/p/w185' + c.profile_path + '" />'
+            : (c.name || '?')[0];
+          return '<div class="cast-item">' +
+            '<div class="cast-avatar">' + avatar + '</div>' +
+            '<div class="cast-name">' + (c.name || '?') + '</div>' +
+            '<div class="cast-role">' + (c.character || '') + '</div>' +
+          '</div>';
+        }).join('') + '</div>';
+    } else {
+      castSection.innerHTML = '';
+    }
+    
+    // Load stars
+    const ur = S.ratings[id] || 0;
+    document.getElementById('stars-row').innerHTML = [1,2,3,4,5].map(n =>
+      '<button class="star-btn' + (n <= ur ? ' lit' : '') + '" onclick="rateMovie(' + id + ',' + n + ')">★</button>'
+    ).join('');
+    
+    // Update fav button
+    updateFavBtn(id);
+    
+    // AUTO-PLAY
+    setTimeout(() => startStream(best.idx, 1, 1), 300);
+    
+  } catch(e) {
+    console.error(e);
+  }
 }
 
-function sendQuick(text) { document.getElementById('ai-input').value = text; sendAI(); }
+function pickBestSource(m, type) {
+  let preferred = 'HD';
+  const year = parseInt((m.release_date || m.first_air_date || '2020').substring(0, 4));
+  const cy = new Date().getFullYear();
+  if (cy - year <= 3) preferred = '4K';
+  if ((m.vote_average || 0) >= 8.0) preferred = '4K';
+  if (type === 'tv') preferred = 'HD';
+  
+  let idx = 0;
+  for (let i = 0; i < SOURCES.length; i++) {
+    if (SOURCES[i].q === preferred) { idx = i; break; }
+  }
+  return { idx, quality: SOURCES[idx].q };
+}
 
-// ============ NAVIGATION ============
-function switchPage(page, e) {
-  if (e) e.preventDefault();
+function startStream(idx, season, episode) {
+  if (!S.currentMovie) return;
+  const pframe = document.getElementById('pframe');
+  const placeholder = document.getElementById('player-placeholder');
+  
+  placeholder.style.display = 'flex';
+  pframe.style.display = 'none';
+  
+  const url = '/player?type=' + S.currentMovie.type +
+              '&id=' + S.currentMovie.id +
+              '&source=' + idx +
+              '&season=' + (season || 1) +
+              '&episode=' + (episode || 1);
+  
+  pframe.src = url;
+  S.currentSourceIdx = idx;
+  
+  pframe.onload = () => {
+    setTimeout(() => {
+      placeholder.style.display = 'none';
+      pframe.style.display = 'block';
+    }, 500);
+  };
+}
+
+function playNow() {
+  if (!S.currentMovie) return;
+  startStream(S.currentSourceIdx, 1, 1);
+  showToast('▶ جاري التشغيل...');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  const pframe = document.getElementById('pframe');
+  if (pframe) pframe.src = 'about:blank';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FAVORITES + RATINGS
+   ═══════════════════════════════════════════════════════════ */
+function toggleFav(id, btn) {
+  if (S.fav.includes(id)) {
+    S.fav = S.fav.filter(x => x !== id);
+    showToast('💔 حُذف من المفضلة');
+  } else {
+    S.fav.push(id);
+    showToast('❤️ أُضيف للمفضلة');
+  }
+  localStorage.setItem('ca_favs', JSON.stringify(S.fav));
+  if (btn) btn.classList.toggle('active', S.fav.includes(id));
+}
+
+function toggleFavCurrent() {
+  if (!S.currentMovie) return;
+  toggleFav(S.currentMovie.id);
+  updateFavBtn(S.currentMovie.id);
+}
+
+function updateFavBtn(id) {
+  const btn = document.getElementById('fav-btn');
+  if (S.fav.includes(id)) {
+    btn.textContent = '❤️ في المفضلة';
+  } else {
+    btn.textContent = '🤍 المفضّلة';
+  }
+}
+
+function addHeroToFav() {
+  if (!S.currentMovie) return;
+  toggleFav(S.currentMovie.id);
+}
+
+function rateMovie(id, val) {
+  S.ratings[id] = val;
+  localStorage.setItem('ca_ratings', JSON.stringify(S.ratings));
+  document.querySelectorAll('#stars-row .star-btn').forEach((b, i) => b.classList.toggle('lit', i < val));
+  showToast('⭐ تم التقييم ' + val + '/5');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SHARE
+   ═══════════════════════════════════════════════════════════ */
+function shareMovie() {
+  if (!S.currentMovie) return;
+  const url = window.location.origin + '/?m=' + S.currentMovie.type + '_' + S.currentMovie.id;
+  if (navigator.share) {
+    navigator.share({ url: url }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(url).then(() => showToast('✅ تم نسخ الرابط')).catch(() => {});
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MATCHES
+   ═══════════════════════════════════════════════════════════ */
+const MATCHES = [
+  { league:'الدوري السعودي', team1:'النصر', team2:'الهلال', s1:'2', s2:'1', status:'live', ch:'SSC', date:'اليوم' },
+  { league:'الدوري المصري', team1:'الأهلي', team2:'الزمالك', s1:'-', s2:'-', status:'upcoming', ch:'ON TV', date:'19:00' },
+  { league:'الإسباني', team1:'ريال مدريد', team2:'برشلونة', s1:'3', s2:'2', status:'finished', ch:'beIN', date:'أمس' },
+  { league:'أبطال أوروبا', team1:'مان سيتي', team2:'ريال مدريد', s1:'1', s2:'1', status:'live', ch:'beIN', date:'الآن' },
+];
+
+function renderMatches() {
+  const grid = document.getElementById('matches-grid');
+  grid.innerHTML = MATCHES.map(m => {
+    const statusClass = m.status === 'live' ? 'live' : m.status === 'upcoming' ? 'upcoming' : 'finished';
+    const statusText = m.status === 'live' ? '🔴 مباشر' : m.status === 'upcoming' ? '⏰ ' + m.date : '✅ انتهت';
+    return '<div class="match-card" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px">' +
+      '<div style="font-size:.72rem;font-weight:700;color:var(--accent);text-transform:uppercase;margin-bottom:10px">' + m.league + '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center">' +
+          '<span style="font-weight:600">' + m.team1 + '</span>' +
+          '<span style="font-family:Bebas Neue,sans-serif;font-size:1.4rem;color:var(--accent)">' + m.s1 + '</span>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center">' +
+          '<span style="font-weight:600">' + m.team2 + '</span>' +
+          '<span style="font-family:Bebas Neue,sans-serif;font-size:1.4rem;color:var(--accent)">' + m.s2 + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;font-size:.74rem;color:var(--text2)">' +
+        '<span>' + statusText + '</span>' +
+        '<span>' + m.ch + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAV
+   ═══════════════════════════════════════════════════════════ */
+function switchPage(page, event) {
+  if (event) event.preventDefault();
   document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-  e.target.classList.add('active');
+  if (event && event.target) event.target.classList.add('active');
   document.getElementById('movies-page').style.display = page === 'movies' ? 'block' : 'none';
   document.getElementById('matches-page').style.display = page === 'matches' ? 'block' : 'none';
-  document.getElementById('ai-page').style.display = page === 'ai' ? 'block' : 'none';
 }
 
-// ============ TOAST ============
+/* ═══════════════════════════════════════════════════════════
+   HERO PLAY
+   ═══════════════════════════════════════════════════════════ */
+function playHero() {
+  if (!S.currentMovie) return;
+  openModal(S.currentMovie.id, S.currentMovie.media_type || 'movie');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════════════════ */
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2600);
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2600);
 }
 
-// ============ INIT ============
-async function init() {
-  const movies = await fetchMovies('popular');
-  tmdbMovies = [...movies];
-  renderHero(movies);
-  renderTrending(movies);
-  renderGenres();
-  renderGrid(movies);
-  renderMatches();
-}
-
-// Events
-document.getElementById('btn-search').addEventListener('click', openSearch);
-document.getElementById('search-close').addEventListener('click', closeSearch);
-document.getElementById('modal-close').addEventListener('click', closeModal);
-document.getElementById('search-overlay').addEventListener('click', e => { if (e.target.id === 'search-overlay') closeSearch(); });
-document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target.id === 'modal-overlay') closeModal(); });
-document.getElementById('profile-modal').addEventListener('click', e => { if (e.target.id === 'profile-modal') closeProfileModal(); });
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeModal(); closeSearch(); closeProfileModal(); }
-  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
-});
-window.addEventListener('scroll', () => { document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40); });
-
-// Check saved session
-const saved = localStorage.getItem('ca_user');
-if (saved) {
-  currentUser = JSON.parse(saved);
-  isLoggedIn = true;
-  document.getElementById('auth-modal').classList.remove('open');
-  updateUserUI();
-  init();
-}
+console.log('[ONYX] Loaded. Sources:', SOURCES.length);
 </script>
+
 </body>
 </html>
