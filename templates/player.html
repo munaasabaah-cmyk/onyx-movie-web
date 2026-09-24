@@ -1,1 +1,2077 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#000000">
+<title>ONYX Player</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   RESET & VARIABLES
+   ═══════════════════════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
+:root {
+  --accent: #e50914;
+  --accent2: #ff1e27;
+  --gold: #f5c518;
+  --green: #22c55e;
+  --bg: #000000;
+  --surface: rgba(20, 20, 20, 0.95);
+  --surface2: rgba(30, 30, 30, 0.9);
+  --text: #ffffff;
+  --text2: #a0a0a0;
+  --border: rgba(255, 255, 255, 0.1);
+  --shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  --radius: 8px;
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --font: 'Cairo', system-ui, sans-serif;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PLAYER CONTAINER
+   ═══════════════════════════════════════════════════════════ */
+.player-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+}
+
+.player-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  z-index: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LOADING OVERLAY
+   ═══════════════════════════════════════════════════════════ */
+.loading-layer {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+
+.loading-layer.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.onyx-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3rem;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  margin-bottom: 30px;
+  text-shadow: 0 0 30px rgba(229, 9, 20, 0.5);
+  animation: logoPulse 2s ease infinite;
+}
+
+@keyframes logoPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.98); }
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.spinner-ring {
+  position: absolute;
+  inset: 0;
+  border: 3px solid transparent;
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.spinner-ring:nth-child(2) {
+  animation-delay: -0.4s;
+  border-top-color: var(--accent2);
+  inset: 8px;
+}
+
+.spinner-ring:nth-child(3) {
+  animation-delay: -0.8s;
+  border-top-color: var(--gold);
+  inset: 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text2);
+  letter-spacing: 0.05em;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.loading-text .source-name {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.loading-progress {
+  width: 200px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.loading-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.3s ease;
+  animation: progressLoad 3s ease forwards;
+}
+
+@keyframes progressLoad {
+  0% { width: 0%; }
+  50% { width: 70%; }
+  100% { width: 95%; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ERROR LAYER
+   ═══════════════════════════════════════════════════════════ */
+.error-layer {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, #1a0000 0%, #000 70%);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.error-layer.active {
+  display: flex;
+}
+
+.error-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(229, 9, 20, 0.15);
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  font-weight: 900;
+  color: var(--accent);
+  margin-bottom: 25px;
+  animation: errorShake 0.5s ease;
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.error-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.error-desc {
+  font-size: 14px;
+  color: var(--text2);
+  max-width: 440px;
+  line-height: 1.7;
+  margin-bottom: 30px;
+}
+
+.error-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.error-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.error-btn:hover {
+  background: var(--accent2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(229, 9, 20, 0.4);
+}
+
+.error-btn.secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.error-btn.secondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOP BAR (خفي - بدون شارة)
+   ═══════════════════════════════════════════════════════════ */
+.top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  opacity: 0;
+  transition: opacity var(--transition);
+  pointer-events: none;
+}
+
+.top-bar.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.top-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.back-btn {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--border);
+  color: #fff;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-size: 18px;
+}
+
+.back-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.1);
+}
+
+.media-title-bar {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  max-width: 400px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.icon-btn {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--border);
+  color: #fff;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-size: 16px;
+  position: relative;
+}
+
+.icon-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.08);
+}
+
+.icon-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BOTTOM CONTROLS
+   ═══════════════════════════════════════════════════════════ */
+.bottom-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 60%, transparent 100%);
+  z-index: 10;
+  padding: 20px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all var(--transition);
+  pointer-events: none;
+}
+
+.bottom-controls.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Progress Bar */
+.progress-container {
+  position: relative;
+  width: 100%;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.progress-track {
+  position: relative;
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: visible;
+  transition: height 0.15s;
+}
+
+.progress-container:hover .progress-track {
+  height: 8px;
+}
+
+.progress-buffer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.3s;
+}
+
+.progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.1s;
+}
+
+.progress-handle {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.15s;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.progress-container:hover .progress-handle {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Controls Row */
+.controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.controls-left,
+.controls-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.controls-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.controls-right {
+  justify-content: flex-end;
+}
+
+.ctrl-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-size: 18px;
+  position: relative;
+}
+
+.ctrl-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.1);
+}
+
+.ctrl-btn.primary {
+  background: rgba(255, 255, 255, 0.15);
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+}
+
+.ctrl-btn.primary:hover {
+  background: var(--accent);
+  transform: scale(1.12);
+}
+
+.ctrl-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: #fff;
+  stroke: #fff;
+  stroke-width: 0;
+}
+
+.ctrl-btn.primary svg {
+  width: 28px;
+  height: 28px;
+}
+
+.ctrl-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Time Display */
+.time-display {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  padding: 0 8px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+}
+
+.time-current {
+  color: #fff;
+}
+
+.time-sep {
+  color: var(--text2);
+  margin: 0 4px;
+}
+
+.time-total {
+  color: var(--text2);
+}
+
+/* Volume Control */
+.volume-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  position: relative;
+}
+
+.volume-slider-wrap {
+  width: 0;
+  overflow: hidden;
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.volume-wrap:hover .volume-slider-wrap {
+  width: 100px;
+}
+
+.volume-slider {
+  width: 90px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  position: relative;
+  cursor: pointer;
+}
+
+.volume-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: #fff;
+  border-radius: 3px;
+  width: 100%;
+  transition: width 0.1s;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SETTINGS MENU
+   ═══════════════════════════════════════════════════════════ */
+.settings-menu {
+  position: absolute;
+  bottom: 100px;
+  right: 20px;
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+  min-width: 260px;
+  max-width: 320px;
+  max-height: 70vh;
+  overflow-y: auto;
+  z-index: 100;
+  display: none;
+  box-shadow: var(--shadow);
+  animation: menuSlideUp 0.25s ease;
+}
+
+.settings-menu.active {
+  display: block;
+}
+
+@keyframes menuSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.settings-menu::-webkit-scrollbar {
+  width: 5px;
+}
+
+.settings-menu::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 3px;
+}
+
+.settings-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text2);
+  padding: 8px 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.settings-section {
+  margin-bottom: 15px;
+}
+
+.settings-section:last-child {
+  margin-bottom: 0;
+}
+
+.settings-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+  padding: 6px 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.settings-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background var(--transition);
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.settings-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.settings-option.active {
+  background: rgba(229, 9, 20, 0.15);
+  color: var(--accent);
+}
+
+.settings-option.active::after {
+  content: '✓';
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.settings-option .badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge.uhd {
+  background: linear-gradient(135deg, #f5c518, #ff9800);
+  color: #000;
+}
+
+.badge.hd {
+  background: var(--green);
+  color: #000;
+}
+
+.badge.sd {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text2);
+}
+
+.badge.noads {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--green);
+}
+
+/* Sources List */
+.sources-list {
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.source-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-size: 13px;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+}
+
+.source-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border);
+}
+
+.source-item.active {
+  background: rgba(229, 9, 20, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.source-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.source-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.source-dot.green {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+}
+
+.source-dot.gold {
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+}
+
+.source-dot.red {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.source-name {
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.source-item.active .source-name {
+  color: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST NOTIFICATIONS
+   ═══════════════════════════════════════════════════════════ */
+.toast {
+  position: absolute;
+  top: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: rgba(20, 20, 20, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  z-index: 200;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  box-shadow: var(--shadow);
+  white-space: nowrap;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast.success {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.toast.error {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.toast.info {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   KEYBOARD SHORTCUTS OVERLAY
+   ═══════════════════════════════════════════════════════════ */
+.shortcuts-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(20px);
+  z-index: 300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+}
+
+.shortcuts-overlay.active {
+  display: flex;
+}
+
+.shortcuts-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 30px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+}
+
+.shortcuts-title {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.shortcuts-subtitle {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 25px;
+}
+
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.shortcut-label {
+  color: var(--text2);
+  font-weight: 600;
+}
+
+.shortcut-key {
+  font-family: monospace;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 3px 10px;
+  border-radius: 5px;
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 12px;
+  border: 1px solid var(--border);
+}
+
+.shortcuts-close {
+  margin-top: 25px;
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .onyx-logo {
+    font-size: 2.2rem;
+  }
+  
+  .spinner {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .top-bar {
+    height: 60px;
+    padding: 0 12px;
+  }
+  
+  .bottom-controls {
+    padding: 15px;
+  }
+  
+  .media-title-bar {
+    font-size: 13px;
+    max-width: 200px;
+  }
+  
+  .time-display {
+    font-size: 11px;
+  }
+  
+  .ctrl-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+  }
+  
+  .ctrl-btn.primary {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .volume-slider-wrap {
+    display: none;
+  }
+  
+  .settings-menu {
+    right: 10px;
+    left: 10px;
+    min-width: auto;
+    max-width: none;
+  }
+  
+  .shortcuts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .controls-row {
+    gap: 8px;
+  }
+  
+  .controls-left .ctrl-btn:not(.primary),
+  .controls-right .ctrl-btn:nth-child(n+3) {
+    display: none;
+  }
+  
+  .time-display {
+    font-size: 10px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hide by default - no source badge */
+.source-badge,
+.badge-source,
+.player-badge,
+.vidsrc-badge,
+.source-watermark {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+</style>
+</head>
+<body>
+
+<div class="player-root" id="playerRoot">
+
+  <!-- ═══════════════════════════════════════════════════
+       LOADING LAYER
+       ═══════════════════════════════════════════════════ -->
+  <div class="loading-layer" id="loadingLayer">
+    <div class="onyx-logo">ONYX</div>
+    <div class="spinner">
+      <div class="spinner-ring"></div>
+      <div class="spinner-ring"></div>
+      <div class="spinner-ring"></div>
+    </div>
+    <div class="loading-text">
+      جاري التحميل من <span class="source-name" id="loadingSourceName">...</span>
+    </div>
+    <div class="loading-progress">
+      <div class="loading-progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       ERROR LAYER
+       ═══════════════════════════════════════════════════ -->
+  <div class="error-layer" id="errorLayer">
+    <div class="error-icon">!</div>
+    <div class="error-title">تعذر تحميل الفيديو</div>
+    <div class="error-desc" id="errorDesc">
+      هذا المصدر غير متاح حالياً. جرّب مصدراً آخر.
+    </div>
+    <div class="error-actions">
+      <button class="error-btn" onclick="tryNextSource()">
+        → المصدر التالي
+      </button>
+      <button class="error-btn secondary" onclick="reloadCurrent()">
+        ↻ إعادة المحاولة
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       IFRAME (Player)
+       ═══════════════════════════════════════════════════ -->
+  <iframe
+    class="player-frame"
+    id="playerFrame"
+    src="about:blank"
+    allowfullscreen
+    allow="autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write"
+    referrerpolicy="origin"
+    sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation"
+  ></iframe>
+
+  <!-- ═══════════════════════════════════════════════════
+       TOP BAR (خفي بشكل افتراضي)
+       ═══════════════════════════════════════════════════ -->
+  <div class="top-bar" id="topBar">
+    <div class="top-left">
+      <button class="back-btn" onclick="goBack()" title="رجوع">←</button>
+      <div class="media-title-bar" id="mediaTitleBar"></div>
+    </div>
+    <div class="top-right">
+      <button class="icon-btn" onclick="toggleShortcuts()" title="اختصارات">⌨</button>
+      <button class="icon-btn" onclick="toggleFullscreen()" title="ملء الشاشة">⛶</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       BOTTOM CONTROLS
+       ═══════════════════════════════════════════════════ -->
+  <div class="bottom-controls" id="bottomControls">
+
+    <!-- Progress Bar -->
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-track">
+        <div class="progress-buffer" id="progressBuffer"></div>
+        <div class="progress-fill" id="progressFill"></div>
+        <div class="progress-handle" id="progressHandle"></div>
+      </div>
+    </div>
+
+    <!-- Controls Row -->
+    <div class="controls-row">
+
+      <!-- Left -->
+      <div class="controls-left">
+        <button class="ctrl-btn primary" onclick="togglePlay()" id="playBtn" title="تشغيل/إيقاف">
+          <svg viewBox="0 0 24 24" id="playIcon"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </button>
+        <button class="ctrl-btn" onclick="seek(-10)" title="10 ثوان للخلف">
+          <svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
+        </button>
+        <button class="ctrl-btn" onclick="seek(10)" title="10 ثوان للأمام">
+          <svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6L13 6zM4 18l8.5-6L4 6v12z"/></svg>
+        </button>
+        <div class="volume-wrap">
+          <button class="ctrl-btn" onclick="toggleMute()" id="volumeBtn" title="كتم الصوت">
+            <svg viewBox="0 0 24 24" id="volumeIcon"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+          </button>
+          <div class="volume-slider-wrap">
+            <div class="volume-slider" id="volumeSlider">
+              <div class="volume-fill" id="volumeFill"></div>
+            </div>
+          </div>
+        </div>
+        <div class="time-display">
+          <span class="time-current" id="timeCurrent">0:00</span>
+          <span class="time-sep">/</span>
+          <span class="time-total" id="timeTotal">0:00</span>
+        </div>
+      </div>
+
+      <!-- Right -->
+      <div class="controls-right">
+        <button class="ctrl-btn" onclick="toggleSettings()" id="settingsBtn" title="الإعدادات">
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+        </button>
+        <button class="ctrl-btn" onclick="togglePiP()" id="pipBtn" title="صورة في صورة">
+          <svg viewBox="0 0 24 24"><path d="M19 11h-8v6h8v-6zm4 8V4.98C23 3.88 22.1 3 21 3H3c-1.1 0-2 .88-2 1.98V19c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2zm-2 .02H3V4.97h18v14.05z"/></svg>
+        </button>
+        <button class="ctrl-btn" onclick="toggleFullscreen()" title="ملء الشاشة">
+          <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SETTINGS MENU
+       ═══════════════════════════════════════════════════ -->
+  <div class="settings-menu" id="settingsMenu">
+
+    <!-- Sources -->
+    <div class="settings-section">
+      <div class="settings-label">مصادر المشاهدة</div>
+      <div class="sources-list" id="sourcesList"></div>
+    </div>
+
+    <!-- Quality -->
+    <div class="settings-section">
+      <div class="settings-label">جودة العرض</div>
+      <div class="settings-option" onclick="setQuality('4k')">
+        <span>4K Ultra HD</span>
+        <span class="badge uhd">4K</span>
+      </div>
+      <div class="settings-option" onclick="setQuality('1080')">
+        <span>Full HD</span>
+        <span class="badge hd">1080p</span>
+      </div>
+      <div class="settings-option" onclick="setQuality('720')">
+        <span>HD</span>
+        <span class="badge hd">720p</span>
+      </div>
+      <div class="settings-option" onclick="setQuality('480')">
+        <span>SD</span>
+        <span class="badge sd">480p</span>
+      </div>
+    </div>
+
+    <!-- Speed -->
+    <div class="settings-section">
+      <div class="settings-label">سرعة العرض</div>
+      <div class="settings-option" onclick="setSpeed(0.5)"><span>0.5x</span></div>
+      <div class="settings-option" onclick="setSpeed(0.75)"><span>0.75x</span></div>
+      <div class="settings-option active" onclick="setSpeed(1)"><span>عادي (1x)</span></div>
+      <div class="settings-option" onclick="setSpeed(1.25)"><span>1.25x</span></div>
+      <div class="settings-option" onclick="setSpeed(1.5)"><span>1.5x</span></div>
+      <div class="settings-option" onclick="setSpeed(2)"><span>2x</span></div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SHORTCUTS OVERLAY
+       ═══════════════════════════════════════════════════ -->
+  <div class="shortcuts-overlay" id="shortcutsOverlay">
+    <div class="shortcuts-panel">
+      <div class="shortcuts-title">اختصارات لوحة المفاتيح</div>
+      <div class="shortcuts-subtitle">تحكم كامل بدون ماوس</div>
+      <div class="shortcuts-grid">
+        <div class="shortcut-item">
+          <span class="shortcut-label">تشغيل / إيقاف</span>
+          <span class="shortcut-key">Space</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">تقديم 10 ثوان</span>
+          <span class="shortcut-key">→</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">ترجيع 10 ثوان</span>
+          <span class="shortcut-key">←</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">رفع الصوت</span>
+          <span class="shortcut-key">↑</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">خفض الصوت</span>
+          <span class="shortcut-key">↓</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">كتم الصوت</span>
+          <span class="shortcut-key">M</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">ملء الشاشة</span>
+          <span class="shortcut-key">F</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">صورة في صورة</span>
+          <span class="shortcut-key">P</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">المصدر التالي</span>
+          <span class="shortcut-key">N</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">إعادة تحميل</span>
+          <span class="shortcut-key">R</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">الإعدادات</span>
+          <span class="shortcut-key">S</span>
+        </div>
+        <div class="shortcut-item">
+          <span class="shortcut-label">إغلاق</span>
+          <span class="shortcut-key">Esc</span>
+        </div>
+      </div>
+      <button class="shortcuts-close" onclick="toggleShortcuts()">إغلاق</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       TOAST
+       ═══════════════════════════════════════════════════ -->
+  <div class="toast" id="toast"></div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   ONYX PLAYER v4.0
+   Full-featured custom player
+   ═══════════════════════════════════════════════════════════ */
+
+// ─────────────────────────────────────────────────────────
+// SOURCES & CONFIG
+// ─────────────────────────────────────────────────────────
+const SOURCES = __SOURCES__;
+
+const CONFIG = {
+  autoNextSource: true,
+  autoNextDelay: 3000,
+  loadingTimeout: 15000,
+  controlsHideDelay: 3000,
+  defaultVolume: 1.0,
+  defaultQuality: '1080',
+  defaultSpeed: 1,
+  seekStep: 10,
+  volumeStep: 0.1,
+};
+
+// ─────────────────────────────────────────────────────────
+// URL PARAMS
+// ─────────────────────────────────────────────────────────
+const params = new URLSearchParams(window.location.search);
+const mediaType = params.get('type') || 'movie';
+const mediaId = params.get('id') || '';
+const sourceIndex = parseInt(params.get('source') || '0', 10);
+const seasonNum = params.get('season') || '1';
+const episodeNum = params.get('episode') || '1';
+const mediaTitle = params.get('title') || '';
+
+// ─────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────
+const state = {
+  currentSourceIndex: sourceIndex,
+  isPlaying: false,
+  isMuted: false,
+  volume: parseFloat(localStorage.getItem('onyx_volume') || CONFIG.defaultVolume),
+  quality: localStorage.getItem('onyx_quality') || CONFIG.defaultQuality,
+  speed: parseFloat(localStorage.getItem('onyx_speed') || CONFIG.defaultSpeed),
+  controlsVisible: true,
+  controlsTimeout: null,
+  loadingTimeout: null,
+  errorCount: 0,
+  currentTime: 0,
+  duration: 0,
+};
+
+// ─────────────────────────────────────────────────────────
+// DOM REFS
+// ─────────────────────────────────────────────────────────
+const $ = (id) => document.getElementById(id);
+const playerRoot = $('playerRoot');
+const playerFrame = $('playerFrame');
+const loadingLayer = $('loadingLayer');
+const loadingSourceName = $('loadingSourceName');
+const errorLayer = $('errorLayer');
+const errorDesc = $('errorDesc');
+const topBar = $('topBar');
+const bottomControls = $('bottomControls');
+const settingsMenu = $('settingsMenu');
+const settingsBtn = $('settingsBtn');
+const sourcesList = $('sourcesList');
+const mediaTitleBar = $('mediaTitleBar');
+const playBtn = $('playBtn');
+const playIcon = $('playIcon');
+const volumeBtn = $('volumeBtn');
+const volumeIcon = $('volumeIcon');
+const volumeSlider = $('volumeSlider');
+const volumeFill = $('volumeFill');
+const progressContainer = $('progressContainer');
+const progressFill = $('progressFill');
+const progressBuffer = $('progressBuffer');
+const progressHandle = $('progressHandle');
+const timeCurrent = $('timeCurrent');
+const timeTotal = $('timeTotal');
+const shortcutsOverlay = $('shortcutsOverlay');
+const toast = $('toast');
+
+// ─────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', init);
+
+function init() {
+  console.log('[ONYX Player] Initializing...');
+  console.log('[ONYX Player] Media:', mediaType, mediaId);
+  console.log('[ONYX Player] Sources available:', SOURCES.length);
+
+  if (!mediaId) {
+    showError('لم يتم تحديد الفيلم أو المسلسل.');
+    return;
+  }
+
+  if (!SOURCES || !SOURCES.length) {
+    showError('لا توجد مصادر متاحة.');
+    return;
+  }
+
+  // Set media title
+  if (mediaTitle) {
+    mediaTitleBar.textContent = decodeURIComponent(mediaTitle);
+  }
+
+  // Build sources list
+  buildSourcesList();
+
+  // Apply saved settings
+  applyVolume(state.volume);
+  applySpeed(state.speed);
+
+  // Load initial source
+  loadSource(sourceIndex);
+
+  // Setup events
+  setupEvents();
+
+  // Start auto-hide controls
+  scheduleHideControls();
+
+  // Notify parent
+  notifyParent('ready', {
+    sourcesCount: SOURCES.length,
+    sourceIndex: sourceIndex,
+  });
+}
+
+// ─────────────────────────────────────────────────────────
+// LOAD SOURCE
+// ─────────────────────────────────────────────────────────
+function loadSource(index) {
+  if (index < 0 || index >= SOURCES.length) {
+    index = 0;
+  }
+
+  state.currentSourceIndex = index;
+  const source = SOURCES[index];
+
+  console.log('[ONYX Player] Loading source:', source.name);
+
+  // Update loading text
+  loadingSourceName.textContent = source.name || 'المصدر';
+
+  // Show loading, hide error
+  loadingLayer.classList.remove('hidden');
+  errorLayer.classList.remove('active');
+
+  // Build URL
+  const url = buildUrl(source);
+
+  // Set iframe src
+  try {
+    playerFrame.src = url;
+  } catch (e) {
+    console.error('[ONYX Player] Error setting iframe src:', e);
+    handleLoadError('خطأ في تحميل المصدر');
+    return;
+  }
+
+  // Setup loading timeout
+  clearTimeout(state.loadingTimeout);
+  state.loadingTimeout = setTimeout(() => {
+    if (!loadingLayer.classList.contains('hidden')) {
+      console.warn('[ONYX Player] Loading timeout for:', source.name);
+      handleLoadError('انتهت مدة الانتظار');
+    }
+  }, CONFIG.loadingTimeout);
+
+  // Update active source in list
+  updateActiveSource(index);
+}
+
+// ─────────────────────────────────────────────────────────
+// BUILD URL
+// ─────────────────────────────────────────────────────────
+function buildUrl(source) {
+  let url = source[mediaType] || source.movie || source.tv || '';
+  
+  url = url.replace(/{id}/g, mediaId);
+  url = url.replace(/{s}/g, seasonNum);
+  url = url.replace(/{e}/g, episodeNum);
+  url = url.replace(/{season}/g, seasonNum);
+  url = url.replace(/{episode}/g, episodeNum);
+
+  return url;
+}
+
+// ─────────────────────────────────────────────────────────
+// BUILD SOURCES LIST
+// ─────────────────────────────────────────────────────────
+function buildSourcesList() {
+  const html = SOURCES.map((src, i) => {
+    let dotClass = 'green';
+    if (src.ads === 'medium') dotClass = 'gold';
+    if (src.ads === 'high') dotClass = 'red';
+
+    const quality = src.q || src.quality || 'HD';
+
+    return `
+      <div class="source-item" data-index="${i}" onclick="selectSource(${i})">
+        <div class="source-item-left">
+          <div class="source-dot ${dotClass}"></div>
+          <div class="source-name">${src.name}</div>
+        </div>
+        <div class="badge ${quality === '4K' ? 'uhd' : quality === 'HD' ? 'hd' : 'sd'}">
+          ${quality}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  sourcesList.innerHTML = html;
+  updateActiveSource(sourceIndex);
+}
+
+// ─────────────────────────────────────────────────────────
+// UPDATE ACTIVE SOURCE
+// ─────────────────────────────────────────────────────────
+function updateActiveSource(index) {
+  const items = sourcesList.querySelectorAll('.source-item');
+  items.forEach((item, i) => {
+    item.classList.toggle('active', i === index);
+  });
+}
+
+// ─────────────────────────────────────────────────────────
+// SELECT SOURCE
+// ─────────────────────────────────────────────────────────
+window.selectSource = function(index) {
+  if (index === state.currentSourceIndex) {
+    toast('هذا المصدر يعمل بالفعل', 'info');
+    return;
+  }
+
+  console.log('[ONYX Player] Switching to source:', index);
+  loadSource(index);
+  toggleSettings();
+};
+
+// ─────────────────────────────────────────────────────────
+// HANDLE LOAD ERROR
+// ─────────────────────────────────────────────────────────
+function handleLoadError(message) {
+  clearTimeout(state.loadingTimeout);
+  loadingLayer.classList.add('hidden');
+  errorDesc.textContent = message || 'هذا المصدر غير متاح حالياً.';
+  errorLayer.classList.add('active');
+
+  state.errorCount++;
+
+  // Auto-try next source after delay
+  if (CONFIG.autoNextSource && state.errorCount < SOURCES.length) {
+    setTimeout(() => {
+      if (errorLayer.classList.contains('active')) {
+        console.log('[ONYX Player] Auto-trying next source...');
+        tryNextSource();
+      }
+    }, CONFIG.autoNextDelay);
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// TRY NEXT SOURCE
+// ─────────────────────────────────────────────────────────
+window.tryNextSource = function() {
+  const next = state.currentSourceIndex + 1;
+  if (next >= SOURCES.length) {
+    toast('لا توجد مصادر أخرى', 'error');
+    return;
+  }
+  loadSource(next);
+};
+
+// ─────────────────────────────────────────────────────────
+// RELOAD CURRENT
+// ─────────────────────────────────────────────────────────
+window.reloadCurrent = function() {
+  state.errorCount = 0;
+  loadSource(state.currentSourceIndex);
+};
+
+// ─────────────────────────────────────────────────────────
+// IFRAME LOAD EVENT
+// ─────────────────────────────────────────────────────────
+playerFrame.addEventListener('load', () => {
+  if (playerFrame.src === 'about:blank') return;
+
+  console.log('[ONYX Player] Iframe loaded');
+
+  setTimeout(() => {
+    loadingLayer.classList.add('hidden');
+    clearTimeout(state.loadingTimeout);
+    state.errorCount = 0;
+  }, 800);
+});
+
+// ─────────────────────────────────────────────────────────
+// TOGGLE PLAY
+// ─────────────────────────────────────────────────────────
+window.togglePlay = function() {
+  // Send postMessage to iframe (custom sources can listen)
+  try {
+    playerFrame.contentWindow.postMessage({
+      type: 'onyx-command',
+      command: 'togglePlay'
+    }, '*');
+  } catch (e) {}
+
+  state.isPlaying = !state.isPlaying;
+  updatePlayIcon();
+  toast(state.isPlaying ? 'تشغيل' : 'إيقاف', 'info');
+};
+
+function updatePlayIcon() {
+  if (state.isPlaying) {
+    playIcon.innerHTML = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
+  } else {
+    playIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// SEEK
+// ─────────────────────────────────────────────────────────
+window.seek = function(seconds) {
+  const newTime = Math.max(0, state.currentTime + seconds);
+  try {
+    playerFrame.contentWindow.postMessage({
+      type: 'onyx-command',
+      command: 'seek',
+      time: newTime
+    }, '*');
+  } catch (e) {}
+  toast((seconds > 0 ? '⏩ +' : '⏪ ') + Math.abs(seconds) + 'ث', 'info');
+};
+
+// ─────────────────────────────────────────────────────────
+// VOLUME
+// ─────────────────────────────────────────────────────────
+window.toggleMute = function() {
+  state.isMuted = !state.isMuted;
+  const vol = state.isMuted ? 0 : state.volume;
+  applyVolume(vol);
+  updateVolumeIcon();
+  toast(state.isMuted ? 'كتم' : 'صوت', 'info');
+};
+
+function applyVolume(vol) {
+  state.volume = Math.max(0, Math.min(1, vol));
+  volumeFill.style.width = (state.volume * 100) + '%';
+  localStorage.setItem('onyx_volume', state.volume);
+  notifyParent('volume', { volume: state.volume });
+}
+
+function updateVolumeIcon() {
+  let icon;
+  if (state.isMuted || state.volume === 0) {
+    icon = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>';
+  } else if (state.volume < 0.5) {
+    icon = '<path d="M18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM5 9v6h4l5 5V4L9 9H5z"/>';
+  } else {
+    icon = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
+  }
+  volumeIcon.innerHTML = icon;
+}
+
+// Volume slider
+volumeSlider.addEventListener('click', (e) => {
+  const rect = volumeSlider.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const pct = x / rect.width;
+  applyVolume(pct);
+  updateVolumeIcon();
+});
+
+// ─────────────────────────────────────────────────────────
+// PROGRESS
+// ─────────────────────────────────────────────────────────
+progressContainer.addEventListener('click', (e) => {
+  if (!state.duration) return;
+  const rect = progressContainer.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const pct = x / rect.width;
+  const time = pct * state.duration;
+
+  try {
+    playerFrame.contentWindow.postMessage({
+      type: 'onyx-command',
+      command: 'seek',
+      time: time
+    }, '*');
+  } catch (e) {}
+});
+
+function updateProgress() {
+  if (state.duration > 0) {
+    const pct = (state.currentTime / state.duration) * 100;
+    progressFill.style.width = pct + '%';
+    progressHandle.style.left = pct + '%';
+  }
+  timeCurrent.textContent = formatTime(state.currentTime);
+  timeTotal.textContent = formatTime(state.duration);
+}
+
+function formatTime(seconds) {
+  if (!seconds || isNaN(seconds)) return '0:00';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  if (h > 0) {
+    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+// ─────────────────────────────────────────────────────────
+// SETTINGS
+// ─────────────────────────────────────────────────────────
+window.toggleSettings = function() {
+  settingsMenu.classList.toggle('active');
+  settingsBtn.classList.toggle('active');
+};
+
+window.setQuality = function(q) {
+  state.quality = q;
+  localStorage.setItem('onyx_quality', q);
+  toast('الجودة: ' + q.toUpperCase(), 'info');
+  
+  // Highlight active
+  document.querySelectorAll('.settings-option').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+};
+
+window.setSpeed = function(s) {
+  state.speed = s;
+  localStorage.setItem('onyx_speed', s);
+  toast('السرعة: ' + s + 'x', 'info');
+
+  try {
+    playerFrame.contentWindow.postMessage({
+      type: 'onyx-command',
+      command: 'setSpeed',
+      speed: s
+    }, '*');
+  } catch (e) {}
+
+  document.querySelectorAll('.settings-option').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+};
+
+function applySpeed(s) {
+  try {
+    playerFrame.contentWindow.postMessage({
+      type: 'onyx-command',
+      command: 'setSpeed',
+      speed: s
+    }, '*');
+  } catch (e) {}
+}
+
+// ─────────────────────────────────────────────────────────
+// PiP
+// ─────────────────────────────────────────────────────────
+window.togglePiP = async function() {
+  try {
+    if (document.pictureInPictureElement) {
+      await document.exitPictureInPicture();
+      toast('خرج من PiP', 'info');
+    } else if (playerFrame.requestPictureInPicture) {
+      await playerFrame.requestPictureInPicture();
+      toast('PiP مفعل', 'success');
+    } else {
+      toast('PiP غير مدعوم', 'error');
+    }
+  } catch (e) {
+    toast('PiP غير متاح', 'error');
+  }
+};
+
+// ─────────────────────────────────────────────────────────
+// FULLSCREEN
+// ─────────────────────────────────────────────────────────
+window.toggleFullscreen = function() {
+  if (!document.fullscreenElement) {
+    playerRoot.requestFullscreen().catch((err) => {
+      console.error(err);
+    });
+  } else {
+    document.exitFullscreen();
+  }
+};
+
+// ─────────────────────────────────────────────────────────
+// SHORTCUTS
+// ─────────────────────────────────────────────────────────
+window.toggleShortcuts = function() {
+  shortcutsOverlay.classList.toggle('active');
+};
+
+// ─────────────────────────────────────────────────────────
+// GO BACK
+// ─────────────────────────────────────────────────────────
+window.goBack = function() {
+  notifyParent('close', {});
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'onyx-close' }, '*');
+    } else {
+      history.back();
+    }
+  } catch (e) {
+    history.back();
+  }
+};
+
+// ─────────────────────────────────────────────────────────
+// EVENTS
+// ─────────────────────────────────────────────────────────
+function setupEvents() {
+  // Mouse move - show controls
+  playerRoot.addEventListener('mousemove', () => {
+    showControls();
+    scheduleHideControls();
+  });
+
+  // Mouse leave
+  playerRoot.addEventListener('mouseleave', () => {
+    scheduleHideControls();
+  });
+
+  // Touch - show controls
+  playerRoot.addEventListener('touchstart', () => {
+    showControls();
+    scheduleHideControls();
+  });
+
+  // Double click - fullscreen
+  playerRoot.addEventListener('dblclick', () => {
+    toggleFullscreen();
+  });
+
+  // Keyboard
+  document.addEventListener('keydown', handleKeyDown);
+
+  // Fullscreen change
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement) {
+      showControls();
+      scheduleHideControls();
+    }
+  });
+
+  // Close settings on click outside
+  document.addEventListener('click', (e) => {
+    if (!settingsMenu.contains(e.target) && !settingsBtn.contains(e.target)) {
+      settingsMenu.classList.remove('active');
+      settingsBtn.classList.remove('active');
+    }
+  });
+}
+
+// ─────────────────────────────────────────────────────────
+// KEYBOARD HANDLER
+// ─────────────────────────────────────────────────────────
+function handleKeyDown(e) {
+  // Ignore if typing in input
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+  switch (e.key) {
+    case ' ':
+    case 'Spacebar':
+      e.preventDefault();
+      togglePlay();
+      break;
+
+    case 'ArrowRight':
+      e.preventDefault();
+      seek(CONFIG.seekStep);
+      break;
+
+    case 'ArrowLeft':
+      e.preventDefault();
+      seek(-CONFIG.seekStep);
+      break;
+
+    case 'ArrowUp':
+      e.preventDefault();
+      applyVolume(Math.min(1, state.volume + CONFIG.volumeStep));
+      updateVolumeIcon();
+      break;
+
+    case 'ArrowDown':
+      e.preventDefault();
+      applyVolume(Math.max(0, state.volume - CONFIG.volumeStep));
+      updateVolumeIcon();
+      break;
+
+    case 'm':
+    case 'M':
+      toggleMute();
+      break;
+
+    case 'f':
+    case 'F':
+      toggleFullscreen();
+      break;
+
+    case 'p':
+    case 'P':
+      togglePiP();
+      break;
+
+    case 'n':
+    case 'N':
+      tryNextSource();
+      break;
+
+    case 'r':
+    case 'R':
+      reloadCurrent();
+      break;
+
+    case 's':
+    case 'S':
+      toggleSettings();
+      break;
+
+    case '?':
+    case '/':
+      toggleShortcuts();
+      break;
+
+    case 'Escape':
+      if (shortcutsOverlay.classList.contains('active')) {
+        toggleShortcuts();
+      } else if (settingsMenu.classList.contains('active')) {
+        toggleSettings();
+      } else {
+        goBack();
+      }
+      break;
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// CONTROLS VISIBILITY
+// ─────────────────────────────────────────────────────────
+function showControls() {
+  state.controlsVisible = true;
+  topBar.classList.add('visible');
+  bottomControls.classList.add('visible');
+}
+
+function hideControls() {
+  state.controlsVisible = false;
+  topBar.classList.remove('visible');
+  bottomControls.classList.remove('visible');
+}
+
+function scheduleHideControls() {
+  clearTimeout(state.controlsTimeout);
+  state.controlsTimeout = setTimeout(() => {
+    if (state.isPlaying) {
+      hideControls();
+    }
+  }, CONFIG.controlsHideDelay);
+}
+
+// ─────────────────────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────────────────────
+function toast(msg, type = '') {
+  toast.textContent = msg;
+  toast.className = 'toast show ' + type;
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => {
+    toast.className = 'toast ' + type;
+  }, 2200);
+}
+
+// ⚠️ Override with proper function (since toast is also DOM id)
+const _toastEl = document.getElementById('toast');
+function _showToast(msg, type = '') {
+  _toastEl.textContent = msg;
+  _toastEl.className = 'toast show ' + type;
+  clearTimeout(_toastEl._t);
+  _toastEl._t = setTimeout(() => {
+    _toastEl.className = 'toast ' + type;
+  }, 2200);
+}
+
+// ─────────────────────────────────────────────────────────
+// SHOW ERROR
+// ─────────────────────────────────────────────────────────
+function showError(msg) {
+  loadingLayer.classList.add('hidden');
+  errorDesc.textContent = msg || 'حدث خطأ غير متوقع.';
+  errorLayer.classList.add('active');
+}
+
+// ─────────────────────────────────────────────────────────
+// NOTIFY PARENT
+// ─────────────────────────────────────────────────────────
+function notifyParent(event, data) {
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'onyx-player',
+        event: event,
+        data: data,
+      }, '*');
+    }
+  } catch (e) {}
+}
+
+// ─────────────────────────────────────────────────────────
+// MESSAGE FROM PARENT
+// ─────────────────────────────────────────────────────────
+window.addEventListener('message', (e) => {
+  const msg = e.data;
+  if (!msg || msg.type !== 'onyx-command') return;
+
+  console.log('[ONYX Player] Parent command:', msg.command);
+
+  switch (msg.command) {
+    case 'play':
+      if (msg.sourceIndex !== undefined) loadSource(msg.sourceIndex);
+      break;
+    case 'reload':
+      reloadCurrent();
+      break;
+    case 'next':
+      tryNextSource();
+      break;
+    case 'setVolume':
+      if (msg.volume !== undefined) {
+        applyVolume(msg.volume);
+        updateVolumeIcon();
+      }
+      break;
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// PERIODIC PING
+// ─────────────────────────────────────────────────────────
+setInterval(() => {
+  notifyParent('ping', {
+    source: state.currentSourceIndex,
+    playing: state.isPlaying,
+    time: Date.now(),
+  });
+}, 5000);
+
+// ─────────────────────────────────────────────────────────
+// ONLINE / OFFLINE
+// ─────────────────────────────────────────────────────────
+window.addEventListener('online', () => {
+  toast('متصل بالإنترنت', 'success');
+});
+
+window.addEventListener('offline', () => {
+  toast('غير متصل بالإنترنت', 'error');
+});
+
+// ─────────────────────────────────────────────────────────
+// PAGE VISIBILITY
+// ─────────────────────────────────────────────────────────
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    notifyParent('hidden', {});
+  } else {
+    notifyParent('visible', {});
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// CLEANUP
+// ─────────────────────────────────────────────────────────
+window.addEventListener('beforeunload', () => {
+  clearTimeout(state.controlsTimeout);
+  clearTimeout(state.loadingTimeout);
+  notifyParent('unload', {});
+});
+
+console.log('[ONYX Player] Script loaded successfully');
+</script>
+
+</body>
+</html>
