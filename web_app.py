@@ -1,5 +1,5 @@
-# -*- -*- coding: utf-8 -*-
-"""ONYX MOVIE — Flask + TMDB + Original Audio Language Support"""
+# -*- coding: utf-8 -*-
+"""ONYX MOVIE — Flask + TMDB + Multi-Audio Sources"""
 
 from flask import Flask, jsonify, request
 import os
@@ -14,31 +14,190 @@ IMG_BASE = "https://image.tmdb.org/t/p"
 
 
 # ══════════════════════════════════════════════════════════
-# المصادر الداعمة للغة الصوتية الأصلية والترجمة Multi-Audio
+# المصادر — مرتبة حسب دعم اللغات المتعددة
 # ══════════════════════════════════════════════════════════
 
 PLAYER_SOURCES = [
-    # المصدر الأول: VidLink مع تفعيل الصوت الأصلي المباشر
-    {"name": "VidLink Original", "quality": "4K", "ads": "none",
-     "movie": "https://vidlink.pro/movie/{id}?primaryColor=e50914&autoplay=true&multiLang=true",
-     "tv":    "https://vidlink.pro/tv/{id}/{season}/{episode}?primaryColor=e50914&autoplay=true&multiLang=true"},
+    # ═══ المستوى 1: 4K + Multi-Audio (الأفضل) ═══
+    {
+        "name": "VidLink Multi-Audio",
+        "quality": "4K",
+        "ads": "none",
+        "langs": "ar,en,ru,es,fr,de,it,pt,tr,ko,ja,zh",
+        "movie": "https://vidlink.pro/movie/{id}?primaryColor=e50914&autoplay=true&multiLang=true&langs=ar,en,ru,es,fr",
+        "tv":    "https://vidlink.pro/tv/{id}/{season}/{episode}?primaryColor=e50914&autoplay=true&multiLang=true&langs=ar,en,ru,es,fr",
+    },
+    {
+        "name": "Videasy Multi-Language",
+        "quality": "4K",
+        "ads": "none",
+        "langs": "ar,en,ru,es,fr,de,it,pt",
+        "movie": "https://player.videasy.net/movie/{id}",
+        "tv":    "https://player.videasy.net/tv/{id}/{season}/{episode}",
+    },
+    {
+        "name": "SmashyStream Multi-Audio",
+        "quality": "HD",
+        "ads": "none",
+        "langs": "ar,en,ru,es,fr,de",
+        "movie": "https://player.smashy.stream/movie/{id}?sub=ar&lang=ar",
+        "tv":    "https://player.smashy.stream/tv/{id}?s={season}&e={episode}&sub=ar&lang=ar",
+    },
+    {
+        "name": "VidPlus Multi-Lang",
+        "quality": "HD",
+        "ads": "low",
+        "langs": "ar,en,ru,es,fr",
+        "movie": "https://vidplus.to/embed/movie/{id}?lang=ar&sub=ar",
+        "tv":    "https://vidplus.to/embed/tv/{id}/{season}/{episode}?lang=ar&sub=ar",
+    },
+    {
+        "name": "VidSrc Pro Original",
+        "quality": "HD",
+        "ads": "none",
+        "langs": "ar,en",
+        "movie": "https://vidsrc.pro/embed/movie/{id}",
+        "tv":    "https://vidsrc.pro/embed/tv/{id}/{season}/{episode}",
+    },
 
-    # المصدر الثاني: Videasy (يدعم تغيير الصوت والترجمة من داخل مشغل الفيديو)
-    {"name": "Videasy Multi-Audio", "quality": "4K", "ads": "none",
-     "movie": "https://player.videasy.net/movie/{id}",
-     "tv":    "https://player.videasy.net/tv/{id}/{season}/{episode}"},
+    # ═══ المستوى 2: HD + Multi-Audio ═══
+    {
+        "name": "AutoEmbed Multi",
+        "quality": "HD",
+        "ads": "none",
+        "langs": "ar,en,ru,es",
+        "movie": "https://player.autoembed.cc/embed/movie/{id}",
+        "tv":    "https://player.autoembed.cc/embed/tv/{id}/{season}/{episode}",
+    },
+    {
+        "name": "VidSrc XYZ Multi",
+        "quality": "HD",
+        "ads": "low",
+        "langs": "ar,en",
+        "movie": "https://vidsrc.xyz/embed/movie?tmdb={id}",
+        "tv":    "https://vidsrc.xyz/embed/tv?tmdb={id}&season={season}&episode={episode}",
+    },
+    {
+        "name": "2Embed Multi",
+        "quality": "HD",
+        "ads": "low",
+        "langs": "ar,en,ru",
+        "movie": "https://www.2embed.to/embed/tmdb/movie?id={id}",
+        "tv":    "https://www.2embed.to/embed/tmdb/tv?id={id}&s={season}&e={episode}",
+    },
+    {
+        "name": "Embed.su Multi",
+        "quality": "HD",
+        "ads": "low",
+        "langs": "ar,en,ru",
+        "movie": "https://embed.su/embed/movie/{id}",
+        "tv":    "https://embed.su/embed/tv/{id}/{season}/{episode}",
+    },
+    {
+        "name": "MoviesAPI",
+        "quality": "HD",
+        "ads": "low",
+        "langs": "ar,en",
+        "movie": "https://moviesapi.club/movie/{id}",
+        "tv":    "https://moviesapi.club/tv/{id}-{season}-{episode}",
+    },
+    {
+        "name": "VidSrc IO Multi",
+        "quality": "HD",
+        "ads": "low",
+        "langs": "ar,en",
+        "movie": "https://vidsrc.io/embed/movie/{id}",
+        "tv":    "https://vidsrc.io/embed/tv/{id}/{season}/{episode}",
+    },
 
-    # المصدر الثالث: VidSrc PRO (الصوت الأصلي دائماً)
-    {"name": "VidSrc Original", "quality": "HD", "ads": "none",
-     "movie": "https://vidsrc.pro/embed/movie/{id}",
-     "tv":    "https://vidsrc.pro/embed/tv/{id}/{season}/{episode}"}
+    # ═══ المستوى 3: احتياطي ═══
+    {
+        "name": "VidSrc CC",
+        "quality": "SD",
+        "ads": "medium",
+        "langs": "ar,en",
+        "movie": "https://vidsrc.cc/v2/embed/movie/{id}",
+        "tv":    "https://vidsrc.cc/v2/embed/tv/{id}/{season}/{episode}",
+    },
+    {
+        "name": "VidSrc WTF",
+        "quality": "SD",
+        "ads": "medium",
+        "langs": "ar,en",
+        "movie": "https://vidsrc.wtf/api/1/movie/?id={id}",
+        "tv":    "https://vidsrc.wtf/api/1/tv/?id={id}&s={season}&e={episode}",
+    },
+    {
+        "name": "VidSrc DEV",
+        "quality": "SD",
+        "ads": "medium",
+        "langs": "ar,en",
+        "movie": "https://vidsrc.dev/embed/movie/{id}",
+        "tv":    "https://vidsrc.dev/embed/tv/{id}/{season}/{episode}",
+    },
+    {
+        "name": "VidSrc.to",
+        "quality": "SD",
+        "ads": "medium",
+        "langs": "ar,en",
+        "movie": "https://vidsrc.to/embed/movie/{id}",
+        "tv":    "https://vidsrc.to/embed/tv/{id}/{season}/{episode}",
+    },
+    {
+        "name": "VidSrc.me",
+        "quality": "SD",
+        "ads": "medium",
+        "langs": "ar,en",
+        "movie": "https://vidsrc.me/embed/movie?tmdb={id}",
+        "tv":    "https://vidsrc.me/embed/tv?tmdb={id}&season={season}&episode={episode}",
+    },
+    {
+        "name": "SuperEmbed",
+        "quality": "SD",
+        "ads": "high",
+        "langs": "ar,en",
+        "movie": "https://multiembed.mov/?video_id={id}&tmdb=1",
+        "tv":    "https://multiembed.mov/?video_id={id}&tmdb=1&s={season}&e={episode}",
+    },
+    {
+        "name": "MultiEmbed",
+        "quality": "SD",
+        "ads": "high",
+        "langs": "ar,en",
+        "movie": "https://multiembed.mov/directstream.php?video_id={id}&tmdb=1",
+        "tv":    "https://multiembed.mov/directstream.php?video_id={id}&tmdb=1&s={season}&e={episode}",
+    },
+    {
+        "name": "2Embed.cc",
+        "quality": "SD",
+        "ads": "high",
+        "langs": "ar,en",
+        "movie": "https://www.2embed.cc/embed/{id}",
+        "tv":    "https://www.2embed.cc/embedtv/{id}&s={season}&e={episode}",
+    },
+    {
+        "name": "VidSrc.lol",
+        "quality": "SD",
+        "ads": "high",
+        "langs": "ar,en",
+        "movie": "https://vidsrc.lol/embed/movie/{id}",
+        "tv":    "https://vidsrc.lol/embed/tv/{id}/{season}/{episode}",
+    },
+    {
+        "name": "Player4u",
+        "quality": "SD",
+        "ads": "high",
+        "langs": "ar,en",
+        "movie": "https://player4u.xyz/embed/movie/{id}",
+        "tv":    "https://player4u.xyz/embed/tv/{id}/{season}/{episode}",
+    },
 ]
 
 SOURCES_JSON = json.dumps(PLAYER_SOURCES, ensure_ascii=False)
 
 
 # ══════════════════════════════════════════════════════════
-# HTML — الواجهة الرئيسية
+# HTML — الواجهة الرئيسية (كامل)
 # ══════════════════════════════════════════════════════════
 
 INDEX_HTML = r"""<!DOCTYPE html>
@@ -75,6 +234,7 @@ input { font-family: var(--font); }
 ::-webkit-scrollbar-track { background: var(--bg2); }
 ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
 
+/* NAVBAR */
 #navbar {
   position: fixed; top: 0; left: 0; right: 0;
   z-index: 1000; padding: 0 4%; height: 68px;
@@ -95,6 +255,7 @@ input { font-family: var(--font); }
 .nav-search input::placeholder { color: var(--text3); }
 .nav-search button { background: var(--accent); color: #fff; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 700; }
 
+/* HERO */
 .hero { position: relative; height: 80vh; min-height: 520px; overflow: hidden; display: flex; align-items: center; }
 .hero-bg { position: absolute; inset: 0; }
 .hero-bg-slide { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: opacity 1.2s ease; }
@@ -110,6 +271,7 @@ html[dir="ltr"] .hero-overlay { background: linear-gradient(270deg, #141414 0%, 
 .btn-play { display: inline-flex; align-items: center; gap: 0.5rem; background: #fff; color: #000; padding: 0.75rem 2rem; border-radius: var(--radius); font-size: 1rem; font-weight: 700; transition: all var(--transition); }
 .btn-play:hover { background: rgba(255,255,255,0.8); transform: scale(1.03); }
 
+/* SECTIONS */
 .section { padding: 2rem 4%; max-width: 1600px; margin: 0 auto; }
 .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
 .section-title { font-size: 1.4rem; font-weight: 700; }
@@ -124,6 +286,7 @@ html[dir="ltr"] .hero-overlay { background: linear-gradient(270deg, #141414 0%, 
 .card-meta { font-size: 0.75rem; color: var(--text2); display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .card-meta .rating { color: var(--gold); font-weight: 700; }
 
+/* TOP LIST */
 .top-list { display: flex; flex-direction: column; gap: 0.75rem; }
 .top-item { display: flex; align-items: center; gap: 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem 1.25rem; transition: all var(--transition); cursor: pointer; }
 .top-item:hover { background: var(--surface2); }
@@ -134,12 +297,13 @@ html[dir="ltr"] .hero-overlay { background: linear-gradient(270deg, #141414 0%, 
 .top-meta { font-size: 0.8rem; color: var(--text2); display: flex; gap: 0.75rem; }
 .top-meta .rating { color: var(--gold); }
 
+/* FOOTER */
 .footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 2rem; text-align: center; color: var(--text3); font-size: 0.85rem; margin-top: 3rem; }
 .loading { text-align: center; padding: 3rem; color: var(--text2); grid-column: 1/-1; }
 .spinner { display: inline-block; width: 36px; height: 36px; border: 3px solid var(--surface2); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* FULLSCREEN MODAL DESIGN */
+/* MODAL */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); z-index: 5000; display: none; align-items: flex-start; justify-content: center; padding: 1.5rem; overflow-y: auto; }
 .modal-overlay.active { display: flex; }
 .modal { background: #181818; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2.5rem; width: 95%; max-width: 1400px; position: relative; margin: auto; }
@@ -147,25 +311,58 @@ html[dir="ltr"] .hero-overlay { background: linear-gradient(270deg, #141414 0%, 
 html[dir="ltr"] .modal-close { left: auto; right: 1.2rem; }
 .modal-close:hover { background: var(--accent); color: #fff; }
 
+/* PLAYER */
 .player-wrapper { width: 100%; display: none; margin-bottom: 2rem; }
 .player-wrapper.active { display: block; }
-.player-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: var(--radius); overflow: hidden; }
+.player-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: var(--radius); overflow: hidden; margin-bottom: 1rem; }
 .player-container iframe { width: 100%; height: 100%; border: none; }
 
+/* PLAYER STATUS */
+.player-status { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+.player-status-info { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.quality-badge { padding: 0.25rem 0.7rem; border-radius: 6px; font-size: 0.72rem; font-weight: 700; }
+.quality-badge.uhd { background: linear-gradient(135deg, #f5c518, #ff9800); color: #000; }
+.quality-badge.hd { background: var(--green); color: #000; }
+.quality-badge.sd { background: var(--surface2); color: var(--text2); }
+.ads-badge { padding: 0.25rem 0.7rem; border-radius: 6px; font-size: 0.72rem; }
+.ads-badge.none { background: rgba(34,197,94,0.15); color: var(--green); }
+.ads-badge.low { background: rgba(245,197,24,0.15); color: var(--gold); }
+.ads-badge.medium, .ads-badge.high { background: rgba(229,9,20,0.15); color: var(--accent2); }
+
+/* LANGUAGE TAGS */
+.lang-tags { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+.lang-tag { padding: 0.2rem 0.5rem; background: var(--surface2); border-radius: 4px; font-size: 0.65rem; color: var(--text2); font-weight: 700; text-transform: uppercase; }
+.lang-tag.ar { color: #22c55e; }
+.lang-tag.en { color: #3b82f6; }
+.lang-tag.ru { color: #ef4444; }
+.lang-tag.es { color: #f59e0b; }
+.lang-tag.fr { color: #a855f7; }
+
+/* PLAYER TABS */
+.player-tabs { display: flex; gap: 0.4rem; margin-bottom: 1rem; flex-wrap: wrap; max-height: 150px; overflow-y: auto; padding: 0.5rem; background: var(--surface); border-radius: 8px; border: 1px solid var(--border); }
+.player-tab { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); padding: 0.45rem 0.85rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; transition: all var(--transition); white-space: nowrap; display: inline-flex; align-items: center; gap: 0.35rem; }
+.player-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.player-tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+.player-tab .dot { width: 6px; height: 6px; border-radius: 50%; }
+.player-tab .dot.green { background: var(--green); }
+.player-tab .dot.gold { background: var(--gold); }
+.player-tab .dot.red { background: var(--accent2); }
+
+/* MOVIE HEADER */
 .movie-header { display: flex; gap: 2.5rem; align-items: flex-start; margin-bottom: 2rem; flex-wrap: wrap; }
 .movie-poster { width: 240px; flex-shrink: 0; border-radius: var(--radius); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
 .movie-info { flex: 1; min-width: 300px; }
 .movie-info h2 { font-size: 2.4rem; margin-bottom: 0.8rem; font-weight: 800; line-height: 1.2; }
 .movie-meta { display: flex; gap: 1rem; flex-wrap: wrap; color: var(--text2); font-size: 0.95rem; margin-bottom: 1.2rem; align-items: center; }
-.movie-meta .rating { color: var(--gold); font-weight: 700; background: rgba(245, 197, 24, 0.1); padding: 0.2rem 0.6rem; border-radius: 4px; }
+.movie-meta .rating { color: var(--gold); font-weight: 700; background: rgba(245,197,24,0.1); padding: 0.2rem 0.6rem; border-radius: 4px; }
 .movie-meta .lang-badge { background: var(--surface2); color: #fff; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 700; text-transform: uppercase; }
 .movie-genres { color: var(--text2); font-size: 0.9rem; margin-bottom: 1.2rem; }
 .movie-desc { color: var(--text2); line-height: 1.7; font-size: 0.95rem; margin-bottom: 1.5rem; max-width: 850px; }
 
-.btn-watch-now { background: var(--accent); color: #fff; border: none; padding: 0.85rem 2.5rem; border-radius: var(--radius); font-size: 1.1rem; font-weight: 800; display: inline-flex; align-items: center; gap: 0.5rem; transition: background 0.2s, transform 0.2s; margin-top: 0.5rem; }
+.btn-watch-now { background: var(--accent); color: #fff; border: none; padding: 0.85rem 2.5rem; border-radius: var(--radius); font-size: 1.1rem; font-weight: 800; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s; margin-top: 0.5rem; }
 .btn-watch-now:hover { background: var(--accent2); transform: scale(1.03); }
 
-/* CAST SECTION */
+/* CAST */
 .cast-section { margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 2rem; }
 .cast-section h3 { font-size: 1.3rem; margin-bottom: 1.2rem; font-weight: 700; }
 .cast-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1rem; }
@@ -174,13 +371,12 @@ html[dir="ltr"] .modal-close { left: auto; right: 1.2rem; }
 .cast-name { font-size: 0.8rem; font-weight: 700; margin-top: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 0.3rem; }
 .cast-role { font-size: 0.7rem; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 0.3rem; }
 
-/* SEASONS & EPISODES WITH IMAGES */
+/* SEASONS */
 .seasons-section { margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 2rem; }
 .seasons-section h3 { font-size: 1.3rem; margin-bottom: 1.2rem; font-weight: 700; }
 .season-selector { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
-.season-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text2); padding: 0.6rem 1.2rem; border-radius: var(--radius); font-size: 0.9rem; font-weight: 700; transition: all 0.2s; }
+.season-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text2); padding: 0.6rem 1.2rem; border-radius: var(--radius); font-size: 0.9rem; font-weight: 700; transition: all 0.2s; cursor: pointer; }
 .season-btn.active, .season-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
-
 .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1.2rem; }
 .episode-card { background: var(--surface); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; }
 .episode-card:hover { transform: translateY(-4px); border-color: var(--accent); }
@@ -189,10 +385,14 @@ html[dir="ltr"] .modal-close { left: auto; right: 1.2rem; }
 .episode-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .episode-num { font-size: 0.75rem; color: var(--accent); font-weight: 700; margin-bottom: 0.3rem; }
 
-/* MOVIE COLLECTION / PARTS SECTION */
-.collection-section { margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 2rem; }
-.collection-section h3 { font-size: 1.3rem; margin-bottom: 1.2rem; font-weight: 700; }
-.parts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .nav-search input { width: 140px; }
+  .section { padding: 1.5rem 3%; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .modal { padding: 1.5rem; }
+}
 </style>
 </head>
 <body>
@@ -218,7 +418,7 @@ html[dir="ltr"] .modal-close { left: auto; right: 1.2rem; }
   <div class="hero-bg" id="heroBg"></div>
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <div class="hero-badge" id="heroBadge">الأكثر رواجاً — جودة 4K</div>
+    <div class="hero-badge" id="heroBadge">الأكثر رواجاً — صوت متعدد اللغات</div>
     <h1 class="hero-title" id="heroTitle">جاري التحميل...</h1>
     <div class="hero-meta" id="heroMeta"></div>
     <p class="hero-desc" id="heroDesc"></p>
@@ -267,16 +467,20 @@ const I18N = {
   ar: {
     home: "الرئيسية", movies: "الأفلام", series: "المسلسلات", top: "الأعلى تقييماً",
     searchPh: "ابحث عن فيلم أو مسلسل...", searchBtn: "بحث",
-    badge: "الأكثر رواجاً — جودة 4K", watchNow: "مشاهدة الآن",
+    badge: "الأكثر رواجاً — صوت متعدد اللغات", watchNow: "مشاهدة الآن",
     trending: "الأكثر رواجاً", popular: "الأفلام الشائعة", topTitle: "الأعلى تقييماً", seriesTitle: "المسلسلات الشائعة",
-    rating: "تقييم", castTitle: "طاقم التمثيل", seasonsTitle: "المواسم والحلقات", partsTitle: "سلسلة الأجزاء المرتبطة", season: "الموسم", episode: "حلقة"
+    rating: "تقييم", castTitle: "طاقم التمثيل", seasonsTitle: "المواسم والحلقات",
+    season: "الموسم", episode: "حلقة", watch: "شاهد",
+    availableLangs: "اللغات المتوفرة", audio: "الصوت"
   },
   en: {
     home: "Home", movies: "Movies", series: "TV Series", top: "Top Rated",
     searchPh: "Search movies or shows...", searchBtn: "Search",
-    badge: "Trending — 4K Quality", watchNow: "Watch Now",
+    badge: "Trending — Multi-Audio", watchNow: "Watch Now",
     trending: "Trending Now", popular: "Popular Movies", topTitle: "Top Rated", seriesTitle: "Popular TV Series",
-    rating: "Rating", castTitle: "Cast & Characters", seasonsTitle: "Seasons & Episodes", partsTitle: "Movie Collection / Parts", season: "Season", episode: "Episode"
+    rating: "Rating", castTitle: "Cast & Characters", seasonsTitle: "Seasons & Episodes",
+    season: "Season", episode: "Episode", watch: "Watch",
+    availableLangs: "Available Languages", audio: "Audio"
   }
 };
 
@@ -304,6 +508,13 @@ function toggleLanguage() {
   reloadAll();
 }
 
+function renderLangTags(langsStr) {
+  const langs = (langsStr || '').split(',').map(l => l.trim()).filter(l => l);
+  return '<div class="lang-tags">' + langs.map(l => 
+    '<span class="lang-tag ' + l + '">' + l.toUpperCase() + '</span>'
+  ).join('') + '</div>';
+}
+
 function movieCard(m) {
   const title = m.title || m.name || '?';
   const year = (m.release_date || m.first_air_date || '').substring(0, 4);
@@ -328,6 +539,11 @@ async function loadHero() {
       '<div class="hero-bg-slide ' + (i === 0 ? 'active' : '') + '" style="background-image:url(\'' + IMG + '/original' + m.backdrop_path + '\')"></div>'
     ).join('');
     renderHero(0);
+    setInterval(() => {
+      heroIndex = (heroIndex + 1) % heroMovies.length;
+      document.querySelectorAll('.hero-bg-slide').forEach((s, i) => s.classList.toggle('active', i === heroIndex));
+      renderHero(heroIndex);
+    }, 7000);
   } catch (e) {}
 }
 
@@ -335,8 +551,12 @@ function renderHero(i) {
   const m = heroMovies[i];
   if (!m) return;
   const t = I18N[currentLang];
+  const origLang = (m.original_language || 'en').toUpperCase();
   document.getElementById('heroTitle').textContent = m.title || m.name || '?';
-  document.getElementById('heroMeta').innerHTML = '<span>' + ((m.release_date || m.first_air_date || '').substring(0, 4)) + '</span><span class="rating">' + t.rating + ' ' + (m.vote_average ? m.vote_average.toFixed(1) : '?') + '</span>';
+  document.getElementById('heroMeta').innerHTML = 
+    '<span>' + ((m.release_date || m.first_air_date || '').substring(0, 4)) + '</span>' +
+    '<span class="rating">' + t.rating + ' ' + (m.vote_average ? m.vote_average.toFixed(1) : '?') + '</span>' +
+    '<span class="lang-badge">' + origLang + '</span>';
   document.getElementById('heroDesc').textContent = (m.overview || '').substring(0, 200) + '...';
 }
 
@@ -380,19 +600,55 @@ async function openMovie(id, type) {
     const desc = m.overview || '';
     const t = I18N[currentLang];
 
-    let html = '<div class="player-wrapper" id="playerWrapper"><div class="player-container"><iframe id="playerFrame" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe></div></div>';
+    let html = '<div class="player-wrapper" id="playerWrapper">';
+    html += '<div class="player-container"><iframe id="playerFrame" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe></div>';
+    
+    // Player status
+    html += '<div class="player-status">';
+    html += '<div class="player-status-info">';
+    html += '<span id="statusQuality" class="quality-badge uhd">4K/HD</span>';
+    html += '<span id="statusAds" class="ads-badge none">No Ads</span>';
+    html += '<span style="color:var(--text2);font-size:0.8rem" id="statusName">' + SOURCES[0].name + '</span>';
+    html += '</div>';
+    html += '<span style="color:var(--text2);font-size:0.75rem">' + SOURCES.length + ' مصادر</span>';
+    html += '</div>';
+    
+    // Player tabs
+    html += '<div class="player-tabs" id="playerTabs">';
+    SOURCES.forEach((s, i) => {
+      const dotClass = s.ads === 'none' ? 'green' : (s.ads === 'low' ? 'gold' : 'red');
+      html += '<button class="player-tab' + (i === 0 ? ' active' : '') + '" onclick="switchSource(' + i + ')">';
+      html += '<span class="dot ' + dotClass + '"></span>';
+      html += s.name + ' (' + s.quality + ')';
+      html += '</button>';
+    });
+    html += '</div>';
+    
+    // Language tags
+    html += '<div style="margin-bottom:1rem">';
+    html += '<div style="font-size:0.85rem;color:var(--text2);margin-bottom:0.5rem">' + t.availableLangs + '</div>';
+    html += renderLangTags(SOURCES[0].langs || 'ar,en');
+    html += '</div>';
+    
+    html += '</div>';
 
+    // Movie info
     html += '<div class="movie-header">';
     html += '<div class="movie-poster"><img src="' + poster + '" alt="' + title + '"></div>';
     html += '<div class="movie-info">';
     html += '<h2>' + title + '</h2>';
-    html += '<div class="movie-meta"><span class="rating">' + t.rating + ' ' + rating + '/10</span><span>' + year + '</span><span>' + runtime + ' min</span><span class="lang-badge">اللغة الأصلية: ' + origLang + '</span></div>';
+    html += '<div class="movie-meta">';
+    html += '<span class="rating">' + t.rating + ' ' + rating + '/10</span>';
+    html += '<span>' + year + '</span>';
+    html += '<span>' + runtime + ' min</span>';
+    html += '<span class="lang-badge">' + origLang + '</span>';
+    html += '</div>';
     if (genres) html += '<p class="movie-genres">' + genres + '</p>';
     html += '<p class="movie-desc">' + desc + '</p>';
     html += '<button class="btn-watch-now" onclick="startStreaming(0, 1, 1)">' + t.watchNow + '</button>';
     html += '</div></div>';
 
-    // Cast Section
+    // Cast
     if (credits.cast && credits.cast.length) {
       html += '<div class="cast-section"><h3>' + t.castTitle + '</h3><div class="cast-grid">';
       credits.cast.slice(0, 8).forEach(c => {
@@ -402,20 +658,7 @@ async function openMovie(id, type) {
       html += '</div></div>';
     }
 
-    // Movie Collection Parts
-    if (type === 'movie' && m.belongs_to_collection) {
-      const colRes = await fetch('/api/collection/' + m.belongs_to_collection.id + '?lang=' + currentLang);
-      const colData = await colRes.json();
-      if (colData.parts && colData.parts.length) {
-        html += '<div class="collection-section"><h3>' + t.partsTitle + '</h3><div class="parts-grid">';
-        colData.parts.forEach(p => {
-          html += movieCard(p);
-        });
-        html += '</div></div>';
-      }
-    }
-
-    // TV Seasons & Episodes Section WITH IMAGES
+    // TV Seasons
     if (type === 'tv' && m.seasons && m.seasons.length) {
       html += '<div class="seasons-section"><h3>' + t.seasonsTitle + '</h3><div class="season-selector">';
       const seasonsList = m.seasons.filter(s => s.season_number > 0);
@@ -432,7 +675,7 @@ async function openMovie(id, type) {
       if (firstSeason) loadEpisodes(id, firstSeason.season_number);
     }
 
-  } catch (e) {}
+  } catch (e) { content.innerHTML = '<div class="loading">Error</div>'; }
 }
 
 async function loadEpisodes(tvId, seasonNum) {
@@ -444,19 +687,19 @@ async function loadEpisodes(tvId, seasonNum) {
     const res = await fetch('/api/tv/' + tvId + '/season/' + seasonNum + '?lang=' + currentLang);
     const data = await res.json();
     const episodes = data.episodes || [];
-    if (!episodes.length) { el.innerHTML = '<div class="loading">No episodes found</div>'; return; }
+    if (!episodes.length) { el.innerHTML = '<div class="loading">No episodes</div>'; return; }
     
     el.innerHTML = episodes.map(ep => {
-      const still = ep.still_path ? IMG + '/w300' + ep.still_path : 'https://via.placeholder.com/300x169/242424/aaaaaa?text=Episode+' + ep.episode_number;
+      const still = ep.still_path ? IMG + '/w300' + ep.still_path : 'https://via.placeholder.com/300x169/242424/aaaaaa?text=EP+' + ep.episode_number;
       return '<div class="episode-card" onclick="playEpisode(' + tvId + ', ' + seasonNum + ', ' + ep.episode_number + ')">' +
-        '<img class="episode-thumb" src="' + still + '" alt="' + ep.name + '" loading="lazy">' +
+        '<img class="episode-thumb" src="' + still + '" loading="lazy">' +
         '<div class="episode-details">' +
           '<div class="episode-num">' + t.episode + ' ' + ep.episode_number + '</div>' +
-          '<div class="episode-title">' + (ep.name || ('Episode ' + ep.episode_number)) + '</div>' +
+          '<div class="episode-title">' + (ep.name || 'Episode ' + ep.episode_number) + '</div>' +
         '</div>' +
       '</div>';
     }).join('');
-  } catch (e) { el.innerHTML = '<div class="loading">Error loading episodes</div>'; }
+  } catch (e) { el.innerHTML = '<div class="loading">Error</div>'; }
 }
 
 function changeSeason(btn, tvId, seasonNum) {
@@ -472,15 +715,34 @@ function playEpisode(tvId, season, episode) {
 function startStreaming(idx, season, episode) {
   const wrapper = document.getElementById('playerWrapper');
   const frame = document.getElementById('playerFrame');
-  frame.src = '/player?type=' + currentMovie.type + '&id=' + currentMovie.id + '&source=0&season=' + (season||1) + '&episode=' + (episode||1);
+  frame.src = '/player?type=' + currentMovie.type + '&id=' + currentMovie.id + '&source=' + idx + '&season=' + (season || 1) + '&episode=' + (episode || 1);
   wrapper.classList.add('active');
   wrapper.scrollIntoView({ behavior: 'smooth' });
+}
+
+function switchSource(idx) {
+  document.querySelectorAll('.player-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+  const s = SOURCES[idx];
+  const q = document.getElementById('statusQuality');
+  const a = document.getElementById('statusAds');
+  const n = document.getElementById('statusName');
+  if (q) { q.textContent = s.quality; q.className = 'quality-badge ' + (s.quality === '4K' ? 'uhd' : s.quality === 'HD' ? 'hd' : 'sd'); }
+  if (a) { a.textContent = s.ads === 'none' ? 'No Ads' : s.ads === 'low' ? 'Low Ads' : 'Has Ads'; a.className = 'ads-badge ' + s.ads; }
+  if (n) n.textContent = s.name;
+  
+  // Update language tags
+  const langContainer = document.querySelector('.lang-tags');
+  if (langContainer) langContainer.outerHTML = renderLangTags(s.langs || 'ar,en');
+  
+  // Reload with new source
+  startStreaming(idx, 1, 1);
 }
 
 function closeModal() {
   document.getElementById('movieModal').classList.remove('active');
   document.body.style.overflow = '';
-  document.getElementById('playerFrame').src = '';
+  const frame = document.getElementById('playerFrame');
+  if (frame) frame.src = '';
 }
 
 function reloadAll() {
@@ -488,9 +750,50 @@ function reloadAll() {
   loadSection('/api/trending', 'trendingGrid', 'trendingCount');
   loadSection('/api/popular/movie', 'popularGrid', 'popularCount');
   loadSection('/api/popular/tv', 'seriesGrid', 'seriesCount');
+  loadTopRated();
 }
 
+async function loadTopRated() {
+  const el = document.getElementById('topList');
+  try {
+    const res = await fetch('/api/popular/movie?lang=' + currentLang);
+    const data = await res.json();
+    const results = (data.results || []).filter(m => m.poster_path).sort((a, b) => b.vote_average - a.vote_average).slice(0, 10);
+    const t = I18N[currentLang];
+    el.innerHTML = results.map((m, i) => {
+      const title = m.title || m.name || '?';
+      const year = (m.release_date || '').substring(0, 4);
+      const rating = m.vote_average ? m.vote_average.toFixed(1) : '?';
+      const poster = IMG + '/w200' + m.poster_path;
+      return '<div class="top-item" onclick="openMovie(' + m.id + ', \'movie\')">' +
+        '<div class="top-rank">' + String(i + 1).padStart(2, '0') + '</div>' +
+        '<img class="top-thumb" src="' + poster + '">' +
+        '<div class="top-details"><div class="top-title">' + title + '</div>' +
+        '<div class="top-meta"><span>' + year + '</span><span class="rating">' + t.rating + ' ' + rating + '</span></div></div></div>';
+    }).join('');
+  } catch (e) { el.innerHTML = ''; }
+}
+
+function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return;
+  const el = document.getElementById('trendingGrid');
+  const title = document.querySelector('#trending-section .section-title');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  title.textContent = 'Search: ' + q;
+  document.getElementById('trending-section').scrollIntoView({ behavior: 'smooth' });
+  fetch('/api/search?q=' + encodeURIComponent(q) + '&lang=' + currentLang)
+    .then(r => r.json())
+    .then(data => {
+      const results = (data.results || []).filter(m => m.poster_path).slice(0, 20);
+      el.innerHTML = results.map(movieCard).join('') || '<div class="loading">No results</div>';
+    });
+}
+
+document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
 document.addEventListener('DOMContentLoaded', reloadAll);
+window.addEventListener('scroll', () => document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 </script>
 </body>
 </html>
@@ -513,16 +816,17 @@ html, body, iframe { width: 100%; height: 100%; background: #000; border: none; 
 </style>
 </head>
 <body>
-<iframe id="player" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+<iframe id="player" src="" allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe>
 <script>
 const SOURCES = __SOURCES__;
 const params = new URLSearchParams(window.location.search);
 const type = params.get('type') || 'movie';
 const id = params.get('id');
+const sourceIdx = parseInt(params.get('source') || '0');
 const season = params.get('season') || '1';
 const episode = params.get('episode') || '1';
 
-const src = SOURCES[0];
+const src = SOURCES[sourceIdx] || SOURCES[0];
 if (src) {
   let url = src[type] || src.movie;
   url = url.replace('{id}', id).replace('{season}', season).replace('{episode}', episode);
@@ -584,13 +888,25 @@ def api_tv(tv_id):
 def api_tv_season(tv_id, season_num):
     return jsonify(tmdb_get(f"/tv/{tv_id}/season/{season_num}"))
 
-@app.route("/api/collection/<int:col_id>")
-def api_collection(col_id):
-    return jsonify(tmdb_get(f"/collection/{col_id}"))
-
 @app.route("/api/<media_type>/<int:item_id>/credits")
 def api_credits(media_type, item_id):
     return jsonify(tmdb_get(f"/{media_type}/{item_id}/credits"))
+
+@app.route("/api/search")
+def api_search():
+    q = request.args.get("q", "").strip()
+    if not q:
+        return jsonify({"results": []})
+    return jsonify(tmdb_get("/search/multi", {"query": q}))
+
+@app.route("/health")
+def health():
+    return jsonify({
+        "status": "ok",
+        "service": "ONYX MOVIE",
+        "tmdb": "configured" if TMDB_API_KEY else "missing",
+        "sources": len(PLAYER_SOURCES),
+    })
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
