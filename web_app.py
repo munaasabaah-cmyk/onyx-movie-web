@@ -37,13 +37,11 @@ _rate = defaultdict(list)
 _banned = {}
 _log = defaultdict(int)
 
-
 def get_ip():
     for h in ("CF-Connecting-IP", "X-Forwarded-For", "X-Real-IP"):
         if request.headers.get(h):
             return request.headers.get(h).split(",")[0].strip()
     return request.remote_addr or "unknown"
-
 
 @app.before_request
 def gate():
@@ -60,7 +58,6 @@ def gate():
     if len(_rate[ip]) > 120:
         return jsonify({"error": "rate limit"}), 429
 
-
 @app.after_request
 def sec(r):
     r.headers["X-Content-Type-Options"] = "nosniff"
@@ -68,7 +65,6 @@ def sec(r):
     r.headers["X-XSS-Protection"] = "1; mode=block"
     r.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     return r
-
 
 # ══════════════════════════════════════════════════════════
 # PLAYER SOURCES — 90+ مصادر
@@ -152,7 +148,6 @@ PLAYER_SOURCES = [
 ]
 SOURCES_JSON = json.dumps(PLAYER_SOURCES, ensure_ascii=False)
 
-
 # ══════════════════════════════════════════════════════════
 # TMDB HELPER
 # ══════════════════════════════════════════════════════════
@@ -169,7 +164,6 @@ def tmdb(ep, params=None):
             return json.loads(r.read().decode("utf-8"))
     except Exception as e:
         return {"error": str(e), "results": []}
-
 
 # ══════════════════════════════════════════════════════════
 # HTML — SINGLE FILE (Full UI + Player + Football + Prefs)
@@ -706,7 +700,6 @@ function saveProfile() {
   updateUserUI();
   closeProfileModal();
   showToast('✅ تم حفظ البيانات والإعدادات');
-  // Re-init to apply language
   init();
 }
 
@@ -745,7 +738,6 @@ function buildCard(m) {
 }
 
 async function init() {
-  // Apply language preference to TMDB calls
   const trending = await fetchMovies('trending');
   const popular = await fetchMovies('popular');
   const series = await fetchSeries();
@@ -1010,7 +1002,6 @@ console.log('[ONYX] Loaded. Sources:', SOURCES.length);
 </html>
 """
 
-
 # ══════════════════════════════════════════════════════════
 # PLAYER HTML
 # ══════════════════════════════════════════════════════════
@@ -1040,7 +1031,6 @@ if (src) {
 </body></html>
 """
 
-
 # ══════════════════════════════════════════════════════════
 # ROUTES
 # ══════════════════════════════════════════════════════════
@@ -1048,16 +1038,13 @@ if (src) {
 def index():
     return render_template_string(INDEX_HTML.replace("__SOURCES__", SOURCES_JSON))
 
-
 @app.route("/player")
 def player():
     return render_template_string(PLAYER_HTML.replace("__SOURCES__", SOURCES_JSON))
 
-
 @app.route("/api/trending")
 def api_trending():
     return jsonify(tmdb("/trending/all/week"))
-
 
 @app.route("/api/popular/<mt>")
 def api_popular(mt):
@@ -1065,13 +1052,11 @@ def api_popular(mt):
         return jsonify({"error": "invalid"}), 400
     return jsonify(tmdb(f"/{mt}/popular"))
 
-
 @app.route("/api/top_rated/<mt>")
 def api_top_rated(mt):
     if mt not in ("movie", "tv"):
         return jsonify({"error": "invalid"}), 400
     return jsonify(tmdb(f"/{mt}/top_rated"))
-
 
 @app.route("/api/search")
 def api_search():
@@ -1080,28 +1065,23 @@ def api_search():
         return jsonify({"results": []})
     return jsonify(tmdb("/search/multi", {"query": q}))
 
-
 @app.route("/api/movie/<int:mid>")
 def api_movie(mid):
     return jsonify(tmdb(f"/movie/{mid}", {"append_to_response": "credits,videos,similar"}))
-
 
 @app.route("/api/tv/<int:tid>")
 def api_tv(tid):
     return jsonify(tmdb(f"/tv/{tid}", {"append_to_response": "credits,videos,similar"}))
 
-
 @app.route("/api/tv/<int:tid>/season/<int:s>")
 def api_tv_season(tid, s):
     return jsonify(tmdb(f"/tv/{tid}/season/{s}"))
-
 
 @app.route("/api/genre/<mt>/<int:gid>")
 def api_genre(mt, gid):
     if mt not in ("movie", "tv"):
         return jsonify({"error": "invalid"}), 400
     return jsonify(tmdb(f"/discover/{mt}", {"with_genres": gid, "sort_by": "popularity.desc"}))
-
 
 @app.route("/api/discover")
 def api_discover():
@@ -1114,7 +1094,6 @@ def api_discover():
     if lang: params["with_original_language"] = lang
     return jsonify(tmdb("/discover/movie", params))
 
-
 @app.route("/health")
 def health():
     return jsonify({
@@ -1124,7 +1103,6 @@ def health():
         "sources": len(PLAYER_SOURCES),
         "admin": ADMIN_EMAIL,
     })
-
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
