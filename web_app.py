@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-ONYX CINEMA v14.0 - Flask + Discord Bot + Templates Folder
+ONYX CINEMA v16.0 - Flask + Discord Bot + 4 Premium 4K Sources
 """
 
 from flask import Flask, jsonify, request, render_template
@@ -69,46 +69,37 @@ def sec(r):
     r.headers["X-Content-Type-Options"] = "nosniff"
     r.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     r.headers.pop("X-Frame-Options", None)
-    r.headers["Content-Security-Policy"] = (
-        "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; "
-        "frame-ancestors *;"
-    )
+    r.headers.pop("Content-Security-Policy", None)
     return r
 
 
 # =========================================================
-# SOURCES
+# SOURCES - 4 PREMIUM 4K ONLY
 # =========================================================
 REAL_SOURCES = [
-    ("VidLink", "https://vidlink.pro/movie/{id}", "https://vidlink.pro/tv/{id}/{s}/{e}"),
-    ("Videasy", "https://player.videasy.net/movie/{id}", "https://player.videasy.net/tv/{id}/{s}/{e}"),
-    ("AutoEmbed", "https://player.autoembed.cc/embed/movie/{id}", "https://player.autoembed.cc/embed/tv/{id}/{s}/{e}"),
-    ("SmashyStream", "https://player.smashy.stream/movie/{id}", "https://player.smashy.stream/tv/{id}?s={s}&e={e}"),
-    ("VidSrcXYZ", "https://vidsrc.xyz/embed/movie?tmdb={id}", "https://vidsrc.xyz/embed/tv?tmdb={id}&season={s}&episode={e}"),
-    ("VidSrcME", "https://vidsrc.me/embed/movie?tmdb={id}", "https://vidsrc.me/embed/tv?tmdb={id}&season={s}&episode={e}"),
-    ("VidSrcCC", "https://vidsrc.cc/v2/embed/movie/{id}", "https://vidsrc.cc/v2/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcNET", "https://vidsrc.net/embed/movie/{id}", "https://vidsrc.net/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcIN", "https://vidsrc.in/embed/movie/{id}", "https://vidsrc.in/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcPM", "https://vidsrc.pm/embed/movie/{id}", "https://vidsrc.pm/embed/tv/{id}/{s}/{e}"),
-    ("2Embed", "https://www.2embed.to/embed/tmdb/movie?id={id}", "https://www.2embed.to/embed/tmdb/tv?id={id}&s={s}&e={e}"),
-    ("EmbedSU", "https://embed.su/embed/movie/{id}", "https://embed.su/embed/tv/{id}/{s}/{e}"),
-    ("MultiEmbed", "https://multiembed.mov/?video_id={id}&tmdb=1", "https://multiembed.mov/?video_id={id}&tmdb=1&s={s}&e={e}"),
-    ("VidPlus", "https://vidplus.to/embed/movie/{id}", "https://vidplus.to/embed/tv/{id}/{s}/{e}"),
-    ("VidCloud", "https://vidcloud.stream/movie/{id}", "https://vidcloud.stream/tv/{id}/{s}/{e}"),
-    ("VidPlay", "https://vidplay.site/movie/{id}", "https://vidplay.site/tv/{id}/{s}/{e}"),
-    ("VidFast", "https://vidfast.pro/movie/{id}", "https://vidfast.pro/tv/{id}/{s}/{e}"),
-    ("VidEasy", "https://videasy.net/movie/{id}", "https://videasy.net/tv/{id}/{s}/{e}"),
-    ("VidSrcPRO", "https://vidsrc.pro/embed/movie/{id}", "https://vidsrc.pro/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcVIP", "https://vidsrc.vip/embed/movie/{id}", "https://vidsrc.vip/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcICU", "https://vidsrc.icu/embed/movie/{id}", "https://vidsrc.icu/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcWATCH", "https://vidsrc.watch/embed/movie/{id}", "https://vidsrc.watch/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcFUN", "https://vidsrc.fun/embed/movie/{id}", "https://vidsrc.fun/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcPLUS", "https://vidsrc.plus/embed/movie/{id}", "https://vidsrc.plus/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcHD", "https://vidsrchd.me/embed/movie/{id}", "https://vidsrchd.me/embed/tv/{id}/{s}/{e}"),
-    ("VidSrc4K", "https://vidsrc4k.me/embed/movie/{id}", "https://vidsrc4k.me/embed/tv/{id}/{s}/{e}"),
+    (
+        "VidLink 4K",
+        "https://vidlink.pro/movie/{id}?quality=4k&sub=ar",
+        "https://vidlink.pro/tv/{id}/{s}/{e}?quality=4k&sub=ar",
+    ),
+    (
+        "Videasy 4K",
+        "https://player.videasy.net/movie/{id}?quality=4k&sub=ar",
+        "https://player.videasy.net/tv/{id}/{s}/{e}?quality=4k&sub=ar",
+    ),
+    (
+        "VidSrc 4K",
+        "https://vidsrc.xyz/embed/movie?tmdb={id}&quality=4k&ds_lang=ar",
+        "https://vidsrc.xyz/embed/tv?tmdb={id}&season={s}&episode={e}&quality=4k&ds_lang=ar",
+    ),
+    (
+        "VidSrc ME 4K",
+        "https://vidsrc.me/embed/movie?tmdb={id}&quality=4k&ds_lang=ar",
+        "https://vidsrc.me/embed/tv?tmdb={id}&season={s}&episode={e}&quality=4k&ds_lang=ar",
+    ),
 ]
 
-QUALITY_VARIANTS = ["4K", "HD", "SD"]
+QUALITY_VARIANTS = ["4K"]
 
 
 def build_sources():
@@ -128,11 +119,9 @@ PLAYER_SOURCES = build_sources()
 SOURCES_JSON = json.dumps(PLAYER_SOURCES, ensure_ascii=False)
 
 SPORTS_SOURCES = [
-    {"name": "YallaShoot 4K", "q": "4K", "movie": "https://yallashoot.com/embed/{id}", "tv": "https://yallashoot.com/embed/{id}"},
-    {"name": "KoraLive HD", "q": "HD", "movie": "https://koralive.com/embed/{id}", "tv": "https://koralive.com/embed/{id}"},
-    {"name": "BeinSport HD", "q": "HD", "movie": "https://beinsport.com/embed/{id}", "tv": "https://beinsport.com/embed/{id}"},
-    {"name": "HesGoal HD", "q": "HD", "movie": "https://hesgoal.com/embed/{id}", "tv": "https://hesgoal.com/embed/{id}"},
-    {"name": "FootyBite HD", "q": "HD", "movie": "https://footybite.com/embed/{id}", "tv": "https://footybite.com/embed/{id}"},
+    {"name": "YallaShoot 4K", "q": "4K", "movie": "https://yallashoot.com/embed/{id}?quality=4k", "tv": "https://yallashoot.com/embed/{id}?quality=4k"},
+    {"name": "KoraLive 4K", "q": "4K", "movie": "https://koralive.com/embed/{id}?quality=4k", "tv": "https://koralive.com/embed/{id}?quality=4k"},
+    {"name": "BeinSport 4K", "q": "4K", "movie": "https://beinsport.com/embed/{id}?quality=4k", "tv": "https://beinsport.com/embed/{id}?quality=4k"},
 ]
 MATCH_SOURCES_JSON = json.dumps(SPORTS_SOURCES, ensure_ascii=False)
 
@@ -148,7 +137,7 @@ def tmdb(ep, params=None):
     p["language"] = "ar"
     url = f"{TMDB_BASE}{ep}?{urllib.parse.urlencode(p)}"
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "ONYX/14.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "ONYX/16.0"})
         with urllib.request.urlopen(req, timeout=25) as r:
             return json.loads(r.read().decode("utf-8"))
     except Exception as e:
@@ -172,14 +161,13 @@ FOOTBALL_LEAGUES = [
 
 def get_matches(league=None, date=None):
     today = datetime.now().strftime("%Y-%m-%d")
-    date = date or today
     base_matches = [
         {"league": "الدوري السعودي", "league_id": "saudi", "team1": "النصر", "team2": "الهلال",
          "s1": "2", "s2": "1", "status": "live", "ch": "SSC", "date": today, "time": "21:00",
          "quality": "4K", "stream_id": "saudi_1"},
         {"league": "الدوري المصري", "league_id": "egypt", "team1": "الأهلي", "team2": "الزمالك",
          "s1": "-", "s2": "-", "status": "upcoming", "ch": "ON TV", "date": today, "time": "19:00",
-         "quality": "HD", "stream_id": "egypt_1"},
+         "quality": "4K", "stream_id": "egypt_1"},
         {"league": "الدوري الإسباني", "league_id": "spain", "team1": "ريال مدريد", "team2": "برشلونة",
          "s1": "3", "s2": "2", "status": "finished", "ch": "beIN", "date": today, "time": "22:00",
          "quality": "4K", "stream_id": "spain_1"},
@@ -188,7 +176,7 @@ def get_matches(league=None, date=None):
          "quality": "4K", "stream_id": "ucl_1"},
         {"league": "الدوري الإنجليزي", "league_id": "england", "team1": "ليفربول", "team2": "أرسنال",
          "s1": "-", "s2": "-", "status": "upcoming", "ch": "beIN", "date": today, "time": "20:30",
-         "quality": "HD", "stream_id": "england_1"},
+         "quality": "4K", "stream_id": "england_1"},
         {"league": "الدوري الإيطالي", "league_id": "italy", "team1": "إنتر", "team2": "ميلان",
          "s1": "2", "s2": "0", "status": "finished", "ch": "beIN", "date": today, "time": "21:45",
          "quality": "4K", "stream_id": "italy_1"},
@@ -281,8 +269,7 @@ def api_discover():
 @app.route("/api/matches")
 def api_matches():
     league = request.args.get("league")
-    date = request.args.get("date")
-    matches = get_matches(league, date)
+    matches = get_matches(league)
     return jsonify({"matches": matches, "count": len(matches)})
 
 
@@ -295,7 +282,7 @@ def api_leagues():
 def health():
     return jsonify({
         "status": "ok",
-        "service": "ONYX CINEMA v14.0",
+        "service": "ONYX CINEMA v16.0",
         "tmdb": "ok" if TMDB_API_KEY else "missing",
         "sources": len(PLAYER_SOURCES),
     })
