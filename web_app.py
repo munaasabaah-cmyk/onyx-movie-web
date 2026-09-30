@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-ONYX CINEMA v13.0 - Flask + Discord Bot + TMDB + Multi Sources
-Single file with embedded full UI
+ONYX CINEMA v13.5 - Flask + Discord Bot + TMDB + Multi Sources
+Complete single-file with embedded full UI
 """
 
 from flask import Flask, jsonify, request, render_template_string
@@ -39,11 +39,13 @@ _rate = defaultdict(list)
 _banned = {}
 _log = defaultdict(int)
 
+
 def get_ip():
     for h in ("CF-Connecting-IP", "X-Forwarded-For", "X-Real-IP"):
         if request.headers.get(h):
             return request.headers.get(h).split(",")[0].strip()
     return request.remote_addr or "unknown"
+
 
 @app.before_request
 def gate():
@@ -62,6 +64,7 @@ def gate():
     if len(_rate[ip]) > 500:
         return jsonify({"error": "rate limit"}), 429
 
+
 @app.after_request
 def sec(r):
     r.headers["X-Content-Type-Options"] = "nosniff"
@@ -70,6 +73,7 @@ def sec(r):
     r.headers.pop("X-Frame-Options", None)
     r.headers["Content-Security-Policy"] = "frame-ancestors 'self' https://*.discord.com https://discord.com"
     return r
+
 
 # =========================================================
 # SOURCES
@@ -86,7 +90,6 @@ REAL_SOURCES = [
     ("VidSrcIN", "https://vidsrc.in/embed/movie/{id}", "https://vidsrc.in/embed/tv/{id}/{s}/{e}"),
     ("VidSrcPM", "https://vidsrc.pm/embed/movie/{id}", "https://vidsrc.pm/embed/tv/{id}/{s}/{e}"),
     ("2Embed", "https://www.2embed.to/embed/tmdb/movie?id={id}", "https://www.2embed.to/embed/tmdb/tv?id={id}&s={s}&e={e}"),
-    ("2EmbedCC", "https://www.2embed.cc/embed/{id}", "https://www.2embed.cc/embedtv/{id}&s={s}&e={e}"),
     ("EmbedSU", "https://embed.su/embed/movie/{id}", "https://embed.su/embed/tv/{id}/{s}/{e}"),
     ("MultiEmbed", "https://multiembed.mov/?video_id={id}&tmdb=1", "https://multiembed.mov/?video_id={id}&tmdb=1&s={s}&e={e}"),
     ("VidPlus", "https://vidplus.to/embed/movie/{id}", "https://vidplus.to/embed/tv/{id}/{s}/{e}"),
@@ -99,24 +102,13 @@ REAL_SOURCES = [
     ("VidSrcICU", "https://vidsrc.icu/embed/movie/{id}", "https://vidsrc.icu/embed/tv/{id}/{s}/{e}"),
     ("VidSrcWATCH", "https://vidsrc.watch/embed/movie/{id}", "https://vidsrc.watch/embed/tv/{id}/{s}/{e}"),
     ("VidSrcFUN", "https://vidsrc.fun/embed/movie/{id}", "https://vidsrc.fun/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcLIVE", "https://vidsrc.live/embed/movie/{id}", "https://vidsrc.live/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcCLUB", "https://vidsrc.club/embed/movie/{id}", "https://vidsrc.club/embed/tv/{id}/{s}/{e}"),
     ("VidSrcPLUS", "https://vidsrc.plus/embed/movie/{id}", "https://vidsrc.plus/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcFILM", "https://vidsrc.film/embed/movie/{id}", "https://vidsrc.film/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcCINEMA", "https://vidsrc.cinema/embed/movie/{id}", "https://vidsrc.cinema/embed/tv/{id}/{s}/{e}"),
     ("VidSrcHD", "https://vidsrchd.me/embed/movie/{id}", "https://vidsrchd.me/embed/tv/{id}/{s}/{e}"),
     ("VidSrc4K", "https://vidsrc4k.me/embed/movie/{id}", "https://vidsrc4k.me/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcMe2", "https://vidsrc2.me/embed/movie/{id}", "https://vidsrc2.me/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcCC2", "https://vidsrc2.cc/embed/movie/{id}", "https://vidsrc2.cc/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcMe3", "https://vidsrc3.me/embed/movie/{id}", "https://vidsrc3.me/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcMe4", "https://vidsrc4.me/embed/movie/{id}", "https://vidsrc4.me/embed/tv/{id}/{s}/{e}"),
-    ("VidSrcMe5", "https://vidsrc5.me/embed/movie/{id}", "https://vidsrc5.me/embed/tv/{id}/{s}/{e}"),
-    ("SuperEmbed", "https://multiembed.mov/directstream.php?video_id={id}&tmdb=1", "https://multiembed.mov/directstream.php?video_id={id}&tmdb=1&s={s}&e={e}"),
-    ("VidLink2", "https://vidlink2.pro/movie/{id}", "https://vidlink2.pro/tv/{id}/{s}/{e}"),
-    ("VideasyAlt", "https://player.videasy.com/movie/{id}", "https://player.videasy.com/tv/{id}/{s}/{e}"),
 ]
 
 QUALITY_VARIANTS = ["4K", "HD", "SD"]
+
 
 def build_sources():
     sources = []
@@ -129,6 +121,7 @@ def build_sources():
                 "tv": tv_url,
             })
     return sources
+
 
 PLAYER_SOURCES = build_sources()
 SOURCES_JSON = json.dumps(PLAYER_SOURCES, ensure_ascii=False)
@@ -154,7 +147,7 @@ def tmdb(ep, params=None):
     p["language"] = "ar"
     url = f"{TMDB_BASE}{ep}?{urllib.parse.urlencode(p)}"
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "ONYX/13.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "ONYX/13.5"})
         with urllib.request.urlopen(req, timeout=25) as r:
             return json.loads(r.read().decode("utf-8"))
     except Exception as e:
@@ -201,8 +194,11 @@ def get_matches(league=None, date=None):
     ]
     if league:
         return [m for m in base_matches if m["league_id"] == league]
-    return base_matches# =========================================================
-# HTML - INDEX (full site)
+    return base_matches
+
+
+# =========================================================
+# HTML - INDEX
 # =========================================================
 INDEX_HTML = r"""<!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -210,28 +206,18 @@ INDEX_HTML = r"""<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
 <title>ONYX CINEMA</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{
-  --bg:#0a0a0f;--bg2:#12121a;--surface:#16161f;--surface2:#1f1f2e;
-  --accent:#e8b84b;--accent2:#c0392b;--gold:#f5c518;--green:#22c55e;
-  --text:#e8e8f0;--text2:#a0a0b8;--text3:#5a5a72;
-  --border:rgba(255,255,255,0.08);
-  --shadow:0 8px 32px rgba(0,0,0,0.6);
-}
-html{scroll-behavior:smooth;font-size:16px}
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--surface:#16161f;--surface2:#1f1f2e;--accent:#e8b84b;--accent2:#c0392b;--green:#22c55e;--text:#e8e8f0;--text2:#a0a0b8;--border:rgba(255,255,255,0.08);--shadow:0 8px 32px rgba(0,0,0,0.6)}
+html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:'Cairo',sans-serif;overflow-x:hidden;min-height:100vh}
-a{text-decoration:none;color:inherit}
-img{max-width:100%;display:block}
+a{text-decoration:none;color:inherit}img{max-width:100%;display:block}
 button{cursor:pointer;font-family:'Cairo',sans-serif;border:none;background:none;color:inherit}
 input{font-family:'Cairo',sans-serif;color:inherit}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
-
-/* NAVBAR */
 #navbar{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 3%;background:linear-gradient(180deg,rgba(10,10,15,0.98) 0%,transparent 100%);transition:.3s}
 #navbar.scrolled{background:rgba(10,10,15,0.98);border-bottom:1px solid var(--border);backdrop-filter:blur(20px)}
 .nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:3px;color:var(--accent)}
@@ -241,10 +227,8 @@ input{font-family:'Cairo',sans-serif;color:inherit}
 .nav-actions{display:flex;align-items:center;gap:12px}
 .btn-icon{width:40px;height:40px;border-radius:10px;background:var(--surface2);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;transition:.2s;border:1px solid var(--border);cursor:pointer}
 .btn-icon:hover{background:var(--accent);color:var(--bg);border-color:var(--accent)}
-
-/* HERO */
 #hero{height:100vh;min-height:580px;position:relative;overflow:hidden;display:flex;align-items:flex-end;padding-bottom:88px}
-#hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;transition:opacity .6s}
+#hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:opacity .6s}
 #hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,var(--bg) 0%,rgba(10,10,15,0.65) 42%,rgba(10,10,15,0.15) 100%)}
 .hero-content{position:relative;z-index:2;padding:0 60px;max-width:700px}
 .hero-eyebrow{font-size:.76rem;font-weight:700;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}
@@ -254,20 +238,16 @@ input{font-family:'Cairo',sans-serif;color:inherit}
 #hero-meta .accent{color:var(--accent);font-weight:700}
 #hero-desc{font-size:.94rem;color:#a0a0be;line-height:1.8;max-width:520px;margin-bottom:30px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .hero-actions{display:flex;gap:14px;flex-wrap:wrap}
-.btn-primary{display:flex;align-items:center;gap:10px;background:var(--accent);color:var(--bg);font-weight:700;font-size:.94rem;padding:13px 30px;border-radius:8px;transition:.2s;border:none}
+.btn-primary{display:flex;align-items:center;gap:10px;background:var(--accent);color:var(--bg);font-weight:700;font-size:.94rem;padding:13px 30px;border-radius:8px;transition:.2s}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(232,184,75,.35)}
 .play-arrow{width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:10px solid var(--bg)}
 .btn-ghost{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.08);color:var(--text);font-weight:600;font-size:.94rem;padding:13px 28px;border-radius:8px;border:1px solid rgba(255,255,255,.15);transition:.2s}
 .btn-ghost:hover{background:rgba(255,255,255,.16)}
-
-/* SECTIONS */
 section{padding:50px 40px;max-width:1900px;margin:0 auto}
 .sec-title{font-size:1.35rem;font-weight:900;margin-bottom:24px;display:flex;align-items:center;gap:12px}
 .sec-title::before{content:'';display:block;width:4px;height:24px;background:var(--accent);border-radius:2px}
-
 .cards-row{display:flex;gap:18px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none;scroll-snap-type:x mandatory}
 .cards-row::-webkit-scrollbar{display:none}
-
 .movie-card{flex:0 0 180px;scroll-snap-align:start;cursor:pointer;transition:transform .25s;position:relative}
 .movie-card:hover{transform:translateY(-8px)}
 .card-poster{width:100%;aspect-ratio:2/3;border-radius:12px;object-fit:cover;background:var(--surface2);margin-bottom:10px;position:relative;overflow:hidden;border:1px solid var(--border)}
@@ -276,19 +256,15 @@ section{padding:50px 40px;max-width:1900px;margin:0 auto}
 .card-rating{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.82);color:var(--accent);font-size:.72rem;font-weight:700;padding:4px 9px;border-radius:5px}
 .card-title{font-size:.87rem;font-weight:700;line-height:1.3;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.4em}
 .card-year{font-size:.74rem;color:var(--text2)}
-
 #browse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:22px}
 #browse-grid .movie-card{flex:none;width:100%}
-
 .genre-strip{display:flex;gap:10px;overflow-x:auto;padding-bottom:12px;margin-bottom:28px;flex-wrap:wrap}
 .genre-chip{padding:8px 20px;border-radius:6px;border:1px solid var(--border);font-size:.82rem;font-weight:600;color:var(--text2);background:var(--surface2);cursor:pointer;transition:.2s;font-family:inherit}
 .genre-chip:hover{border-color:var(--accent);color:var(--accent)}
 .genre-chip.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}
-
-/* MODAL */
 .modal-overlay{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);display:flex;align-items:flex-start;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s;overflow-y:auto}
 .modal-overlay.open{opacity:1;pointer-events:all}
-#modal{width:min(1100px,96vw);background:var(--surface);border:1px solid var(--border);border-radius:20px;transform:translateY(24px) scale(.97);transition:.35s;margin:auto;overflow:hidden}
+#modal{width:min(1100px,96vw);background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);transform:translateY(24px) scale(.97);transition:transform .35s;margin:auto;overflow:hidden}
 .modal-overlay.open #modal{transform:translateY(0) scale(1)}
 .modal-backdrop{width:100%;height:280px;background-size:cover;background-position:center;position:relative;background-color:var(--surface2)}
 .modal-backdrop::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,var(--surface) 0%,transparent 70%)}
@@ -299,22 +275,18 @@ section{padding:50px 40px;max-width:1900px;margin:0 auto}
 .modal-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.85rem;color:var(--text2);margin-bottom:18px}
 .modal-meta .accent{color:var(--accent);font-weight:700}
 .modal-desc{font-size:.92rem;color:#a8a8c4;line-height:1.85;margin-bottom:24px}
-
 .player-container{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;margin-bottom:18px;position:relative;box-shadow:0 15px 50px rgba(0,0,0,.9)}
 .player-container iframe{width:100%;height:100%;border:none;display:block}
 .player-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1a2e,#0a0a15);color:var(--text2);flex-direction:column;gap:14px}
 .player-placeholder-icon{width:70px;height:70px;border-radius:50%;background:rgba(232,184,75,.15);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:var(--accent);animation:pulse 2s infinite;font-weight:900}
 @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:.7}}
-
 .quality-info{display:flex;align-items:center;gap:.8rem;padding:12px 16px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);margin-bottom:18px;flex-wrap:wrap}
 .quality-badge{padding:5px 14px;border-radius:6px;font-size:.78rem;font-weight:800;text-transform:uppercase}
 .quality-badge.q4k{background:linear-gradient(135deg,#f5c518,#ff9800);color:#000}
 .quality-badge.qhd{background:var(--green);color:#000}
 .quality-badge.qsd{background:var(--surface);color:var(--text2)}
 .quality-info-text{color:var(--text2);font-size:.85rem;font-weight:600}
-
 .modal-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
-
 .cast-section{margin-top:24px}
 .cast-section h4{font-size:.82rem;color:var(--text2);margin-bottom:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
 .cast-list{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px}
@@ -323,7 +295,6 @@ section{padding:50px 40px;max-width:1900px;margin:0 auto}
 .cast-avatar img{width:100%;height:100%;object-fit:cover}
 .cast-name{font-size:.76rem;font-weight:700;margin-bottom:3px}
 .cast-role{font-size:.66rem;color:var(--text2)}
-
 .seasons-section{margin-top:24px}
 .seasons-section h4{font-size:.82rem;color:var(--text2);margin-bottom:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
 .season-tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:12px;margin-bottom:16px}
@@ -333,14 +304,11 @@ section{padding:50px 40px;max-width:1900px;margin:0 auto}
 .episode-btn{padding:14px 8px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;text-align:center;font-family:inherit}
 .episode-btn:hover{border-color:var(--accent);color:var(--accent)}
 .episode-btn.active{background:var(--accent);color:var(--bg)}
-
 .loading{text-align:center;padding:50px 20px;color:var(--text2);grid-column:1/-1}
 .spinner{display:inline-block;width:40px;height:40px;border:3px solid var(--surface2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px}
 @keyframes spin{to{transform:rotate(360deg)}}
-
 footer{background:var(--surface);border-top:1px solid var(--border);padding:40px;text-align:center;color:var(--text2);font-size:.82rem}
 .footer-logo{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--accent);margin-bottom:10px;letter-spacing:3px}
-
 .match-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;transition:.2s}
 .match-card:hover{border-color:var(--accent);transform:translateY(-3px)}
 .match-league{font-size:.72rem;font-weight:700;color:var(--accent);text-transform:uppercase;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
@@ -352,25 +320,14 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:40px
 .match-footer{display:flex;justify-content:space-between;font-size:.74rem;color:var(--text2);margin-bottom:12px}
 .match-quality{background:linear-gradient(135deg,#f5c518,#ff9800);color:#000;font-weight:800;font-size:.65rem;padding:2px 8px;border-radius:4px;text-transform:uppercase}
 .league-strip{display:flex;gap:10px;overflow-x:auto;padding-bottom:14px;margin-bottom:24px;flex-wrap:wrap}
-
 @media(max-width:900px){
-  #navbar{padding:0 16px;height:60px}
-  .nav-links{display:none}
-  .nav-logo{font-size:1.5rem}
-  section{padding:35px 16px}
-  .hero-content{padding:0 20px}
-  #hero-title{font-size:2rem}
-  #modal{width:100%;border-radius:16px}
-  .modal-body{padding:20px}
-  .modal-title{font-size:1.5rem}
+  #navbar{padding:0 16px;height:60px}.nav-links{display:none}.nav-logo{font-size:1.5rem}
+  section{padding:35px 16px}.hero-content{padding:0 20px}#hero-title{font-size:2rem}
+  #modal{width:100%;border-radius:16px}.modal-body{padding:20px}.modal-title{font-size:1.5rem}
   #browse-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
-  .movie-card{flex:0 0 145px}
-  .cast-item{width:96px}
+  .movie-card{flex:0 0 145px}.cast-item{width:96px}
 }
-@media(max-width:500px){
-  .movie-card{flex:0 0 130px}
-  .btn-primary,.btn-ghost{padding:11px 20px;font-size:.85rem}
-}
+@media(max-width:500px){.movie-card{flex:0 0 130px}.btn-primary,.btn-ghost{padding:11px 20px;font-size:.85rem}}
 </style>
 </head>
 <body>
@@ -407,7 +364,6 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:40px
       <h2 class="modal-title" id="modal-title"></h2>
       <div class="modal-meta" id="modal-meta"></div>
       <p class="modal-desc" id="modal-desc"></p>
-
       <div class="player-container">
         <div class="player-placeholder" id="player-placeholder">
           <div class="player-placeholder-icon">▶</div>
@@ -415,26 +371,19 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:40px
         </div>
         <iframe id="pframe" src="" allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture" referrerpolicy="origin" style="display:none"></iframe>
       </div>
-
       <div class="quality-info">
         <span class="quality-badge q4k" id="quality-badge">4K</span>
         <span class="quality-info-text">يتم التشغيل تلقائياً بأفضل جودة متاحة</span>
       </div>
-
       <div class="modal-actions">
-        <button class="btn-primary" onclick="playNow()">
-          <div class="play-arrow"></div>
-          مشاهدة الآن
-        </button>
+        <button class="btn-primary" onclick="playNow()"><div class="play-arrow"></div>مشاهدة الآن</button>
         <button class="btn-ghost" onclick="openFullscreen()">شاشة كاملة</button>
       </div>
-
       <div class="seasons-section" id="seasons-section" style="display:none">
         <h4>المواسم والحلقات</h4>
         <div class="season-tabs" id="season-tabs"></div>
         <div class="episodes-grid" id="episodes-grid"></div>
       </div>
-
       <div class="cast-section" id="cast-section"></div>
     </div>
   </div>
@@ -450,25 +399,19 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:40px
         <div id="hero-meta"></div>
         <p id="hero-desc"></p>
         <div class="hero-actions">
-          <button class="btn-primary" onclick="playHero()">
-            <div class="play-arrow"></div>
-            مشاهدة الآن
-          </button>
+          <button class="btn-primary" onclick="playHero()"><div class="play-arrow"></div>مشاهدة الآن</button>
           <button class="btn-ghost" onclick="addHeroToFav()">❤ أضف للمفضلة</button>
         </div>
       </div>
     </section>
-
     <section>
       <h2 class="sec-title">رائج الآن</h2>
       <div class="cards-row" id="trending-row"><div class="loading"><div class="spinner"></div></div></div>
     </section>
-
     <section>
       <h2 class="sec-title">أفلام شائعة</h2>
       <div class="cards-row" id="popular-row"><div class="loading"><div class="spinner"></div></div></div>
     </section>
-
     <section>
       <h2 class="sec-title">الأعلى تقييماً</h2>
       <div class="cards-row" id="toprated-row"><div class="loading"><div class="spinner"></div></div></div>
@@ -516,7 +459,6 @@ const IMG_P = 'https://image.tmdb.org/t/p/w185';
 const S = {
   movies: [],
   current: null,
-  currentIdx: 0,
   seasons: [],
   tvId: null,
   currentSeason: 1,
@@ -556,16 +498,14 @@ function buildCard(m) {
   const year = (m.release_date || m.first_air_date || '').substring(0, 4);
   const rating = m.vote_average ? m.vote_average.toFixed(1) : '?';
   const poster = m.poster_path ? IMG_W + m.poster_path : '';
-
   div.innerHTML =
     '<div class="card-poster">' +
       (poster ? '<img src="' + poster + '" loading="lazy" alt="" />' :
-        '<div style="width:100%;height:100%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--text3)">لا صورة</div>') +
+        '<div style="width:100%;height:100%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--text2)">لا صورة</div>') +
       '<div class="card-rating">★ ' + rating + '</div>' +
     '</div>' +
     '<div class="card-title">' + title + '</div>' +
     '<div class="card-year">' + year + '</div>';
-
   div.onclick = () => openModal(m.id, type);
   return div;
 }
@@ -576,9 +516,7 @@ async function init() {
   const top = await fetchJSON('/api/top_rated/movie');
   const series = await fetchJSON('/api/popular/tv');
   const seriesTop = await fetchJSON('/api/top_rated/tv');
-
   S.movies = [...(trending.results || []), ...(popular.results || []), ...(series.results || [])];
-
   renderHero((trending.results || [])[0]);
   renderRow('trending-row', trending.results || []);
   renderRow('popular-row', popular.results || []);
@@ -674,7 +612,6 @@ async function openModal(id, type) {
   S.current = { id, type };
   document.getElementById('modal-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
-
   const pframe = document.getElementById('pframe');
   const ph = document.getElementById('player-placeholder');
   pframe.style.display = 'none';
@@ -682,7 +619,6 @@ async function openModal(id, type) {
   ph.style.display = 'flex';
   document.getElementById('seasons-section').style.display = 'none';
   document.getElementById('cast-section').innerHTML = '';
-
   const data = await fetchJSON('/api/' + type + '/' + id);
   document.getElementById('modal-title').textContent = data.title || data.name || '?';
   document.getElementById('modal-meta').innerHTML =
@@ -690,11 +626,9 @@ async function openModal(id, type) {
     '<span>' + (data.release_date || data.first_air_date || '').substring(0, 4) + '</span>' +
     (data.runtime ? '<span>' + data.runtime + ' دقيقة</span>' : '');
   document.getElementById('modal-desc').textContent = data.overview || 'لا يوجد وصف';
-
   if (data.backdrop_path) {
     document.getElementById('modal-backdrop').style.backgroundImage = "url('" + IMG_O + data.backdrop_path + "')";
   }
-
   const cast = data.credits?.cast?.slice(0, 12) || [];
   if (cast.length) {
     document.getElementById('cast-section').innerHTML =
@@ -706,7 +640,6 @@ async function openModal(id, type) {
           '<div class="cast-role">' + (c.character || '') + '</div></div>';
       }).join('') + '</div>';
   }
-
   if (type === 'tv' && data.seasons) {
     S.seasons = data.seasons.filter(s => s.season_number > 0);
     S.tvId = id;
@@ -715,7 +648,6 @@ async function openModal(id, type) {
     document.getElementById('seasons-section').style.display = 'block';
     renderSeasons(S.seasons, 1);
   }
-
   setTimeout(() => startStream(id, type, 1, 1), 300);
 }
 
@@ -748,7 +680,7 @@ async function loadEpisodes(seasonNum) {
   }
   grid.innerHTML = eps.map(e =>
     '<button class="episode-btn" onclick="playEpisode(' + seasonNum + ',' + e.episode_number + ', this)">' +
-    '<div style="font-size:.7rem;color:var(--text3);margin-bottom:4px">حلقة</div>' +
+    '<div style="font-size:.7rem;color:var(--text2);margin-bottom:4px">حلقة</div>' +
     '<div style="font-size:1rem;font-weight:700">' + e.episode_number + '</div>' +
     '</button>'
   ).join('');
@@ -885,7 +817,13 @@ document.addEventListener('keydown', (e) => {
 </script>
 </body>
 </html>
-"""PLAYER_HTML = r"""<!DOCTYPE html>
+"""
+
+
+# =========================================================
+# HTML - PLAYER (Activity)
+# =========================================================
+PLAYER_HTML = r"""<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -940,10 +878,7 @@ body{display:flex;flex-direction:column;min-height:100vh}
 .loading{text-align:center;padding:60px 20px;color:var(--text2);grid-column:1/-1}
 .spinner{width:40px;height:40px;border:3px solid var(--surface2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
-@media(max-width:600px){
-  .grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:12px}
-  .detail-poster{width:140px}
-}
+@media(max-width:600px){.grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:12px}.detail-poster{width:140px}}
 </style>
 </head>
 <body>
@@ -1149,7 +1084,13 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-"""MATCH_PLAYER_HTML = r"""<!DOCTYPE html>
+"""
+
+
+# =========================================================
+# HTML - MATCH PLAYER
+# =========================================================
+MATCH_PLAYER_HTML = r"""<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -1216,17 +1157,21 @@ loadMatchSource(0);
 def index():
     return render_template_string(INDEX_HTML)
 
+
 @app.route("/player")
 def player():
     return render_template_string(PLAYER_HTML)
+
 
 @app.route("/match")
 def match_player():
     return render_template_string(MATCH_PLAYER_HTML.replace("__SOURCES__", MATCH_SOURCES_JSON))
 
+
 @app.route("/api/trending")
 def api_trending():
     return jsonify(tmdb("/trending/all/week"))
+
 
 @app.route("/api/popular/<mt>")
 def api_popular(mt):
@@ -1234,19 +1179,23 @@ def api_popular(mt):
         return jsonify({"error": "invalid"}), 400
     return jsonify(tmdb(f"/{mt}/popular"))
 
+
 @app.route("/api/top_rated/<mt>")
 def api_top_rated(mt):
     if mt not in ("movie", "tv"):
         return jsonify({"error": "invalid"}), 400
     return jsonify(tmdb(f"/{mt}/top_rated"))
 
+
 @app.route("/api/now_playing")
 def api_now_playing():
     return jsonify(tmdb("/movie/now_playing"))
 
+
 @app.route("/api/upcoming")
 def api_upcoming():
     return jsonify(tmdb("/movie/upcoming"))
+
 
 @app.route("/api/search")
 def api_search():
@@ -1255,17 +1204,21 @@ def api_search():
         return jsonify({"results": []})
     return jsonify(tmdb("/search/multi", {"query": q}))
 
+
 @app.route("/api/movie/<int:mid>")
 def api_movie(mid):
     return jsonify(tmdb(f"/movie/{mid}", {"append_to_response": "credits,videos,similar,images,recommendations"}))
+
 
 @app.route("/api/tv/<int:tid>")
 def api_tv(tid):
     return jsonify(tmdb(f"/tv/{tid}", {"append_to_response": "credits,videos,similar,images,recommendations"}))
 
+
 @app.route("/api/tv/<int:tid>/season/<int:s>")
 def api_tv_season(tid, s):
     return jsonify(tmdb(f"/tv/{tid}/season/{s}"))
+
 
 @app.route("/api/discover")
 def api_discover():
@@ -1276,6 +1229,7 @@ def api_discover():
     if year: params["primary_release_year"] = year
     return jsonify(tmdb("/discover/movie", params))
 
+
 @app.route("/api/matches")
 def api_matches():
     league = request.args.get("league")
@@ -1283,15 +1237,17 @@ def api_matches():
     matches = get_matches(league, date)
     return jsonify({"matches": matches, "count": len(matches)})
 
+
 @app.route("/api/leagues")
 def api_leagues():
     return jsonify({"leagues": FOOTBALL_LEAGUES})
+
 
 @app.route("/health")
 def health():
     return jsonify({
         "status": "ok",
-        "service": "ONYX CINEMA v13.0",
+        "service": "ONYX CINEMA v13.5",
         "tmdb": "ok" if TMDB_API_KEY else "missing",
         "sources": len(PLAYER_SOURCES),
     })
@@ -1301,6 +1257,7 @@ def health():
 # DISCORD BOT
 # =========================================================
 _bot_started = False
+
 
 def start_discord_bot():
     global _bot_started
@@ -1312,6 +1269,7 @@ def start_discord_bot():
         subprocess.Popen([sys.executable, "bot.py"])
     except Exception as e:
         print(f"[ONYX] Bot failed: {e}")
+
 
 if RUN_BOT and os.getenv("WERKZEUG_RUN_MAIN") != "true":
     _bot_thread = threading.Thread(target=start_discord_bot, daemon=True)
