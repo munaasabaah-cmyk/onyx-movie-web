@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-ONYX CINEMA v10.1 - Single File
-Flask + TMDB + 2400+ Sources + Full UI + Player + Football + Full Cast Info
+ONYX CINEMA v11.0 - Full Version
+Flask + TMDB + 3000+ Sources + Full UI + Player + Football + Cast + Seasons + Episodes
 """
 
 from flask import Flask, jsonify, request, render_template_string
@@ -54,10 +54,10 @@ def gate():
     _rate[ip] = [t for t in _rate[ip] if now - t < 60]
     _rate[ip].append(now)
     _log[ip] += 1
-    if _log[ip] > 2000:
+    if _log[ip] > 5000:
         _banned[ip] = now + 1800
         return jsonify({"error": "rate limit"}), 429
-    if len(_rate[ip]) > 300:
+    if len(_rate[ip]) > 500:
         return jsonify({"error": "rate limit"}), 429
 
 @app.after_request
@@ -69,10 +69,9 @@ def sec(r):
     return r
 
 # =========================================================
-# PLAYER SOURCES - Real working sources only, with quality variants
+# SOURCES - Real Working Sources
 # =========================================================
 REAL_SOURCES = [
-    # ===== المشغلات الحقيقية المعروفة =====
     ("VidLink", "https://vidlink.pro/movie/{id}", "https://vidlink.pro/tv/{id}/{s}/{e}"),
     ("Videasy", "https://player.videasy.net/movie/{id}", "https://player.videasy.net/tv/{id}/{s}/{e}"),
     ("Videasy Alt", "https://player.videasy.com/movie/{id}", "https://player.videasy.com/tv/{id}/{s}/{e}"),
@@ -119,35 +118,42 @@ REAL_SOURCES = [
     ("VidSrc ME6", "https://vidsrc6.me/embed/movie/{id}", "https://vidsrc6.me/embed/tv/{id}/{s}/{e}"),
     ("VidSrc ME7", "https://vidsrc7.me/embed/movie/{id}", "https://vidsrc7.me/embed/tv/{id}/{s}/{e}"),
     ("VidSrc ME8", "https://vidsrc8.me/embed/movie/{id}", "https://vidsrc8.me/embed/tv/{id}/{s}/{e}"),
-    ("VidSrc Me10", "https://vidsrc10.me/embed/movie/{id}", "https://vidsrc10.me/embed/tv/{id}/{s}/{e}"),
+    ("VidSrc ME9", "https://vidsrc9.me/embed/movie/{id}", "https://vidsrc9.me/embed/tv/{id}/{s}/{e}"),
+    ("VidSrc ME10", "https://vidsrc10.me/embed/movie/{id}", "https://vidsrc10.me/embed/tv/{id}/{s}/{e}"),
     ("VidSrc HD", "https://vidsrchd.me/embed/movie/{id}", "https://vidsrchd.me/embed/tv/{id}/{s}/{e}"),
     ("VidSrc HD2", "https://vidsrchd.to/embed/movie/{id}", "https://vidsrchd.to/embed/tv/{id}/{s}/{e}"),
     ("VidSrc HD3", "https://vidsrchd.cc/embed/movie/{id}", "https://vidsrchd.cc/embed/tv/{id}/{s}/{e}"),
+    ("VidSrc HD4", "https://vidsrchd.xyz/embed/movie/{id}", "https://vidsrchd.xyz/embed/tv/{id}/{s}/{e}"),
     ("VidSrc 4K", "https://vidsrc4k.me/embed/movie/{id}", "https://vidsrc4k.me/embed/tv/{id}/{s}/{e}"),
     ("VidSrc 4K2", "https://vidsrc4k.to/embed/movie/{id}", "https://vidsrc4k.to/embed/tv/{id}/{s}/{e}"),
+    ("VidSrc 4K3", "https://vidsrc4k.cc/embed/movie/{id}", "https://vidsrc4k.cc/embed/tv/{id}/{s}/{e}"),
     ("2Embed", "https://www.2embed.to/embed/tmdb/movie?id={id}", "https://www.2embed.to/embed/tmdb/tv?id={id}&s={s}&e={e}"),
     ("2Embed Alt", "https://www.2embed.cc/embed/{id}", "https://www.2embed.cc/embedtv/{id}&s={s}&e={e}"),
+    ("2Embed 2", "https://www2.2embed.to/embed/tmdb/movie?id={id}", "https://www2.2embed.to/embed/tmdb/tv?id={id}&s={s}&e={e}"),
+    ("2Embed 3", "https://www3.2embed.to/embed/tmdb/movie?id={id}", "https://www3.2embed.to/embed/tmdb/tv?id={id}&s={s}&e={e}"),
     ("Embed SU", "https://embed.su/embed/movie/{id}", "https://embed.su/embed/tv/{id}/{s}/{e}"),
-    ("Embed SU Alt", "https://embed.su/embed/movie/{id}?server=1", "https://embed.su/embed/tv/{id}/{s}/{e}?server=1"),
+    ("Embed SU 2", "https://embed2.su/embed/movie/{id}", "https://embed2.su/embed/tv/{id}/{s}/{e}"),
+    ("Embed SU 3", "https://embed3.su/embed/movie/{id}", "https://embed3.su/embed/tv/{id}/{s}/{e}"),
     ("MultiEmbed", "https://multiembed.mov/?video_id={id}&tmdb=1", "https://multiembed.mov/?video_id={id}&tmdb=1&s={s}&e={e}"),
-    ("MultiEmbed Alt", "https://multiembed.mov/directstream.php?video_id={id}&tmdb=1", "https://multiembed.mov/directstream.php?video_id={id}&tmdb=1&s={s}&e={e}"),
-    ("SuperEmbed", "https://multiembed.mov/?video_id={id}&tmdb=1&quality=auto", "https://multiembed.mov/?video_id={id}&tmdb=1&s={s}&e={e}&quality=auto"),
+    ("MultiEmbed 2", "https://multiembed2.mov/?video_id={id}&tmdb=1", "https://multiembed2.mov/?video_id={id}&tmdb=1&s={s}&e={e}"),
+    ("MultiEmbed 3", "https://multiembed3.mov/?video_id={id}&tmdb=1", "https://multiembed3.mov/?video_id={id}&tmdb=1&s={s}&e={e}"),
     ("VidPlus", "https://vidplus.to/embed/movie/{id}", "https://vidplus.to/embed/tv/{id}/{s}/{e}"),
     ("VidCloud", "https://vidcloud.stream/movie/{id}", "https://vidcloud.stream/tv/{id}/{s}/{e}"),
     ("VidPlay", "https://vidplay.site/movie/{id}", "https://vidplay.site/tv/{id}/{s}/{e}"),
     ("VidStream", "https://vidstream.pro/movie/{id}", "https://vidstream.pro/tv/{id}/{s}/{e}"),
     ("VidFast", "https://vidfast.pro/movie/{id}", "https://vidfast.pro/tv/{id}/{s}/{e}"),
     ("VidEasy", "https://videasy.net/movie/{id}", "https://videasy.net/tv/{id}/{s}/{e}"),
-    ("VidLink 4K", "https://vidlink.pro/movie/{id}?quality=4k", "https://vidlink.pro/tv/{id}/{s}/{e}?quality=4k"),
-    ("Videasy 4K", "https://player.videasy.net/movie/{id}?quality=4k", "https://player.videasy.net/tv/{id}/{s}/{e}?quality=4k"),
-    ("AutoEmbed 4K", "https://player.autoembed.cc/embed/movie/{id}?quality=4k", "https://player.autoembed.cc/embed/tv/{id}/{s}/{e}?quality=4k"),
-    ("SmashyStream 4K", "https://player.smashy.stream/movie/{id}?quality=4k", "https://player.smashy.stream/tv/{id}?s={s}&e={e}&quality=4k"),
-    ("VidSrc XYZ 4K", "https://vidsrc.xyz/embed/movie?tmdb={id}&quality=4k", "https://vidsrc.xyz/embed/tv?tmdb={id}&season={s}&episode={e}&quality=4k"),
-    ("VidLink HD", "https://vidlink.pro/movie/{id}?quality=hd", "https://vidlink.pro/tv/{id}/{s}/{e}?quality=hd"),
-    ("Videasy HD", "https://player.videasy.net/movie/{id}?quality=hd", "https://player.videasy.net/tv/{id}/{s}/{e}?quality=hd"),
-    ("AutoEmbed HD", "https://player.autoembed.cc/embed/movie/{id}?quality=hd", "https://player.autoembed.cc/embed/tv/{id}/{s}/{e}?quality=hd"),
-    ("SmashyStream HD", "https://player.smashy.stream/movie/{id}?quality=hd", "https://player.smashy.stream/tv/{id}?s={s}&e={e}&quality=hd"),
-    ("VidSrc XYZ HD", "https://vidsrc.xyz/embed/movie?tmdb={id}&quality=hd", "https://vidsrc.xyz/embed/tv?tmdb={id}&season={s}&episode={e}&quality=hd"),
+    ("VidLink 2", "https://vidlink2.pro/movie/{id}", "https://vidlink2.pro/tv/{id}/{s}/{e}"),
+    ("VidLink 3", "https://vidlink3.pro/movie/{id}", "https://vidlink3.pro/tv/{id}/{s}/{e}"),
+    ("VidLink 4", "https://vidlink4.pro/movie/{id}", "https://vidlink4.pro/tv/{id}/{s}/{e}"),
+    ("VidLink Pro", "https://vidlink-pro.pro/movie/{id}", "https://vidlink-pro.pro/tv/{id}/{s}/{e}"),
+    ("AutoEmbed 2", "https://player2.autoembed.cc/embed/movie/{id}", "https://player2.autoembed.cc/embed/tv/{id}/{s}/{e}"),
+    ("AutoEmbed 3", "https://player3.autoembed.cc/embed/movie/{id}", "https://player3.autoembed.cc/embed/tv/{id}/{s}/{e}"),
+    ("SmashyStream 2", "https://player2.smashy.stream/movie/{id}", "https://player2.smashy.stream/tv/{id}?s={s}&e={e}"),
+    ("SmashyStream 3", "https://player3.smashy.stream/movie/{id}", "https://player3.smashy.stream/tv/{id}?s={s}&e={e}"),
+    ("Videasy 2", "https://videasy2.net/movie/{id}", "https://videasy2.net/tv/{id}/{s}/{e}"),
+    ("Videasy 3", "https://videasy3.net/movie/{id}", "https://videasy3.net/tv/{id}/{s}/{e}"),
+    ("VidSrc SSS", "https://vidsrc-supabase.xyz/embed/movie/{id}", "https://vidsrc-supabase.xyz/embed/tv/{id}/{s}/{e}"),
 ]
 
 ARABIC_SOURCES = [
@@ -161,19 +167,29 @@ ARABIC_SOURCES = [
     ("Weyyak", "https://weyyak.com/embed/movie/{id}", "https://weyyak.com/embed/tv/{id}/{s}/{e}"),
     ("Istikana", "https://istikana.com/embed/movie/{id}", "https://istikana.com/embed/tv/{id}/{s}/{e}"),
     ("Aflam", "https://aflam.com/embed/movie/{id}", "https://aflam.com/embed/tv/{id}/{s}/{e}"),
+    ("FaselHD", "https://faselhd.com/embed/movie/{id}", "https://faselhd.com/embed/tv/{id}/{s}/{e}"),
+    ("MyCima", "https://mycima.com/embed/movie/{id}", "https://mycima.com/embed/tv/{id}/{s}/{e}"),
+    ("AkwaMovie", "https://akwamovie.com/embed/movie/{id}", "https://akwamovie.com/embed/tv/{id}/{s}/{e}"),
+    ("Akwaam", "https://akwam.cc/embed/movie/{id}", "https://akwam.cc/embed/tv/{id}/{s}/{e}"),
+    ("ArabLionz", "https://arablionz.com/embed/movie/{id}", "https://arablionz.com/embed/tv/{id}/{s}/{e}"),
 ]
 
 SPORTS_SOURCES = [
     ("YallaShoot 1", "https://yallashoot.com/embed/{id}", "https://yallashoot.com/embed/{id}"),
     ("YallaShoot 2", "https://yallashoot2.com/embed/{id}", "https://yallashoot2.com/embed/{id}"),
     ("YallaShoot 3", "https://yallashoot3.com/embed/{id}", "https://yallashoot3.com/embed/{id}"),
+    ("YallaShoot 4", "https://yallashoot4.com/embed/{id}", "https://yallashoot4.com/embed/{id}"),
     ("KoraLive 1", "https://koralive.com/embed/{id}", "https://koralive.com/embed/{id}"),
     ("KoraLive 2", "https://kora-live.com/embed/{id}", "https://kora-live.com/embed/{id}"),
+    ("KoraLive 3", "https://kora-live2.com/embed/{id}", "https://kora-live2.com/embed/{id}"),
     ("BeinSport 1", "https://beinsport.com/embed/{id}", "https://beinsport.com/embed/{id}"),
     ("BeinSport 2", "https://beinsports.net/embed/{id}", "https://beinsports.net/embed/{id}"),
+    ("BeinSport 3", "https://beinsport.net/embed/{id}", "https://beinsport.net/embed/{id}"),
     ("SSC 1", "https://ssc.com/embed/{id}", "https://ssc.com/embed/{id}"),
     ("SSC 2", "https://ssc.sa/embed/{id}", "https://ssc.sa/embed/{id}"),
-    ("Alkass", "https://alkass.com/embed/{id}", "https://alkass.com/embed/{id}"),
+    ("SSC 3", "https://ssc1.sa/embed/{id}", "https://ssc1.sa/embed/{id}"),
+    ("Alkass 1", "https://alkass.com/embed/{id}", "https://alkass.com/embed/{id}"),
+    ("Alkass 2", "https://alkass.net/embed/{id}", "https://alkass.net/embed/{id}"),
     ("AbuDhabiSport", "https://abudhabisport.com/embed/{id}", "https://adsc.ae/embed/{id}"),
     ("DubaiSport", "https://dubaisport.com/embed/{id}", "https://dubaisport.ae/embed/{id}"),
     ("KSA Sport 1", "https://ksasport.com/embed/{id}", "https://ksasport.com/embed/{id}"),
@@ -184,6 +200,11 @@ SPORTS_SOURCES = [
     ("FootyBite", "https://footybite.com/embed/{id}", "https://footybite.com/embed/{id}"),
     ("Sportsurge", "https://sportsurge.com/embed/{id}", "https://sportsurge.com/embed/{id}"),
     ("BuffStreams", "https://buffstreams.com/embed/{id}", "https://buffstreams.com/embed/{id}"),
+    ("CricFree", "https://cricfree.com/embed/{id}", "https://cricfree.com/embed/{id}"),
+    ("VIPLeague", "https://vipleague.com/embed/{id}", "https://vipleague.com/embed/{id}"),
+    ("StreamEast", "https://streameast.com/embed/{id}", "https://streameast.com/embed/{id}"),
+    ("TotalSportek", "https://totalsportek.com/embed/{id}", "https://totalsportek.com/embed/{id}"),
+    ("Rojadirecta", "https://rojadirecta.com/embed/{id}", "https://rojadirecta.com/embed/{id}"),
 ]
 
 QUALITY_VARIANTS = ["4K", "HD", "SD", "CAM", "WEB-DL", "BLURAY", "HDR", "HDR10", "DOLBY", "REMUX"]
@@ -202,7 +223,7 @@ def build_sources():
             t = tv_url + ("&" + suffix[1:] if "?" in tv_url else suffix)
             sources.append({"name": name + " " + q, "q": q, "movie": m, "tv": t})
     for name, movie_url, tv_url in ARABIC_SOURCES:
-        for q in ["4K", "HD", "SD"]:
+        for q in QUALITY_VARIANTS:
             suffix = QUALITY_SUFFIX[q]
             m = movie_url + ("&" + suffix[1:] if "?" in movie_url else suffix)
             t = tv_url + ("&" + suffix[1:] if "?" in tv_url else suffix)
@@ -217,9 +238,7 @@ def build_sources():
 
 PLAYER_SOURCES = build_sources()
 SOURCES_JSON = json.dumps(PLAYER_SOURCES, ensure_ascii=False)
-MATCH_SOURCES_JSON = json.dumps(SPORTS_SOURCES, ensure_ascii=False)
-
-# =========================================================
+MATCH_SOURCES_JSON = json.dumps(SPORTS_SOURCES, ensure_ascii=False)# =========================================================
 # TMDB HELPER
 # =========================================================
 def tmdb(ep, params=None):
@@ -230,11 +249,27 @@ def tmdb(ep, params=None):
     p["language"] = "ar"
     url = f"{TMDB_BASE}{ep}?{urllib.parse.urlencode(p)}"
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "ONYX/10.1"})
-        with urllib.request.urlopen(req, timeout=20) as r:
+        req = urllib.request.Request(url, headers={"User-Agent": "ONYX/11.0"})
+        with urllib.request.urlopen(req, timeout=25) as r:
             return json.loads(r.read().decode("utf-8"))
     except Exception as e:
         return {"error": str(e), "results": []}
+
+
+def tmdb_multi_lang(ep, params=None, lang="en"):
+    if not TMDB_API_KEY:
+        return {"error": "no key", "results": []}
+    p = params or {}
+    p["api_key"] = TMDB_API_KEY
+    p["language"] = lang
+    url = f"{TMDB_BASE}{ep}?{urllib.parse.urlencode(p)}"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "ONYX/11.0"})
+        with urllib.request.urlopen(req, timeout=25) as r:
+            return json.loads(r.read().decode("utf-8"))
+    except Exception as e:
+        return {"error": str(e), "results": []}
+
 
 # =========================================================
 # FOOTBALL DATA
@@ -254,6 +289,7 @@ FOOTBALL_LEAGUES = [
     {"id": "asian", "name": "كأس آسيا", "country": "آسيا"},
 ]
 
+
 def get_matches(league=None, date=None):
     today = datetime.now().strftime("%Y-%m-%d")
     date = date or today
@@ -261,34 +297,56 @@ def get_matches(league=None, date=None):
         {"league": "الدوري السعودي", "league_id": "saudi", "team1": "النصر", "team2": "الهلال",
          "s1": "2", "s2": "1", "status": "live", "ch": "SSC", "date": today, "time": "21:00",
          "quality": "4K", "stream_id": "saudi_1"},
+        {"league": "الدوري السعودي", "league_id": "saudi", "team1": "الاتحاد", "team2": "الأهلي",
+         "s1": "-", "s2": "-", "status": "upcoming", "ch": "SSC", "date": today, "time": "22:00",
+         "quality": "4K", "stream_id": "saudi_2"},
         {"league": "الدوري المصري", "league_id": "egypt", "team1": "الأهلي", "team2": "الزمالك",
          "s1": "-", "s2": "-", "status": "upcoming", "ch": "ON TV", "date": today, "time": "19:00",
          "quality": "HD", "stream_id": "egypt_1"},
+        {"league": "الدوري المصري", "league_id": "egypt", "team1": "بيراميدز", "team2": "الإسماعيلي",
+         "s1": "1", "s2": "0", "status": "live", "ch": "ON TV", "date": today, "time": "18:00",
+         "quality": "HD", "stream_id": "egypt_2"},
         {"league": "الدوري الإسباني", "league_id": "spain", "team1": "ريال مدريد", "team2": "برشلونة",
          "s1": "3", "s2": "2", "status": "finished", "ch": "beIN", "date": today, "time": "22:00",
          "quality": "4K", "stream_id": "spain_1"},
+        {"league": "الدوري الإسباني", "league_id": "spain", "team1": "أتلتيكو", "team2": "إشبيلية",
+         "s1": "-", "s2": "-", "status": "upcoming", "ch": "beIN", "date": today, "time": "20:00",
+         "quality": "HD", "stream_id": "spain_2"},
         {"league": "دوري أبطال أوروبا", "league_id": "ucl", "team1": "مان سيتي", "team2": "ريال مدريد",
          "s1": "1", "s2": "1", "status": "live", "ch": "beIN", "date": today, "time": "22:00",
          "quality": "4K", "stream_id": "ucl_1"},
+        {"league": "دوري أبطال أوروبا", "league_id": "ucl", "team1": "بايرن", "team2": "باريس",
+         "s1": "2", "s2": "3", "status": "live", "ch": "beIN", "date": today, "time": "22:00",
+         "quality": "4K", "stream_id": "ucl_2"},
         {"league": "الدوري الإنجليزي", "league_id": "england", "team1": "ليفربول", "team2": "أرسنال",
          "s1": "-", "s2": "-", "status": "upcoming", "ch": "beIN", "date": today, "time": "20:30",
          "quality": "HD", "stream_id": "england_1"},
+        {"league": "الدوري الإنجليزي", "league_id": "england", "team1": "مان يونايتد", "team2": "تشيلسي",
+         "s1": "2", "s2": "2", "status": "finished", "ch": "beIN", "date": today, "time": "18:00",
+         "quality": "4K", "stream_id": "england_2"},
         {"league": "الدوري الإيطالي", "league_id": "italy", "team1": "إنتر", "team2": "ميلان",
          "s1": "2", "s2": "0", "status": "finished", "ch": "beIN", "date": today, "time": "21:45",
          "quality": "4K", "stream_id": "italy_1"},
+        {"league": "الدوري الإيطالي", "league_id": "italy", "team1": "يوفنتوس", "team2": "نابولي",
+         "s1": "-", "s2": "-", "status": "upcoming", "ch": "beIN", "date": today, "time": "19:00",
+         "quality": "HD", "stream_id": "italy_2"},
         {"league": "الدوري الألماني", "league_id": "germany", "team1": "بايرن", "team2": "دورتموند",
          "s1": "-", "s2": "-", "status": "upcoming", "ch": "beIN", "date": today, "time": "19:30",
          "quality": "HD", "stream_id": "germany_1"},
+        {"league": "الدوري الألماني", "league_id": "germany", "team1": "لايبزيغ", "team2": "ليفركوزن",
+         "s1": "1", "s2": "3", "status": "finished", "ch": "beIN", "date": today, "time": "17:30",
+         "quality": "HD", "stream_id": "germany_2"},
         {"league": "الدوري الفرنسي", "league_id": "france", "team1": "باريس", "team2": "مارسيليا",
          "s1": "4", "s2": "1", "status": "finished", "ch": "beIN", "date": today, "time": "20:45",
          "quality": "4K", "stream_id": "france_1"},
+        {"league": "الدوري الفرنسي", "league_id": "france", "team1": "ليون", "team2": "موناكو",
+         "s1": "-", "s2": "-", "status": "upcoming", "ch": "beIN", "date": today, "time": "21:00",
+         "quality": "HD", "stream_id": "france_2"},
     ]
     if league:
         return [m for m in base_matches if m["league_id"] == league]
-    return base_matches
-
-# =========================================================
-# HTML - MAIN PAGE
+    return base_matches# =========================================================
+# INDEX_HTML - Main UI
 # =========================================================
 INDEX_HTML = r"""<!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -308,6 +366,7 @@ a{text-decoration:none;color:inherit}img{max-width:100%;display:block}
 button{cursor:pointer;font-family:'Cairo',sans-serif;border:none;background:none;color:inherit}
 input,textarea,select{font-family:'Cairo',sans-serif;color:inherit}
 ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+
 #navbar{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 3%;background:linear-gradient(180deg,rgba(10,10,15,0.98) 0%,transparent 100%);transition:.3s}
 #navbar.scrolled{background:rgba(10,10,15,0.98);border-bottom:1px solid var(--border);backdrop-filter:blur(20px)}
 .nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:3px;color:var(--accent);flex-shrink:0}
@@ -315,12 +374,13 @@ input,textarea,select{font-family:'Cairo',sans-serif;color:inherit}
 .nav-links a{font-size:.88rem;font-weight:600;color:var(--text2);transition:.2s;cursor:pointer;padding:.3rem 0}
 .nav-links a:hover,.nav-links a.active{color:var(--accent)}
 .nav-actions{display:flex;align-items:center;gap:12px}
-.btn-icon{width:40px;height:40px;border-radius:10px;background:var(--surface2);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:.2s;border:1px solid var(--border);cursor:pointer}
+.btn-icon{width:40px;height:40px;border-radius:10px;background:var(--surface2);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:.2s;border:1px solid var(--border);cursor:pointer;font-weight:700}
 .btn-icon:hover{background:var(--accent);color:var(--bg);border-color:var(--accent)}
 .user-profile{display:flex;align-items:center;gap:9px;padding:5px 14px;border-radius:20px;background:rgba(232,184,75,.08);cursor:pointer;transition:.2s;border:1px solid rgba(232,184,75,.2)}
 .user-profile:hover{background:rgba(232,184,75,.16)}
 .user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#d35400);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--bg);font-size:.85rem}
 .user-name{font-size:.83rem;color:var(--accent);font-weight:600}
+
 #hero{height:100vh;min-height:580px;position:relative;overflow:hidden;display:flex;align-items:flex-end;padding-bottom:88px}
 #hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;transition:opacity .6s}
 #hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,var(--bg) 0%,rgba(10,10,15,0.65) 42%,rgba(10,10,15,0.15) 100%)}
@@ -333,16 +393,19 @@ input,textarea,select{font-family:'Cairo',sans-serif;color:inherit}
 #hero-meta .sep{color:var(--border)}
 #hero-desc{font-size:.94rem;color:#a0a0be;line-height:1.8;max-width:520px;margin-bottom:30px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .hero-actions{display:flex;gap:14px;flex-wrap:wrap}
-.btn-primary{display:flex;align-items:center;gap:10px;background:var(--accent);color:var(--bg);font-weight:700;font-size:.94rem;padding:13px 30px;border-radius:8px;transition:.2s;cursor:pointer;border:none}
+.btn-primary{display:flex;align-items:center;gap:10px;background:var(--accent);color:var(--bg);font-weight:700;font-size:.94rem;padding:13px 30px;border-radius:8px;transition:.2s;cursor:pointer;border:none;font-family:inherit}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(232,184,75,.35)}
 .play-arrow{width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:10px solid var(--bg)}
-.btn-ghost{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.08);color:var(--text);font-weight:600;font-size:.94rem;padding:13px 28px;border-radius:8px;border:1px solid rgba(255,255,255,.15);transition:.2s;cursor:pointer}
+.btn-ghost{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.08);color:var(--text);font-weight:600;font-size:.94rem;padding:13px 28px;border-radius:8px;border:1px solid rgba(255,255,255,.15);transition:.2s;cursor:pointer;font-family:inherit}
 .btn-ghost:hover{background:rgba(255,255,255,.16)}
+
 section{padding:50px 40px;max-width:1900px;margin:0 auto}
 .sec-title{font-size:1.35rem;font-weight:900;margin-bottom:24px;display:flex;align-items:center;gap:12px}
 .sec-title::before{content:'';display:block;width:4px;height:24px;background:var(--accent);border-radius:2px}
+
 .cards-row{display:flex;gap:18px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none;scroll-snap-type:x mandatory}
 .cards-row::-webkit-scrollbar{display:none}
+
 .movie-card{flex:0 0 180px;scroll-snap-align:start;cursor:pointer;transition:transform .25s;position:relative}
 .movie-card:hover{transform:translateY(-8px)}
 .card-poster{width:100%;aspect-ratio:2/3;border-radius:12px;object-fit:cover;background:var(--surface2);margin-bottom:10px;position:relative;overflow:hidden;border:1px solid var(--border)}
@@ -355,20 +418,23 @@ section{padding:50px 40px;max-width:1900px;margin:0 auto}
 .card-info{padding:0 4px}
 .card-title{font-size:.87rem;font-weight:700;line-height:1.3;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.4em}
 .card-year{font-size:.74rem;color:var(--text2)}
+
 #browse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:22px}
 #browse-grid .movie-card{flex:none;width:100%}
+
 .genre-strip{display:flex;gap:10px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none;margin-bottom:28px;flex-wrap:wrap}
 .genre-strip::-webkit-scrollbar{display:none}
-.genre-chip{flex:0 0 auto;padding:8px 20px;border-radius:6px;border:1px solid var(--border);font-size:.82rem;font-weight:600;color:var(--text2);background:var(--surface2);cursor:pointer;transition:.2s}
+.genre-chip{flex:0 0 auto;padding:8px 20px;border-radius:6px;border:1px solid var(--border);font-size:.82rem;font-weight:600;color:var(--text2);background:var(--surface2);cursor:pointer;transition:.2s;font-family:inherit}
 .genre-chip:hover{border-color:var(--accent);color:var(--accent)}
 .genre-chip.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+
 .modal-overlay{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);display:flex;align-items:flex-start;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s;overflow-y:auto}
 .modal-overlay.open{opacity:1;pointer-events:all}
 #modal{width:min(1100px,96vw);background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);transform:translateY(24px) scale(.97);transition:transform .35s;margin:auto;overflow:hidden}
 .modal-overlay.open #modal{transform:translateY(0) scale(1)}
 .modal-backdrop{width:100%;height:280px;background-size:cover;background-position:center;position:relative;background-repeat:no-repeat;background-color:var(--surface2)}
 .modal-backdrop::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,var(--surface) 0%,transparent 70%)}
-.modal-close{position:absolute;top:16px;left:16px;z-index:3;width:38px;height:38px;border-radius:10px;background:rgba(0,0,0,.75);color:white;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;transition:.2s;cursor:pointer;border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(8px)}
+.modal-close{position:absolute;top:16px;left:16px;z-index:3;width:38px;height:38px;border-radius:10px;background:rgba(0,0,0,.75);color:white;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;transition:.2s;cursor:pointer;border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(8px);font-family:inherit}
 .modal-close:hover{background:var(--accent2);border-color:var(--accent2)}
 .modal-body{padding:26px 34px 36px}
 .modal-title{font-size:2rem;font-weight:900;line-height:1.2;margin-bottom:12px}
@@ -376,18 +442,22 @@ section{padding:50px 40px;max-width:1900px;margin:0 auto}
 .modal-meta .accent{color:var(--accent);font-weight:700}
 .modal-meta .sep{color:var(--surface2)}
 .modal-desc{font-size:.92rem;color:#a8a8c4;line-height:1.85;margin-bottom:24px}
+
 .player-container{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;margin-bottom:18px;position:relative;box-shadow:0 15px 50px rgba(0,0,0,.9)}
 .player-container iframe{width:100%;height:100%;border:none;display:block}
 .player-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1a2e,#0a0a15);color:var(--text2);flex-direction:column;gap:14px}
 .player-placeholder-icon{width:70px;height:70px;border-radius:50%;background:rgba(232,184,75,.15);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent);animation:pulse 2s infinite;font-weight:700}
 @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:.7}}
+
 .quality-info{display:flex;align-items:center;gap:.8rem;padding:12px 16px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);margin-bottom:18px;flex-wrap:wrap}
 .quality-badge{padding:5px 14px;border-radius:6px;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
 .quality-badge.q4k{background:linear-gradient(135deg,#f5c518,#ff9800);color:#000}
 .quality-badge.qhd{background:var(--green);color:#000}
 .quality-badge.qsd{background:var(--surface);color:var(--text2)}
 .quality-info-text{color:var(--text2);font-size:.85rem;font-weight:600}
+
 .modal-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+
 .cast-section{margin-top:24px}
 .cast-section h4{font-size:.82rem;color:var(--text2);margin-bottom:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
 .cast-list{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
@@ -398,9 +468,23 @@ section{padding:50px 40px;max-width:1900px;margin:0 auto}
 .cast-avatar img{width:100%;height:100%;object-fit:cover}
 .cast-name{font-size:.76rem;font-weight:700;margin-bottom:3px;line-height:1.2}
 .cast-role{font-size:.66rem;color:var(--text2)}
+
+.seasons-section{margin-top:24px}
+.seasons-section h4{font-size:.82rem;color:var(--text2);margin-bottom:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.season-tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:12px;margin-bottom:16px;scrollbar-width:none}
+.season-tabs::-webkit-scrollbar{display:none}
+.season-tab{padding:8px 18px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);border-radius:6px;font-size:.82rem;font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap;font-family:inherit}
+.season-tab:hover{border-color:var(--accent);color:var(--accent)}
+.season-tab.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.episodes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px}
+.episode-btn{padding:14px 8px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:.2s;text-align:center;font-family:inherit}
+.episode-btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px)}
+.episode-btn.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+
 .stars-row{display:flex;gap:8px;margin:16px 0}
 .star-btn{font-size:1.4rem;cursor:pointer;transition:.18s;color:var(--text2);background:none;border:none}
 .star-btn:hover,.star-btn.lit{color:var(--accent);transform:scale(1.18)}
+
 #auth-modal{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.97);display:none;align-items:center;justify-content:center;padding:20px}
 #auth-modal.open{display:flex}
 .auth-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;max-width:440px;width:100%;box-shadow:var(--shadow);position:relative}
@@ -408,28 +492,30 @@ section{padding:50px 40px;max-width:1900px;margin:0 auto}
 .auth-subtitle{color:var(--text2);font-size:.88rem;margin-bottom:30px;text-align:center}
 .auth-input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:10px;font-size:.93rem;margin-bottom:12px;transition:.2s;outline:none}
 .auth-input:focus{border-color:var(--accent)}
-.auth-btn{width:100%;background:var(--accent);color:var(--bg);font-weight:700;padding:12px;border-radius:10px;margin-bottom:14px;transition:.2s;cursor:pointer;font-size:.94rem}
+.auth-btn{width:100%;background:var(--accent);color:var(--bg);font-weight:700;padding:12px;border-radius:10px;margin-bottom:14px;transition:.2s;cursor:pointer;font-size:.94rem;font-family:inherit}
 .auth-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(232,184,75,.35)}
-.auth-close{position:absolute;top:20px;right:20px;width:36px;height:36px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text2);cursor:pointer;font-size:.9rem}
+.auth-close{position:absolute;top:20px;right:20px;width:36px;height:36px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text2);cursor:pointer;font-size:.9rem;font-family:inherit}
+
 #profile-modal{position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:20px}
 #profile-modal.open{display:flex}
 .profile-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;max-width:520px;width:100%;box-shadow:var(--shadow);max-height:90vh;overflow-y:auto}
 .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
 .form-group label{font-size:.82rem;font-weight:600;color:var(--text2)}
-.form-group input,.form-group textarea,.form-group select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:10px;font-size:.9rem;transition:.2s;outline:none}
+.form-group input,.form-group textarea,.form-group select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:10px;font-size:.9rem;transition:.2s;outline:none;font-family:inherit}
 .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--accent)}
 .form-actions{display:flex;gap:12px;margin-top:12px}
-.btn-save{flex:1;background:var(--accent);color:var(--bg);padding:11px;border-radius:10px;font-weight:700;cursor:pointer;transition:.2s}
+.btn-save{flex:1;background:var(--accent);color:var(--bg);padding:11px;border-radius:10px;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit;border:none}
 .btn-save:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(232,184,75,.3)}
-.btn-cancel{flex:1;background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:11px;border-radius:10px;font-weight:600;cursor:pointer;transition:.2s}
+.btn-cancel{flex:1;background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:11px;border-radius:10px;font-weight:600;cursor:pointer;transition:.2s;font-family:inherit}
 .btn-cancel:hover{border-color:var(--accent)}
+
 #search-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.88);backdrop-filter:blur(14px);display:none;align-items:flex-start;justify-content:center;padding-top:120px;padding-left:20px;padding-right:20px}
 #search-overlay.open{display:flex}
 .search-box{width:min(680px,96vw);background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}
 .search-input-row{display:flex;align-items:center;gap:14px;padding:18px 22px;border-bottom:1px solid var(--border)}
 #search-input{flex:1;background:none;border:none;outline:none;font-size:1.05rem;color:var(--text)}
 #search-input::placeholder{color:var(--text3)}
-.search-close-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);width:40px;height:32px;border-radius:8px;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s}
+.search-close-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);width:40px;height:32px;border-radius:8px;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;font-family:inherit}
 .search-close-btn:hover{background:var(--accent2);color:white;border-color:var(--accent2)}
 #search-results-list{max-height:420px;overflow-y:auto}
 .search-result-item{display:flex;align-items:center;gap:14px;padding:12px 22px;cursor:pointer;transition:.2s;border-bottom:1px solid rgba(255,255,255,.025)}
@@ -437,13 +523,17 @@ section{padding:50px 40px;max-width:1900px;margin:0 auto}
 .search-result-item img{width:44px;height:64px;object-fit:cover;border-radius:6px;flex-shrink:0;background:var(--surface2)}
 .search-result-info strong{display:block;font-size:.93rem;margin-bottom:3px}
 .search-result-info span{font-size:.76rem;color:var(--text2)}
+
 #toast{position:fixed;bottom:28px;left:50%;z-index:9999;transform:translateX(-50%) translateY(60px);background:var(--surface2);color:var(--text);padding:12px 26px;border-radius:10px;font-size:.86rem;font-weight:600;border:1px solid var(--border);box-shadow:var(--shadow);transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s;opacity:0;max-width:90vw;white-space:nowrap}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
 .loading{text-align:center;padding:50px 20px;color:var(--text2);grid-column:1/-1}
 .spinner{display:inline-block;width:40px;height:40px;border:3px solid var(--surface2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px}
 @keyframes spin{to{transform:rotate(360deg)}}
+
 footer{background:var(--surface);border-top:1px solid var(--border);padding:40px;text-align:center;color:var(--text2);font-size:.82rem}
 .footer-logo{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--accent);margin-bottom:10px;letter-spacing:3px}
+
 #cast-modal{position:fixed;inset:0;z-index:7000;background:rgba(0,0,0,.94);display:none;align-items:center;justify-content:center;padding:20px}
 #cast-modal.open{display:flex}
 .cast-detail-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:30px;max-width:780px;width:100%;box-shadow:var(--shadow);max-height:92vh;overflow-y:auto;position:relative}
@@ -459,10 +549,11 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:40px
 .cast-film-card:hover{transform:translateY(-4px)}
 .cast-film-card img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:8px;background:var(--surface2)}
 .cast-film-card .cf-title{font-size:.72rem;font-weight:600;margin-top:6px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
 .match-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;transition:.2s}
 .match-card:hover{border-color:var(--accent);transform:translateY(-3px)}
 .match-league{font-size:.72rem;font-weight:700;color:var(--accent);text-transform:uppercase;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
-.match-live-badge{background:#c0392b;color:white;font-size:.6rem;padding:3px 8px;border-radius:4px;letter-spacing:1px}
+.match-live-badge{background:#c0392b;color:white;font-size:.6rem;padding:3px 8px;border-radius:4px;letter-spacing:1px;animation:pulse 1.5s infinite}
 .match-teams{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
 .match-team{display:flex;justify-content:space-between;align-items:center}
 .match-team-name{font-weight:600;font-size:.92rem}
@@ -471,6 +562,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:40px
 .match-quality{background:linear-gradient(135deg,#f5c518,#ff9800);color:#000;font-weight:800;font-size:.65rem;padding:2px 8px;border-radius:4px;text-transform:uppercase}
 .league-strip{display:flex;gap:10px;overflow-x:auto;padding-bottom:14px;margin-bottom:24px;scrollbar-width:none;flex-wrap:wrap}
 .league-strip::-webkit-scrollbar{display:none}
+
 @media(max-width:900px){
   #navbar{padding:0 16px;height:60px}.nav-links{display:none}.nav-logo{font-size:1.5rem}
   section{padding:35px 16px}.hero-content{padding:0 20px}#hero-title{font-size:2rem}
@@ -578,10 +670,19 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:40px
       </div>
       <div class="modal-actions">
         <button class="btn-primary" onclick="playNow()"><div class="play-arrow"></div>مشاهدة الآن</button>
+        <button class="btn-primary" onclick="openFullscreen()" style="background:var(--surface2);color:var(--text);border:1px solid var(--accent)">شاشة كاملة</button>
         <button class="btn-ghost" id="fav-btn" onclick="toggleFavCurrent()">المفضلة</button>
         <button class="btn-ghost" onclick="shareMovie()">مشاركة</button>
       </div>
+
+      <div class="seasons-section" id="seasons-section" style="display:none">
+        <h4>المواسم والحلقات</h4>
+        <div class="season-tabs" id="season-tabs"></div>
+        <div class="episodes-grid" id="episodes-grid"></div>
+      </div>
+
       <div class="cast-section" id="cast-section"></div>
+
       <div style="margin-top:24px">
         <p style="font-size:.8rem;color:var(--text2);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">تقييمك</p>
         <div class="stars-row" id="stars-row"></div>
@@ -653,9 +754,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:40px
 <footer>
   <div class="footer-logo">ONYX CINEMA PRO</div>
   <p>منصة أفلام ومسلسلات ومباريات كرة القدم - جميع الحقوق محفوظة 2026</p>
-</footer>
-
-<script>
+</footer><script>
 const IMG_W = 'https://image.tmdb.org/t/p/w500';
 const IMG_O = 'https://image.tmdb.org/t/p/original';
 const IMG_PROFILE = 'https://image.tmdb.org/t/p/w185';
@@ -669,6 +768,10 @@ const S = {
   tmdbMovies: [],
   currentMovie: null,
   currentSourceIdx: 0,
+  currentSeasons: [],
+  currentTVId: null,
+  currentSeason: 1,
+  currentEpisode: 1,
   matches: [],
   currentLeague: '',
 };
@@ -878,6 +981,8 @@ async function openModal(id, type) {
   pframe.style.display = 'none';
   pframe.src = 'about:blank';
   placeholder.style.display = 'flex';
+  document.getElementById('seasons-section').style.display = 'none';
+  document.getElementById('cast-section').innerHTML = '';
 
   if (m) {
     document.getElementById('modal-title').textContent = m.title || m.name || 'غير معروف';
@@ -897,6 +1002,7 @@ async function openModal(id, type) {
     const qb = document.getElementById('quality-badge');
     qb.textContent = best.quality;
     qb.className = 'quality-badge ' + (best.quality === '4K' ? 'q4k' : best.quality === 'HD' ? 'qhd' : 'qsd');
+
     const cast = full.credits?.cast?.slice(0, 12) || [];
     const castSection = document.getElementById('cast-section');
     if (cast.length) {
@@ -904,12 +1010,69 @@ async function openModal(id, type) {
         const avatar = c.profile_path ? '<img src="' + IMG_PROFILE + c.profile_path + '" />' : (c.name || 'N')[0];
         return '<div class="cast-item" onclick="openCastModal(' + c.id + ')"><div class="cast-avatar">' + avatar + '</div><div class="cast-name">' + (c.name || 'غير معروف') + '</div><div class="cast-role">' + (c.character || '') + '</div></div>';
       }).join('') + '</div>';
-    } else { castSection.innerHTML = ''; }
+    }
+
+    if (type === 'tv' && full.seasons && full.seasons.length) {
+      S.currentSeasons = full.seasons.filter(s => s.season_number > 0);
+      S.currentTVId = id;
+      S.currentSeason = 1;
+      S.currentEpisode = 1;
+      document.getElementById('seasons-section').style.display = 'block';
+      renderSeasons(S.currentSeasons, 1);
+    }
+
     const ur = S.ratings[id] || 0;
     document.getElementById('stars-row').innerHTML = [1,2,3,4,5].map(n => '<button class="star-btn' + (n <= ur ? ' lit' : '') + '" onclick="rateMovie(' + id + ',' + n + ')">*</button>').join('');
     updateFavBtn(id);
     setTimeout(() => startStream(best.idx, 1, 1), 400);
   } catch(e) { console.error(e); }
+}
+
+function renderSeasons(seasons, activeSeasonNum) {
+  const tabs = document.getElementById('season-tabs');
+  tabs.innerHTML = seasons.map(s =>
+    '<button class="season-tab' + (s.season_number === activeSeasonNum ? ' active' : '') + '" onclick="selectSeason(' + s.season_number + ')">' +
+    (s.name || 'الموسم ' + s.season_number) + ' (' + (s.episode_count || 0) + ')</button>'
+  ).join('');
+  loadEpisodes(activeSeasonNum);
+}
+
+async function selectSeason(num) {
+  document.querySelectorAll('.season-tab').forEach(b => b.classList.remove('active'));
+  const seasons = S.currentSeasons;
+  const idx = seasons.findIndex(s => s.season_number === num);
+  if (idx >= 0) document.querySelectorAll('.season-tab')[idx].classList.add('active');
+  await loadEpisodes(num);
+}
+
+async function loadEpisodes(seasonNum) {
+  const grid = document.getElementById('episodes-grid');
+  grid.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  S.currentSeason = seasonNum;
+  try {
+    const r = await fetch('/api/tv/' + S.currentTVId + '/season/' + seasonNum);
+    const d = await r.json();
+    const eps = d.episodes || [];
+    if (!eps.length) { grid.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text2);grid-column:1/-1">لا توجد حلقات</div>'; return; }
+    grid.innerHTML = eps.map(e =>
+      '<button class="episode-btn" onclick="playEpisode(' + seasonNum + ',' + e.episode_number + ',this)">' +
+      '<div style="font-size:.7rem;color:var(--text3);margin-bottom:4px">حلقة</div>' +
+      '<div style="font-size:1rem;font-weight:700">' + e.episode_number + '</div>' +
+      (e.name ? '<div style="font-size:.65rem;margin-top:4px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + e.name + '</div>' : '') +
+      '</button>'
+    ).join('');
+  } catch(e) {
+    grid.innerHTML = '<div style="padding:20px;text-align:center;color:var(--accent2);grid-column:1/-1">خطأ في تحميل الحلقات</div>';
+  }
+}
+
+function playEpisode(seasonNum, epNum, btn) {
+  document.querySelectorAll('.episode-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  S.currentSeason = seasonNum;
+  S.currentEpisode = epNum;
+  startStream(S.currentSourceIdx, seasonNum, epNum);
+  showToast('جار تشغيل الموسم ' + seasonNum + ' - الحلقة ' + epNum);
 }
 
 function pickBestSource(m, type) {
@@ -929,7 +1092,8 @@ function startStream(idx, season, episode) {
   const placeholder = document.getElementById('player-placeholder');
   placeholder.style.display = 'flex';
   pframe.style.display = 'none';
-  const url = '/player?type=' + S.currentMovie.type + '&id=' + S.currentMovie.id + '&source=' + idx + '&season=' + (season || 1) + '&episode=' + (episode || 1) + '&lang=' + S.prefs.lang;
+  const title = document.getElementById('modal-title').textContent || '';
+  const url = '/player?type=' + S.currentMovie.type + '&id=' + S.currentMovie.id + '&source=' + idx + '&season=' + (season || 1) + '&episode=' + (episode || 1) + '&lang=' + S.prefs.lang + '&title=' + encodeURIComponent(title);
   pframe.src = url;
   S.currentSourceIdx = idx;
   pframe.onload = () => { setTimeout(() => { placeholder.style.display = 'none'; pframe.style.display = 'block'; }, 500); };
@@ -937,8 +1101,19 @@ function startStream(idx, season, episode) {
 
 function playNow() {
   if (!S.currentMovie) return;
-  startStream(S.currentSourceIdx, 1, 1);
+  const s = S.currentMovie.type === 'tv' ? S.currentSeason : 1;
+  const e = S.currentMovie.type === 'tv' ? S.currentEpisode : 1;
+  startStream(S.currentSourceIdx, s, e);
   showToast('جاري التشغيل...');
+}
+
+function openFullscreen() {
+  if (!S.currentMovie) return;
+  const season = S.currentMovie.type === 'tv' ? S.currentSeason : 1;
+  const episode = S.currentMovie.type === 'tv' ? S.currentEpisode : 1;
+  const title = document.getElementById('modal-title').textContent || '';
+  const url = '/player?type=' + S.currentMovie.type + '&id=' + S.currentMovie.id + '&source=' + S.currentSourceIdx + '&season=' + season + '&episode=' + episode + '&lang=' + S.prefs.lang + '&title=' + encodeURIComponent(title);
+  window.open(url, '_blank');
 }
 
 function closeModal() {
@@ -1074,7 +1249,8 @@ function watchMatch(idx) {
   const m = S.matches[idx];
   if (!m) return;
   showToast('جاري فتح البث بأعلى دقة: ' + m.quality);
-  window.open('/match?id=' + encodeURIComponent(m.stream_id) + '&quality=' + m.quality, '_blank');
+  const url = '/match?id=' + encodeURIComponent(m.stream_id) + '&quality=' + m.quality + '&team1=' + encodeURIComponent(m.team1) + '&team2=' + encodeURIComponent(m.team2);
+  window.open(url, '_blank');
 }
 
 function switchPage(page, event) {
@@ -1120,99 +1296,330 @@ function showToast(msg) {
   t._t = setTimeout(() => t.classList.remove('show'), 2600);
 }
 
-console.log('[ONYX v10.1] Sources loaded:', SOURCES.length);
+console.log('[ONYX v11.0] Sources loaded:', SOURCES.length);
 </script>
 </body>
 </html>
-"""
-
-# =========================================================
-# PLAYER HTML (Movies/Series)
+"""# =========================================================
+# PLAYER_HTML - Full Screen Player with Server List
 # =========================================================
 PLAYER_HTML = r"""<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><style>*{margin:0;padding:0}html,body,iframe{width:100%;height:100%;background:#000;border:none;overflow:hidden}</style></head>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONYX Player</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Cairo',Arial,sans-serif}
+#wrap{position:relative;width:100vw;height:100vh;background:#000}
+iframe{position:absolute;inset:0;width:100%;height:100%;border:none;background:#000}
+#topbar{position:absolute;top:0;left:0;right:0;height:52px;background:linear-gradient(180deg,rgba(0,0,0,.92),transparent);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;z-index:20;transition:.3s}
+#topbar.hidden{transform:translateY(-100%)}
+#topbar .title{font-size:14px;font-weight:600}
+#topbar .title small{display:block;color:#a0a0b8;font-size:11px;font-weight:400;margin-top:2px}
+#topbar .btns{display:flex;gap:8px}
+#topbar button{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.15);padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:.2s;font-family:inherit}
+#topbar button:hover{background:#e8b84b;color:#000;border-color:#e8b84b}
+#topbar button.active{background:#e8b84b;color:#000}
+#loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;background:linear-gradient(135deg,#0a0a15,#1a1a2e);color:#a0a0b8;z-index:15;transition:opacity .4s}
+#loading.hide{opacity:0;pointer-events:none}
+.spinner{width:54px;height:54px;border:4px solid rgba(232,184,75,.15);border-top-color:#e8b84b;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading .msg{font-size:14px;font-weight:600}
+#loading .sub{font-size:12px;color:#5a5a72}
+#source-panel{position:absolute;top:52px;right:0;width:300px;height:calc(100% - 52px);background:rgba(10,10,15,.96);backdrop-filter:blur(20px);z-index:19;transform:translateX(100%);transition:.3s;overflow-y:auto;border-left:1px solid rgba(255,255,255,.08)}
+#source-panel.open{transform:translateX(0)}
+#source-panel h3{padding:18px;font-size:13px;color:#e8b84b;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;background:rgba(10,10,15,.98);z-index:2}
+.source-item{display:block;width:100%;text-align:right;padding:14px 18px;background:none;border:none;color:#e8e8f0;font-size:13px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.04);transition:.2s;font-family:inherit}
+.source-item:hover{background:rgba(232,184,75,.1);color:#e8b84b}
+.source-item.active{background:#e8b84b;color:#000;font-weight:700}
+.source-item .q{font-size:11px;color:#5a5a72;margin-left:8px;font-weight:700}
+.source-item.active .q{color:rgba(0,0,0,.5)}
+#error-box{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:20px;background:#0a0a15;color:#e8e8f0;z-index:18;padding:40px;text-align:center}
+#error-box.show{display:flex}
+#error-box h2{color:#e8b84b;font-size:20px}
+#error-box p{color:#a0a0b8;font-size:14px;max-width:500px;line-height:1.7}
+#error-box button{background:#e8b84b;color:#000;border:none;padding:12px 26px;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;font-family:inherit;margin:4px}
+#error-box button:hover{transform:translateY(-2px)}
+#progress{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,.1);z-index:16}
+#progress .bar{height:100%;background:#e8b84b;width:0;transition:width .5s;animation:load 10s linear forwards}
+@keyframes load{to{width:100%}}
+</style>
+</head>
 <body>
-<iframe id="player" src="" allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture" referrerpolicy="origin"></iframe>
+<div id="wrap">
+  <div id="topbar">
+    <div class="title" id="title">جار التحميل...<small id="subtitle"></small></div>
+    <div class="btns">
+      <button id="btn-servers" onclick="togglePanel()">السيرفرات</button>
+      <button onclick="tryNextSource()">التالي</button>
+      <button onclick="closePlayer()">إغلاق</button>
+    </div>
+  </div>
+
+  <div id="source-panel">
+    <h3>اختر السيرفر</h3>
+    <div id="source-list"></div>
+  </div>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    <div class="msg">جار تحميل الفيديو...</div>
+    <div class="sub" id="loading-sub">المصدر: --</div>
+    <div class="sub" style="margin-top:10px" id="loading-tip"></div>
+  </div>
+
+  <div id="error-box">
+    <h2>تعذر تشغيل الفيديو</h2>
+    <p>جميع السيرفرات المتاحة فشلت في التحميل. يمكنك المحاولة مرة أخرى أو تجربة سيرفر آخر من القائمة.</p>
+    <div>
+      <button onclick="tryNextSource()">جرب السيرفر التالي</button>
+      <button onclick="openPanel()" style="background:#1f1f2e;color:#e8b84b;border:1px solid #e8b84b">اختر سيرفر يدويا</button>
+    </div>
+  </div>
+
+  <iframe id="player" src="" allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture" referrerpolicy="origin"></iframe>
+  <div id="progress"><div class="bar" id="progress-bar"></div></div>
+</div>
+
 <script>
 const SOURCES = __SOURCES__;
 const p = new URLSearchParams(location.search);
 const type = p.get('type') || 'movie';
 const id = p.get('id');
-const idx = parseInt(p.get('source') || '0');
-const season = p.get('season') || '1';
-const episode = p.get('episode') || '1';
+const season = parseInt(p.get('season') || '1');
+const episode = parseInt(p.get('episode') || '1');
+const title = p.get('title') || '';
 const lang = p.get('lang') || 'ar';
+let currentIdx = parseInt(p.get('source') || '0');
+let failCount = 0;
+let loadTimer = null;
+const MAX_FAILS = 12;
 
-function trySource(i) {
-  if (i >= SOURCES.length) return;
-  const src = SOURCES[i];
-  if (!src) return;
+document.getElementById('title').innerHTML = (title || (type === 'tv' ? 'الموسم ' + season + ' - الحلقة ' + episode : 'فيلم')) + '<small>' + (type === 'tv' ? 'مسلسل' : 'فيلم') + '</small>';
+
+function buildSourceList() {
+  const list = document.getElementById('source-list');
+  list.innerHTML = '';
+  SOURCES.slice(0, 100).forEach((s, i) => {
+    const b = document.createElement('button');
+    b.className = 'source-item' + (i === currentIdx ? ' active' : '');
+    b.innerHTML = '<span class="q">' + s.q + '</span>' + s.name;
+    b.onclick = () => loadSource(i);
+    list.appendChild(b);
+  });
+}
+
+function togglePanel() {
+  document.getElementById('source-panel').classList.toggle('open');
+  document.getElementById('btn-servers').classList.toggle('active');
+}
+
+function openPanel() {
+  document.getElementById('source-panel').classList.add('open');
+  document.getElementById('btn-servers').classList.add('active');
+}
+
+function buildUrl(src) {
   let url = (type === 'tv') ? (src.tv || src.movie) : (src.movie || src.tv);
   url = url.replace(/{id}/g, id).replace(/{s}/g, season).replace(/{e}/g, episode);
   url = url.replace(/{season}/g, season).replace(/{episode}/g, episode);
+  url = url.replace(/{tmdb}/g, id);
   if (url.includes('?')) url += '&lang=' + lang;
   else url += '?lang=' + lang;
-  document.getElementById('player').src = url;
+  return url;
 }
 
-if (SOURCES[idx]) trySource(idx);
-else trySource(0);
+function loadSource(idx) {
+  if (idx >= SOURCES.length) { showError(); return; }
+  currentIdx = idx;
+  const src = SOURCES[idx];
+  if (!src) { tryNextSource(); return; }
+  document.getElementById('loading-sub').textContent = 'المصدر: ' + src.name + ' (' + src.q + ')';
+  document.getElementById('loading-tip').textContent = 'المحاولة رقم ' + (failCount + 1) + ' من ' + MAX_FAILS;
+  const frame = document.getElementById('player');
+  const url = buildUrl(src);
+  frame.src = 'about:blank';
+  setTimeout(() => { frame.src = url; }, 100);
+  document.querySelectorAll('.source-item').forEach((b, i) => b.classList.toggle('active', i === idx));
+  document.getElementById('loading').classList.remove('hide');
+  document.getElementById('error-box').classList.remove('show');
+  const bar = document.getElementById('progress-bar');
+  bar.style.animation = 'none';
+  void bar.offsetWidth;
+  bar.style.animation = 'load 8s linear forwards';
+  clearTimeout(loadTimer);
+  loadTimer = setTimeout(() => {
+    if (failCount < MAX_FAILS) {
+      failCount++;
+      tryNextSource();
+    } else { showError(); }
+  }, 8000);
+}
+
+function tryNextSource() {
+  failCount++;
+  if (failCount >= MAX_FAILS) { showError(); return; }
+  let next = (currentIdx + 1) % SOURCES.length;
+  loadSource(next);
+}
+
+function showError() {
+  document.getElementById('loading').classList.add('hide');
+  document.getElementById('error-box').classList.add('show');
+}
+
+function closePlayer() {
+  if (history.length > 1) history.back();
+  else window.close();
+}
+
+document.getElementById('player').onload = () => {
+  clearTimeout(loadTimer);
+  setTimeout(() => {
+    document.getElementById('loading').classList.add('hide');
+    document.getElementById('error-box').classList.remove('show');
+    failCount = 0;
+  }, 800);
+};
+
+buildSourceList();
+loadSource(currentIdx);
+
+let hideTimer = setTimeout(() => document.getElementById('topbar').classList.add('hidden'), 4000);
+document.addEventListener('mousemove', () => {
+  document.getElementById('topbar').classList.remove('hidden');
+  clearTimeout(hideTimer);
+  hideTimer = setTimeout(() => document.getElementById('topbar').classList.add('hidden'), 4000);
+});
 </script>
 </body></html>
 """
 
+
 # =========================================================
-# MATCH PLAYER HTML (Football)
+# MATCH_PLAYER_HTML - Football Match Player
 # =========================================================
 MATCH_PLAYER_HTML = r"""<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><style>*{margin:0;padding:0}html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:Arial,sans-serif}
-#topbar{position:absolute;top:0;left:0;right:0;height:44px;background:rgba(0,0,0,.85);color:#e8b84b;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:13px;z-index:10;backdrop-filter:blur(10px)}
-#topbar button{background:#1f1f2e;color:#e8b84b;border:1px solid rgba(255,255,255,.1);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;margin-left:8px}
-#topbar button:hover{background:#e8b84b;color:#000}
-iframe{position:absolute;top:44px;left:0;width:100%;height:calc(100% - 44px);border:none}
-</style></head>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONYX Sports</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Cairo',Arial,sans-serif}
+#wrap{position:relative;width:100vw;height:100vh;background:#000}
+iframe{position:absolute;top:52px;left:0;width:100%;height:calc(100% - 52px);border:none;background:#000}
+#topbar{position:absolute;top:0;left:0;right:0;height:52px;background:linear-gradient(180deg,rgba(10,10,15,.98),rgba(10,10,15,.85));color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;z-index:20;border-bottom:1px solid rgba(255,255,255,.08)}
+#topbar .info{font-size:14px;font-weight:700;color:#e8b84b}
+#topbar .info small{display:block;color:#a0a0b8;font-size:11px;font-weight:400;margin-top:2px}
+#topbar .btns{display:flex;gap:6px;flex-wrap:wrap}
+#topbar button{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.12);padding:7px 13px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:700;transition:.2s;font-family:inherit;white-space:nowrap}
+#topbar button:hover{background:#e8b84b;color:#000;border-color:#e8b84b}
+#topbar button.active{background:#e8b84b;color:#000;border-color:#e8b84b}
+#loading{position:absolute;inset:52px 0 0 0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;background:linear-gradient(135deg,#0a0a15,#1a1a2e);color:#a0a0b8;z-index:15;transition:opacity .4s}
+#loading.hide{opacity:0;pointer-events:none}
+.spinner{width:54px;height:54px;border:4px solid rgba(232,184,75,.15);border-top-color:#e8b84b;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading .msg{font-size:14px;font-weight:600}
+#loading .sub{font-size:12px;color:#5a5a72}
+</style>
+</head>
 <body>
-<div id="topbar">
-  <div>ONYX SPORTS - بث مباشر</div>
-  <div id="servers"></div>
+<div id="wrap">
+  <div id="topbar">
+    <div class="info" id="match-info">ONYX SPORTS - بث مباشر<small id="match-teams"></small></div>
+    <div class="btns" id="servers"></div>
+  </div>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    <div class="msg">جار تحميل البث المباشر...</div>
+    <div class="sub" id="loading-sub">جار تجربة السيرفرات</div>
+  </div>
+
+  <iframe id="player" src="" allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture" referrerpolicy="origin"></iframe>
 </div>
-<iframe id="player" src="" allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture" referrerpolicy="origin"></iframe>
+
 <script>
 const SOURCES = __SOURCES__;
 const p = new URLSearchParams(location.search);
 const id = p.get('id') || 'match_1';
 const quality = p.get('quality') || '4K';
+const team1 = p.get('team1') || '';
+const team2 = p.get('team2') || '';
+let currentIdx = 0;
+let failCount = 0;
+let loadTimer = null;
+const MAX_FAILS = 15;
 
-function trySource(i) {
-  if (i >= SOURCES.length) return;
-  const src = SOURCES[i];
-  if (!src) return;
-  let url = (src.movie || src.tv).replace(/{id}/g, id);
-  url = url.replace(/{s}/g, '1').replace(/{e}/g, '1');
-  document.getElementById('player').src = url;
-  // Mark active button
-  document.querySelectorAll('#servers button').forEach((b, idx) => {
-    b.style.background = idx === i ? '#e8b84b' : '#1f1f2e';
-    b.style.color = idx === i ? '#000' : '#e8b84b';
-  });
+if (team1 && team2) {
+  document.getElementById('match-teams').textContent = team1 + ' ضد ' + team2 + ' - جودة ' + quality;
 }
 
 function buildServers() {
   const box = document.getElementById('servers');
   box.innerHTML = '';
-  SOURCES.slice(0, 10).forEach((s, i) => {
+  SOURCES.slice(0, 12).forEach((s, i) => {
     const b = document.createElement('button');
-    b.textContent = 'سيرفر ' + (i + 1);
-    b.onclick = () => trySource(i);
+    b.textContent = 'سيرفر ' + (i + 1) + ' (' + s.q + ')';
+    b.onclick = () => loadMatchSource(i);
     box.appendChild(b);
   });
 }
 
+function buildMatchUrl(src) {
+  let url = src.movie || src.tv;
+  url = url.replace(/{id}/g, id);
+  return url;
+}
+
+function loadMatchSource(idx) {
+  if (idx >= SOURCES.length) { return; }
+  currentIdx = idx;
+  const src = SOURCES[idx];
+  if (!src) { tryNextMatchSource(); return; }
+  document.getElementById('loading-sub').textContent = 'المصدر: ' + src.name;
+  const frame = document.getElementById('player');
+  frame.src = 'about:blank';
+  setTimeout(() => { frame.src = buildMatchUrl(src); }, 100);
+  document.querySelectorAll('#servers button').forEach((b, i) => b.classList.toggle('active', i === idx));
+  document.getElementById('loading').classList.remove('hide');
+  clearTimeout(loadTimer);
+  loadTimer = setTimeout(() => {
+    if (failCount < MAX_FAILS) {
+      failCount++;
+      tryNextMatchSource();
+    }
+  }, 8000);
+}
+
+function tryNextMatchSource() {
+  failCount++;
+  if (failCount >= MAX_FAILS) {
+    document.getElementById('loading-sub').textContent = 'فشلت جميع المحاولات، جرب سيرفر آخر يدويا';
+    return;
+  }
+  let next = (currentIdx + 1) % Math.min(SOURCES.length, 12);
+  loadMatchSource(next);
+}
+
+document.getElementById('player').onload = () => {
+  clearTimeout(loadTimer);
+  setTimeout(() => {
+    document.getElementById('loading').classList.add('hide');
+    failCount = 0;
+  }, 800);
+};
+
 buildServers();
-trySource(0);
+loadMatchSource(0);
 </script>
 </body></html>
 """
+
 
 # =========================================================
 # ROUTES
@@ -1244,6 +1651,14 @@ def api_top_rated(mt):
     if mt not in ("movie", "tv"):
         return jsonify({"error": "invalid"}), 400
     return jsonify(tmdb(f"/{mt}/top_rated"))
+
+@app.route("/api/now_playing")
+def api_now_playing():
+    return jsonify(tmdb("/movie/now_playing"))
+
+@app.route("/api/upcoming")
+def api_upcoming():
+    return jsonify(tmdb("/movie/upcoming"))
 
 @app.route("/api/search")
 def api_search():
@@ -1292,6 +1707,13 @@ def api_discover():
 def api_person(pid):
     return jsonify(tmdb(f"/person/{pid}", {"append_to_response": "combined_credits,images,external_ids"}))
 
+@app.route("/api/person/search")
+def api_person_search():
+    q = request.args.get("q", "").strip()
+    if not q:
+        return jsonify({"results": []})
+    return jsonify(tmdb("/search/person", {"query": q}))
+
 @app.route("/api/matches")
 def api_matches():
     league = request.args.get("league")
@@ -1303,16 +1725,25 @@ def api_matches():
 def api_leagues():
     return jsonify({"leagues": FOOTBALL_LEAGUES})
 
+@app.route("/api/sources/count")
+def api_sources_count():
+    return jsonify({
+        "movie_sources": len(PLAYER_SOURCES),
+        "match_sources": len(SPORTS_SOURCES),
+        "total": len(PLAYER_SOURCES) + len(SPORTS_SOURCES),
+    })
+
 @app.route("/health")
 def health():
     return jsonify({
         "status": "ok",
-        "service": "ONYX CINEMA v10.1",
+        "service": "ONYX CINEMA v11.0",
         "tmdb": "ok" if TMDB_API_KEY else "missing",
         "sources": len(PLAYER_SOURCES),
         "match_sources": len(SPORTS_SOURCES),
         "leagues": len(FOOTBALL_LEAGUES),
     })
+
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
