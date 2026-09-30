@@ -2,543 +2,564 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#000000">
-<title>ONYX Player</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>سينما بوكس — المشغل</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+:root{
+  --ink:#0b0a0d;
+  --ink-2:#141116;
+  --ink-3:#1d1920;
+  --oxblood:#5c1a24;
+  --oxblood-bright:#8c2635;
+  --gold:#c9a24b;
+  --gold-dim:#8a7239;
+  --bone:#efe8de;
+  --bone-dim:#b8afa4;
+  --line: rgba(239,232,222,0.08);
+  --shadow-deep: 0 30px 60px -20px rgba(0,0,0,0.7);
+  --ease-out: cubic-bezier(.16,1,.3,1);
+  --font-display:'Cormorant Garamond', serif;
+  --font-ui:'Tajawal', sans-serif;
 }
+*{box-sizing:border-box;}
+body{margin:0;background:var(--ink);color:var(--bone);font-family:var(--font-ui);-webkit-font-smoothing:antialiased;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+img{max-width:100%;display:block;}
+::-webkit-scrollbar{height:8px;width:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--ink-3);border-radius:4px;}
 
-:root {
-  --accent: #e50914;
-  --accent2: #ff1e27;
-  --gold: #f5c518;
-  --green: #22c55e;
-  --bg: #000000;
-  --surface: rgba(20, 20, 20, 0.95);
-  --surface2: rgba(30, 30, 30, 0.9);
-  --text: #ffffff;
-  --text2: #a0a0a0;
-  --border: rgba(255, 255, 255, 0.1);
-  --shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-  --radius: 8px;
-  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  --font: 'Cairo', system-ui, sans-serif;
+/* -------- top bar -------- */
+.topbar{
+  position:fixed;top:0;inset-inline:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 5vw;background:linear-gradient(180deg,rgba(11,10,13,.85),transparent);
+  opacity:1;transition:opacity .4s;
 }
+.topbar.hide{opacity:0;pointer-events:none;}
+.back{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--bone-dim);transition:color .2s;}
+.back:hover{color:var(--gold);}
+.brand{font-family:var(--font-display);font-style:italic;font-size:22px;}
+.brand span{color:var(--gold);}
 
-html, body {
-  width: 100%;
-  height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font);
-  overflow: hidden;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-tap-highlight-color: transparent;
+/* -------- player stage -------- */
+.stage{
+  position:relative;width:100%;height:100vh;background:#000;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
 }
+video{width:100%;height:100%;object-fit:contain;background:#000;}
+.stage-click{position:absolute;inset:0;z-index:5;cursor:pointer;}
 
-.player-root {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background: #000;
-  overflow: hidden;
+/* center play/pause pulse feedback */
+.center-flash{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.6);
+  width:88px;height:88px;border-radius:50%;background:rgba(0,0,0,.5);
+  display:flex;align-items:center;justify-content:center;opacity:0;z-index:6;pointer-events:none;
+  transition:opacity .3s, transform .3s;
 }
+.center-flash.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.center-flash svg{width:36px;height:36px;fill:var(--bone);}
 
-.player-frame {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: none;
-  display: block;
-  z-index: 1;
+/* skip intro */
+.skip-intro{
+  position:absolute;bottom:130px;left:5vw;z-index:20;
+  background:var(--ink-2);border:1px solid var(--gold-dim);color:var(--bone);
+  padding:12px 22px;border-radius:6px;font-size:14px;
+  opacity:0;transform:translateY(10px);pointer-events:none;transition:.3s var(--ease-out);
 }
+.skip-intro.show{opacity:1;transform:translateY(0);pointer-events:auto;}
+.skip-intro:hover{border-color:var(--gold);background:var(--ink-3);}
 
-/* LOADING */
-.loading-layer {
-  position: absolute;
-  inset: 0;
-  background: #000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
-  opacity: 1;
-  transition: opacity 0.6s ease;
+/* next-episode countdown */
+.next-card{
+  position:absolute;bottom:130px;right:5vw;z-index:20;width:280px;
+  background:var(--ink-2);border:1px solid var(--line);border-radius:10px;overflow:hidden;
+  opacity:0;transform:translateY(14px);pointer-events:none;transition:.35s var(--ease-out);box-shadow:var(--shadow-deep);
 }
-
-.loading-layer.hidden {
-  opacity: 0;
-  pointer-events: none;
+.next-card.show{opacity:1;transform:translateY(0);pointer-events:auto;}
+.next-card img{width:100%;height:120px;object-fit:cover;}
+.next-card .body{padding:12px 14px;}
+.next-card .label{font-size:11px;color:var(--gold);margin-bottom:4px;}
+.next-card .title{font-family:var(--font-display);font-style:italic;font-size:17px;margin-bottom:8px;}
+.next-card .ring{
+  width:22px;height:22px;border-radius:50%;border:2px solid var(--gold-dim);border-top-color:var(--gold);
+  animation:spin 1s linear infinite;display:inline-block;vertical-align:middle;margin-left:6px;
 }
+@keyframes spin{to{transform:rotate(360deg);}}
 
-.onyx-logo {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 3rem;
-  letter-spacing: 0.15em;
-  color: var(--accent);
-  margin-bottom: 30px;
-  text-shadow: 0 0 30px rgba(229, 9, 20, 0.5);
-  animation: logoPulse 2s ease infinite;
+/* -------- controls -------- */
+.controls{
+  position:absolute;bottom:0;inset-inline:0;z-index:15;
+  padding:70px 5vw 26px;
+  background:linear-gradient(0deg,rgba(11,10,13,.92) 10%,transparent 100%);
+  opacity:1;transition:opacity .4s;
 }
+.controls.hide{opacity:0;pointer-events:none;}
 
-@keyframes logoPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(0.98); }
+.progress-wrap{position:relative;margin-bottom:18px;cursor:pointer;padding:8px 0;}
+.progress-track{position:relative;height:4px;border-radius:2px;background:rgba(239,232,222,0.18);overflow:visible;}
+.progress-buffer{position:absolute;top:0;bottom:0;right:0;background:rgba(239,232,222,0.3);border-radius:2px;width:0%;}
+.progress-fill{position:absolute;top:0;bottom:0;right:0;background:var(--gold);border-radius:2px;width:0%;}
+.progress-handle{
+  position:absolute;top:50%;width:13px;height:13px;border-radius:50%;background:var(--gold);
+  transform:translate(50%,-50%) scale(0);transition:transform .2s;box-shadow:0 0 0 4px rgba(201,162,75,.2);
 }
-
-.spinner {
-  width: 60px;
-  height: 60px;
-  position: relative;
-  margin-bottom: 24px;
+.progress-wrap:hover .progress-handle{transform:translate(50%,-50%) scale(1);}
+.progress-wrap:hover .progress-track{height:6px;}
+.time-tooltip{
+  position:absolute;bottom:22px;transform:translateX(50%);background:var(--ink-3);border:1px solid var(--line);
+  padding:4px 9px;border-radius:4px;font-size:12px;opacity:0;transition:opacity .15s;white-space:nowrap;
 }
+.progress-wrap:hover .time-tooltip{opacity:1;}
 
-.spinner-ring {
-  position: absolute;
-  inset: 0;
-  border: 3px solid transparent;
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+.control-row{display:flex;align-items:center;justify-content:space-between;}
+.control-left,.control-right{display:flex;align-items:center;gap:18px;}
+.ctl-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--bone);transition:color .2s,transform .2s;}
+.ctl-btn:hover{color:var(--gold);transform:scale(1.1);}
+.ctl-btn svg{width:22px;height:22px;}
+.play-btn svg{width:26px;height:26px;}
+
+.vol-wrap{display:flex;align-items:center;gap:8px;}
+.vol-slider{width:0;overflow:hidden;transition:width .25s var(--ease-out);}
+.vol-wrap:hover .vol-slider{width:80px;}
+.vol-slider input{width:80px;accent-color:var(--gold);}
+
+.time-label{font-size:13px;color:var(--bone-dim);font-variant-numeric:tabular-nums;letter-spacing:.02em;}
+
+.title-block{margin-inline-start:6px;}
+.title-block .t{font-family:var(--font-display);font-style:italic;font-size:16px;color:var(--bone);}
+.title-block .e{font-size:11px;color:var(--bone-dim);}
+
+.speed-menu{position:relative;}
+.speed-btn{font-size:13px;border:1px solid var(--line);border-radius:5px;padding:5px 10px;color:var(--bone-dim);transition:.2s;}
+.speed-btn:hover{border-color:var(--gold);color:var(--gold);}
+.speed-list{
+  position:absolute;bottom:42px;left:0;background:var(--ink-2);border:1px solid var(--line);border-radius:8px;
+  padding:6px;display:none;flex-direction:column;min-width:80px;box-shadow:var(--shadow-deep);
 }
+.speed-list.open{display:flex;}
+.speed-list button{padding:7px 12px;font-size:13px;border-radius:5px;text-align:right;}
+.speed-list button:hover{background:var(--ink-3);color:var(--gold);}
+.speed-list button.active{color:var(--gold);}
 
-.spinner-ring:nth-child(2) {
-  animation-delay: -0.4s;
-  border-top-color: var(--accent2);
-  inset: 8px;
+/* -------- below-player info -------- */
+.info-section{padding:56px 5vw 90px;max-width:1200px;margin:0 auto;}
+.info-top{display:grid;grid-template-columns:1.6fr 1fr;gap:44px;margin-bottom:56px;}
+.info-title{font-family:var(--font-display);font-style:italic;font-size:clamp(28px,4vw,44px);margin-bottom:14px;}
+.info-meta{display:flex;gap:12px;color:var(--bone-dim);font-size:14px;margin-bottom:18px;flex-wrap:wrap;}
+.info-meta .pill{border:1px solid var(--line);padding:3px 11px;border-radius:5px;font-size:12px;}
+.info-desc{font-size:15px;line-height:1.85;color:var(--bone-dim);max-width:65ch;}
+.info-facts{font-size:14px;color:var(--bone-dim);}
+.info-facts div{margin-bottom:10px;}
+.info-facts b{color:var(--bone);font-weight:500;}
+
+.section-title{font-family:var(--font-display);font-style:italic;font-size:24px;margin-bottom:20px;}
+.related-rail{display:flex;gap:14px;overflow-x:auto;padding-bottom:16px;}
+.related-card{flex:0 0 auto;width:220px;border-radius:8px;overflow:hidden;background:var(--ink-2);cursor:pointer;transition:transform .3s var(--ease-out);border:1px solid var(--line);}
+.related-card:hover{transform:translateY(-5px);}
+.related-card img{width:100%;aspect-ratio:16/9;object-fit:cover;}
+.related-card .body{padding:10px 12px;}
+.related-card .t{font-size:14px;font-family:var(--font-display);font-style:italic;}
+.related-card .m{font-size:11px;color:var(--bone-dim);margin-top:3px;}
+
+/* -------- comments -------- */
+.comments{margin-top:64px;}
+.comment-form{display:flex;gap:14px;margin-bottom:32px;}
+.comment-form .who{
+  width:40px;height:40px;border-radius:9px;flex:0 0 auto;
+  background:linear-gradient(150deg,var(--oxblood),var(--ink-3));
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-style:italic;color:var(--gold);
 }
-
-.spinner-ring:nth-child(3) {
-  animation-delay: -0.8s;
-  border-top-color: var(--gold);
-  inset: 16px;
+.comment-form textarea{
+  flex:1;background:var(--ink-2);border:1px solid var(--line);border-radius:8px;color:var(--bone);
+  padding:12px 14px;font-family:inherit;font-size:14px;resize:vertical;min-height:46px;transition:border-color .2s;
 }
+.comment-form textarea:focus{outline:none;border-color:var(--gold-dim);}
+.comment-form button{align-self:flex-end;background:var(--gold);color:var(--ink);padding:10px 20px;border-radius:6px;font-size:13px;font-weight:700;transition:.2s;}
+.comment-form button:hover{background:#ddb862;}
+.comment{display:flex;gap:14px;margin-bottom:26px;}
+.comment .who{width:38px;height:38px;border-radius:9px;flex:0 0 auto;background:var(--ink-3);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-style:italic;color:var(--bone-dim);}
+.comment .name{font-size:13px;color:var(--bone);margin-bottom:3px;}
+.comment .name small{color:var(--bone-dim);font-weight:400;margin-inline-start:8px;}
+.comment .text{font-size:14px;line-height:1.7;color:var(--bone-dim);}
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+@media (prefers-reduced-motion: reduce){
+  .center-flash,.skip-intro,.next-card,.related-card{transition:none;}
 }
-
-.loading-text {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text2);
-  text-align: center;
-  padding: 0 20px;
-}
-
-.loading-text .source-name {
-  color: var(--accent);
-  font-weight: 700;
-}
-
-/* ERROR */
-.error-layer {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, #1a0000 0%, #000 70%);
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 60;
-  padding: 40px 20px;
-  text-align: center;
-}
-
-.error-layer.active {
-  display: flex;
-}
-
-.error-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: rgba(229, 9, 20, 0.15);
-  border: 2px solid var(--accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 40px;
-  font-weight: 900;
-  color: var(--accent);
-  margin-bottom: 25px;
-}
-
-.error-title {
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--text);
-  margin-bottom: 12px;
-}
-
-.error-desc {
-  font-size: 14px;
-  color: var(--text2);
-  max-width: 440px;
-  line-height: 1.7;
-  margin-bottom: 30px;
-}
-
-.error-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.error-btn {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  padding: 12px 28px;
-  border-radius: var(--radius);
-  font-size: 15px;
-  font-weight: 700;
-  font-family: var(--font);
-  cursor: pointer;
-  transition: all var(--transition);
-}
-
-.error-btn:hover {
-  background: var(--accent2);
-  transform: translateY(-2px);
-}
-
-.error-btn.secondary {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text);
-}
-
-.error-btn.secondary:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-/* TOAST */
-.toast-msg {
-  position: absolute;
-  top: 90px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-20px);
-  background: rgba(20, 20, 20, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
-  border-radius: 50px;
-  padding: 10px 24px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #fff;
-  z-index: 200;
-  opacity: 0;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  pointer-events: none;
-  box-shadow: var(--shadow);
-  white-space: nowrap;
-}
-
-.toast-msg.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-.toast-msg.success {
-  border-color: var(--green);
-  color: var(--green);
-}
-
-.toast-msg.error {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.toast-msg.info {
-  border-color: var(--gold);
-  color: var(--gold);
+@media (max-width:860px){
+  .info-top{grid-template-columns:1fr;}
+  .vol-wrap:hover .vol-slider{width:60px;}
+  .next-card{width:220px;right:4vw;}
 }
 </style>
 </head>
 <body>
 
-<div class="player-root" id="playerRoot">
-
-  <!-- LOADING -->
-  <div class="loading-layer" id="loadingLayer">
-    <div class="onyx-logo">ONYX</div>
-    <div class="spinner">
-      <div class="spinner-ring"></div>
-      <div class="spinner-ring"></div>
-      <div class="spinner-ring"></div>
-    </div>
-    <div class="loading-text">
-      جاري التحميل من <span class="source-name" id="loadingSourceName">...</span>
-    </div>
-  </div>
-
-  <!-- ERROR -->
-  <div class="error-layer" id="errorLayer">
-    <div class="error-icon">!</div>
-    <div class="error-title">تعذر تحميل الفيديو</div>
-    <div class="error-desc" id="errorDesc">
-      هذا المصدر غير متاح حالياً. جرّب مصدراً آخر.
-    </div>
-    <div class="error-actions">
-      <button class="error-btn" onclick="tryNextSource()">→ المصدر التالي</button>
-      <button class="error-btn secondary" onclick="reloadCurrent()">↻ إعادة المحاولة</button>
-    </div>
-  </div>
-
-  <!-- PLAYER IFRAME -->
-  <iframe
-    class="player-frame"
-    id="playerFrame"
-    src="about:blank"
-    allowfullscreen
-    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-    referrerpolicy="origin"
-    sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation"
-  ></iframe>
-
-  <!-- TOAST -->
-  <div class="toast-msg" id="toastMsg"></div>
-
+<!-- ============ TOP BAR ============ -->
+<div class="topbar" id="topbar">
+  <a class="back" href="index.html">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
+    رجوع إلى الرئيسية
+  </a>
+  <div class="brand">سينما <span>بوكس</span></div>
 </div>
 
+<!-- ============ STAGE ============ -->
+<div class="stage" id="stage">
+  <video id="video" playsinline></video>
+  <div class="stage-click" id="stageClick"></div>
+  <div class="center-flash" id="centerFlash"></div>
+
+  <button class="skip-intro" id="skipIntro">تخطي المقدمة ⏭</button>
+
+  <div class="next-card" id="nextCard">
+    <img id="nextImg" src="" alt="">
+    <div class="body">
+      <div class="label"><span class="ring"></span> الحلقة التالية خلال <span id="nextCountdown">10</span></div>
+      <div class="title" id="nextTitle"></div>
+    </div>
+  </div>
+
+  <!-- ============ CONTROLS ============ -->
+  <div class="controls" id="controls">
+    <div class="progress-wrap" id="progressWrap">
+      <div class="time-tooltip" id="timeTooltip">00:00</div>
+      <div class="progress-track">
+        <div class="progress-buffer" id="progressBuffer"></div>
+        <div class="progress-fill" id="progressFill"></div>
+        <div class="progress-handle" id="progressHandle"></div>
+      </div>
+    </div>
+    <div class="control-row">
+      <div class="control-left">
+        <button class="ctl-btn play-btn" id="playBtn"></button>
+        <button class="ctl-btn" id="rewindBtn" title="ترجيع 10 ثواني">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><text x="7" y="15.5" font-size="7" fill="currentColor" stroke="none">10</text></svg>
+        </button>
+        <button class="ctl-btn" id="forwardBtn" title="تقديم 10 ثواني">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/><text x="8" y="15.5" font-size="7" fill="currentColor" stroke="none">10</text></svg>
+        </button>
+        <div class="vol-wrap">
+          <button class="ctl-btn" id="muteBtn">
+            <svg id="volIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 5V4L8 9H4z"/></svg>
+          </button>
+          <div class="vol-slider"><input type="range" id="volRange" min="0" max="100" value="100"></div>
+        </div>
+        <div class="time-label"><span id="curTime">00:00</span> / <span id="durTime">00:00</span></div>
+      </div>
+      <div class="control-right">
+        <div class="title-block">
+          <div class="t" id="ctlTitle">—</div>
+          <div class="e" id="ctlEpisode"></div>
+        </div>
+        <div class="speed-menu">
+          <button class="speed-btn" id="speedBtn">1x</button>
+          <div class="speed-list" id="speedList">
+            <button data-speed="0.5">0.5x</button>
+            <button data-speed="0.75">0.75x</button>
+            <button data-speed="1" class="active">1x</button>
+            <button data-speed="1.25">1.25x</button>
+            <button data-speed="1.5">1.5x</button>
+            <button data-speed="2">2x</button>
+          </div>
+        </div>
+        <button class="ctl-btn" id="pipBtn" title="صورة داخل صورة">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="14" rx="2"/><rect x="12" y="11" width="7" height="5" rx="1" fill="currentColor" stroke="none"/></svg>
+        </button>
+        <button class="ctl-btn" id="fullscreenBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ INFO / RELATED / COMMENTS ============ -->
+<section class="info-section">
+  <div class="info-top">
+    <div>
+      <h1 class="info-title" id="infoTitle">—</h1>
+      <div class="info-meta" id="infoMeta"></div>
+      <p class="info-desc" id="infoDesc"></p>
+    </div>
+    <div class="info-facts" id="infoFacts"></div>
+  </div>
+
+  <div>
+    <div class="section-title">قد يعجبك أيضاً</div>
+    <div class="related-rail" id="relatedRail"></div>
+  </div>
+
+  <div class="comments">
+    <div class="section-title">التعليقات</div>
+    <form class="comment-form" id="commentForm">
+      <div class="who">أ</div>
+      <textarea id="commentInput" placeholder="اكتب تعليقك…" rows="1"></textarea>
+      <button type="submit">نشر</button>
+    </form>
+    <div id="commentList"></div>
+  </div>
+</section>
+
 <script>
-/* ═══════════════════════════════════════════════════════════
-   ONYX PLAYER — v8.0 (مُصحّح)
-   ═══════════════════════════════════════════════════════════ */
+/* ================================================================
+   Cinema Box — player logic
+   -----------------------------------------------------------------
+   API CONTRACT (adjust to your movie_api.py):
+     GET /api/movie/<id> -> { id, title, desc, backdrop, poster,
+                               stream_url, year, rating, duration,
+                               genres:[], related:[{id,title,poster,year}] }
+   `stream_url` should point at an actual video file/HLS manifest
+   served by your Flask backend. Until wired up, a public sample
+   video is used so the player is fully testable standalone.
+   ================================================================ */
+const params = new URLSearchParams(location.search);
+const MOVIE_ID = params.get('id') || '1';
+const ENDPOINT = (id) => `/api/movie/${id}`;
 
-// SOURCES from Flask
-const SOURCES = {{ sources_json|safe }};
-
-// URL Params
-const params = new URLSearchParams(window.location.search);
-const mediaType = params.get('type') || 'movie';
-const mediaId = params.get('id') || '';
-const sourceIndex = parseInt(params.get('source') || '0', 10);
-const seasonNum = params.get('season') || '1';
-const episodeNum = params.get('episode') || '1';
-
-// State
-const state = {
-  currentSourceIndex: sourceIndex,
-  errorCount: 0,
-  loadingTimeout: null,
+const FALLBACK_STREAM = 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
+const DEMO_MOVIE = {
+  id: MOVIE_ID, title: 'العابر', episode: 'الفيلم الكامل',
+  desc: 'قصة مشحونة بالتوتر تتبع بطلاً يقف على حافة قرار يغيّر كل شيء، وسط شبكة من الأسرار التي تتكشف رويداً حتى المشهد الأخير. إخراج مكثّف وأداء يحبس الأنفاس.',
+  backdrop: 'https://picsum.photos/seed/cinemabox-hero/1600/900',
+  stream_url: FALLBACK_STREAM,
+  year: 2023, rating: '8.1', duration: '1س 46د',
+  genres: ['أكشن', 'إثارة', 'دراما'],
+  related: Array.from({length:8}).map((_,i)=>({
+    id: 100+i, title: ['ظل الصحراء','ليالي القاهرة','بين نارين','مدينة الصمت','خيط رفيع','قبل الفجر','وجه آخر','سكة بلا عودة'][i],
+    poster: `https://picsum.photos/seed/cinemabox-rel${i}/400/225`, year: 2020+i%4,
+  })),
 };
 
-// DOM Refs
-const $ = (id) => document.getElementById(id);
-const playerFrame = $('playerFrame');
-const loadingLayer = $('loadingLayer');
-const loadingSourceName = $('loadingSourceName');
-const errorLayer = $('errorLayer');
-const errorDesc = $('errorDesc');
-const toastEl = $('toastMsg');
+let MOVIE = null;
 
-/* ═══════════════════════════════════════════════════════════
-   BUILD URL
-   ═══════════════════════════════════════════════════════════ */
-function buildUrl(source) {
-  let url = source[mediaType] || source.movie || source.tv || '';
-  
-  url = url.replace(/{id}/g, mediaId);
-  url = url.replace(/{s}/g, seasonNum);
-  url = url.replace(/{e}/g, episodeNum);
-  url = url.replace(/{season}/g, seasonNum);
-  url = url.replace(/{episode}/g, episodeNum);
-  
-  return url;
+async function loadMovie(){
+  try{
+    const res = await fetch(ENDPOINT(MOVIE_ID), {headers:{'Accept':'application/json'}});
+    if(!res.ok) throw 0;
+    MOVIE = await res.json();
+  }catch(e){
+    MOVIE = DEMO_MOVIE;
+  }
+  hydrate();
 }
 
-/* ═══════════════════════════════════════════════════════════
-   LOAD SOURCE
-   ═══════════════════════════════════════════════════════════ */
-function loadSource(index) {
-  if (index < 0 || index >= SOURCES.length) index = 0;
-  
-  state.currentSourceIndex = index;
-  const source = SOURCES[index];
-  
-  if (!source) {
-    showError('لا يوجد مصدر متاح');
-    return;
+function fmt(t){
+  if(!isFinite(t)) return '00:00';
+  const m = Math.floor(t/60).toString().padStart(2,'0');
+  const s = Math.floor(t%60).toString().padStart(2,'0');
+  return `${m}:${s}`;
+}
+
+function hydrate(){
+  document.getElementById('ctlTitle').textContent = MOVIE.title;
+  document.getElementById('ctlEpisode').textContent = MOVIE.episode || '';
+  document.getElementById('infoTitle').textContent = MOVIE.title;
+  document.getElementById('infoDesc').textContent = MOVIE.desc;
+  document.getElementById('infoMeta').innerHTML =
+    `<span class="pill">${MOVIE.year}</span><span class="pill">⭐ ${MOVIE.rating}</span><span class="pill">${MOVIE.duration}</span>`;
+  document.getElementById('infoFacts').innerHTML = `
+    <div><b>التصنيفات:</b> ${(MOVIE.genres||[]).join('، ')}</div>
+    <div><b>السنة:</b> ${MOVIE.year}</div>
+    <div><b>التقييم:</b> ⭐ ${MOVIE.rating}</div>`;
+
+  document.getElementById('relatedRail').innerHTML = (MOVIE.related||[]).map(r => `
+    <a class="related-card" href="player.html?id=${r.id}">
+      <img src="${r.poster}" alt="${r.title}">
+      <div class="body"><div class="t">${r.title}</div><div class="m">${r.year}</div></div>
+    </a>`).join('');
+
+  const v = document.getElementById('video');
+  v.poster = MOVIE.backdrop;
+  v.src = MOVIE.stream_url || FALLBACK_STREAM;
+  v.play().catch(()=>{ /* autoplay blocked — waits for a user gesture */ });
+}
+
+/* ---------------- player controls ---------------- */
+const video = document.getElementById('video');
+const playBtn = document.getElementById('playBtn');
+const centerFlash = document.getElementById('centerFlash');
+const ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+const ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
+playBtn.innerHTML = ICON_PLAY;
+
+function togglePlay(){
+  if(video.paused){ video.play(); flash(ICON_PLAY); } else { video.pause(); flash(ICON_PAUSE); }
+}
+function flash(icon){
+  centerFlash.innerHTML = icon;
+  centerFlash.classList.add('show');
+  setTimeout(()=>centerFlash.classList.remove('show'), 380);
+}
+video.addEventListener('play', ()=>{ playBtn.innerHTML = ICON_PAUSE; });
+video.addEventListener('pause', ()=>{ playBtn.innerHTML = ICON_PLAY; });
+playBtn.addEventListener('click', togglePlay);
+document.getElementById('stageClick').addEventListener('click', togglePlay);
+
+document.getElementById('rewindBtn').addEventListener('click', ()=>{ video.currentTime = Math.max(0, video.currentTime-10); });
+document.getElementById('forwardBtn').addEventListener('click', ()=>{ video.currentTime = Math.min(video.duration||0, video.currentTime+10); });
+
+/* progress bar */
+const progressWrap = document.getElementById('progressWrap');
+const progressFill = document.getElementById('progressFill');
+const progressBuffer = document.getElementById('progressBuffer');
+const progressHandle = document.getElementById('progressHandle');
+const timeTooltip = document.getElementById('timeTooltip');
+let scrubbing = false;
+
+function updateProgress(){
+  if(!video.duration) return;
+  const pct = (video.currentTime/video.duration)*100;
+  progressFill.style.width = pct+'%';
+  progressHandle.style.right = pct+'%';
+  document.getElementById('curTime').textContent = fmt(video.currentTime);
+  document.getElementById('durTime').textContent = fmt(video.duration);
+  if(video.buffered.length){
+    const bufPct = (video.buffered.end(video.buffered.length-1)/video.duration)*100;
+    progressBuffer.style.width = bufPct+'%';
   }
-  
-  console.log('[ONYX] Loading:', source.name);
-  
-  // Show loading
-  loadingSourceName.textContent = source.name || 'المصدر';
-  loadingLayer.classList.remove('hidden');
-  errorLayer.classList.remove('active');
-  
-  // Build URL
-  const url = buildUrl(source);
-  console.log('[ONYX] URL:', url);
-  
-  // Set iframe
-  try {
-    playerFrame.src = url;
-  } catch (e) {
-    console.error('[ONYX] Error:', e);
-    showError('خطأ في تحميل المصدر');
-    return;
-  }
-  
-  // Timeout
-  clearTimeout(state.loadingTimeout);
-  state.loadingTimeout = setTimeout(() => {
-    if (!loadingLayer.classList.contains('hidden')) {
-      console.warn('[ONYX] Timeout for:', source.name);
-      showError('انتهت مدة الانتظار');
+  // skip-intro affordance for first 20s
+  document.getElementById('skipIntro').classList.toggle('show', video.currentTime < 20 && video.currentTime > 1);
+  // next-episode card in the final 12s
+  const remaining = video.duration - video.currentTime;
+  document.getElementById('nextCard').classList.toggle('show', remaining < 12 && remaining > 0);
+}
+video.addEventListener('timeupdate', updateProgress);
+video.addEventListener('progress', updateProgress);
+
+function scrubTo(e){
+  const rect = progressWrap.getBoundingClientRect();
+  const ratio = 1 - Math.min(Math.max((e.clientX-rect.left)/rect.width,0),1); // RTL: right = start
+  const t = ratio*video.duration;
+  timeTooltip.textContent = fmt(t);
+  timeTooltip.style.right = `${(1-ratio)*100}%`;
+  return t;
+}
+progressWrap.addEventListener('mousemove', scrubTo);
+progressWrap.addEventListener('mousedown', e=>{ scrubbing = true; video.currentTime = scrubTo(e); });
+window.addEventListener('mouseup', ()=> scrubbing=false);
+window.addEventListener('mousemove', e=>{ if(scrubbing) video.currentTime = scrubTo(e); });
+
+/* skip intro / next card wiring */
+document.getElementById('skipIntro').addEventListener('click', ()=>{ video.currentTime = 20; });
+let nextTimer;
+video.addEventListener('timeupdate', ()=>{
+  const remaining = video.duration - video.currentTime;
+  if(remaining < 10 && remaining > 0 && !nextTimer){
+    const next = (MOVIE.related||[])[0];
+    if(next){
+      document.getElementById('nextImg').src = next.poster;
+      document.getElementById('nextTitle').textContent = next.title;
+      let count = Math.ceil(remaining);
+      const el = document.getElementById('nextCountdown');
+      nextTimer = setInterval(()=>{
+        count--; el.textContent = Math.max(count,0);
+        if(count<=0){ clearInterval(nextTimer); location.href = `player.html?id=${next.id}`; }
+      },1000);
     }
-  }, 20000);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   IFRAME LOAD
-   ═══════════════════════════════════════════════════════════ */
-playerFrame.addEventListener('load', () => {
-  if (playerFrame.src === 'about:blank') return;
-  console.log('[ONYX] Iframe loaded');
-  setTimeout(() => {
-    loadingLayer.classList.add('hidden');
-    clearTimeout(state.loadingTimeout);
-    state.errorCount = 0;
-  }, 800);
-});
-
-/* ═══════════════════════════════════════════════════════════
-   SHOW ERROR
-   ═══════════════════════════════════════════════════════════ */
-function showError(msg) {
-  clearTimeout(state.loadingTimeout);
-  loadingLayer.classList.add('hidden');
-  errorDesc.textContent = msg || 'هذا المصدر غير متاح حالياً.';
-  errorLayer.classList.add('active');
-  state.errorCount++;
-}
-
-/* ═══════════════════════════════════════════════════════════
-   TRY NEXT / RELOAD
-   ═══════════════════════════════════════════════════════════ */
-function tryNextSource() {
-  const next = state.currentSourceIndex + 1;
-  if (next >= SOURCES.length) {
-    showError('لا توجد مصادر أخرى متاحة');
-    return;
-  }
-  loadSource(next);
-}
-
-function reloadCurrent() {
-  state.errorCount = 0;
-  errorLayer.classList.remove('active');
-  loadSource(state.currentSourceIndex);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   TOAST
-   ═══════════════════════════════════════════════════════════ */
-function showToast(msg, type = '') {
-  toastEl.textContent = msg;
-  toastEl.className = 'toast-msg show ' + type;
-  clearTimeout(toastEl._t);
-  toastEl._t = setTimeout(() => {
-    toastEl.className = 'toast-msg ' + type;
-  }, 2200);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   NOTIFY PARENT
-   ═══════════════════════════════════════════════════════════ */
-function notifyParent(event, data) {
-  try {
-    if (window.parent && window.parent !== window) {
-      window.parent.postMessage({
-        type: 'onyx-player',
-        event: event,
-        data: data,
-      }, '*');
-    }
-  } catch (e) {}
-}
-
-/* ═══════════════════════════════════════════════════════════
-   MESSAGE FROM PARENT
-   ═══════════════════════════════════════════════════════════ */
-window.addEventListener('message', (e) => {
-  const msg = e.data;
-  if (!msg || msg.type !== 'onyx-command') return;
-  
-  switch (msg.command) {
-    case 'loadSource':
-      if (msg.idx !== undefined) loadSource(msg.idx);
-      break;
-    case 'next':
-      tryNextSource();
-      break;
-    case 'reload':
-      reloadCurrent();
-      break;
   }
 });
 
-/* ═══════════════════════════════════════════════════════════
-   INIT
-   ═══════════════════════════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('[ONYX Player] Init');
-  console.log('[ONYX] Sources:', SOURCES.length);
-  console.log('[ONYX] Media:', mediaType, mediaId);
-  
-  if (!mediaId) {
-    showError('لم يتم تحديد الفيلم');
-    return;
-  }
-  
-  if (!SOURCES || !SOURCES.length) {
-    showError('لا توجد مصادر متاحة');
-    return;
-  }
-  
-  loadSource(sourceIndex);
-  notifyParent('ready', { sources: SOURCES.length });
+/* volume */
+const volRange = document.getElementById('volRange');
+const volIcon = document.getElementById('volIcon');
+const ICON_VOL = '<path d="M4 9v6h4l5 5V4L8 9H4z"/>';
+const ICON_MUTE = '<path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M17 9l4 6M21 9l-4 6" stroke="currentColor" stroke-width="1.6" fill="none"/>';
+volRange.addEventListener('input', ()=>{
+  video.volume = volRange.value/100;
+  video.muted = video.volume===0;
+  volIcon.innerHTML = video.muted ? ICON_MUTE : ICON_VOL;
+});
+document.getElementById('muteBtn').addEventListener('click', ()=>{
+  video.muted = !video.muted;
+  volIcon.innerHTML = video.muted ? ICON_MUTE : ICON_VOL;
+  volRange.value = video.muted ? 0 : (video.volume*100 || 100);
 });
 
-/* ═══════════════════════════════════════════════════════════
-   KEYBOARD
-   ═══════════════════════════════════════════════════════════ */
-document.addEventListener('keydown', (e) => {
-  if (e.ctrlKey && (e.key === 'n' || e.key === 'N')) {
-    e.preventDefault();
-    tryNextSource();
-  }
-  if (e.ctrlKey && (e.key === 'r' || e.key === 'R')) {
-    e.preventDefault();
-    reloadCurrent();
-  }
-  if (e.key === 'Escape') {
-    notifyParent('close', {});
-    try { window.parent.postMessage({ type: 'onyx-close' }, '*'); } catch (e) {}
+/* speed menu */
+const speedBtn = document.getElementById('speedBtn');
+const speedList = document.getElementById('speedList');
+speedBtn.addEventListener('click', ()=> speedList.classList.toggle('open'));
+speedList.querySelectorAll('button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    video.playbackRate = parseFloat(b.dataset.speed);
+    speedBtn.textContent = b.textContent;
+    speedList.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    speedList.classList.remove('open');
+  });
+});
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.speed-menu')) speedList.classList.remove('open');
+});
+
+/* pip + fullscreen */
+document.getElementById('pipBtn').addEventListener('click', async ()=>{
+  try{ await video.requestPictureInPicture(); }catch(e){}
+});
+document.getElementById('fullscreenBtn').addEventListener('click', ()=>{
+  if(!document.fullscreenElement) document.getElementById('stage').requestFullscreen();
+  else document.exitFullscreen();
+});
+
+/* auto-hide controls on inactivity */
+let hideTimer;
+const controls = document.getElementById('controls');
+const topbar = document.getElementById('topbar');
+function showControls(){
+  controls.classList.remove('hide'); topbar.classList.remove('hide');
+  clearTimeout(hideTimer);
+  hideTimer = setTimeout(()=>{
+    if(!video.paused){ controls.classList.add('hide'); topbar.classList.add('hide'); }
+  }, 3200);
+}
+['mousemove','touchstart','keydown'].forEach(ev => document.addEventListener(ev, showControls));
+showControls();
+
+/* keyboard shortcuts */
+document.addEventListener('keydown', e=>{
+  if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+  switch(e.key){
+    case ' ': case 'k': e.preventDefault(); togglePlay(); break;
+    case 'ArrowRight': video.currentTime += 5; break;
+    case 'ArrowLeft': video.currentTime -= 5; break;
+    case 'ArrowUp': e.preventDefault(); video.volume = Math.min(1, video.volume+0.1); volRange.value = video.volume*100; break;
+    case 'ArrowDown': e.preventDefault(); video.volume = Math.max(0, video.volume-0.1); volRange.value = video.volume*100; break;
+    case 'f': document.getElementById('fullscreenBtn').click(); break;
+    case 'm': document.getElementById('muteBtn').click(); break;
   }
 });
 
-// Prevent right-click
-document.addEventListener('contextmenu', (e) => e.preventDefault());
+/* ---------------- comments (local demo state) ---------------- */
+const DEMO_COMMENTS = [
+  {name:'سارة', time:'قبل يومين', text:'من أقوى الأفلام اللي شفتها هالسنة، النهاية صدمتني فعلاً.'},
+  {name:'يوسف', time:'قبل 5 أيام', text:'التصوير في المشهد الأخير خرافي، والموسيقى عززت التوتر بشكل رهيب.'},
+];
+function renderComments(list){
+  document.getElementById('commentList').innerHTML = list.map(c => `
+    <div class="comment">
+      <div class="who">${c.name[0]}</div>
+      <div>
+        <div class="name">${c.name} <small>${c.time}</small></div>
+        <div class="text">${c.text}</div>
+      </div>
+    </div>`).join('');
+}
+renderComments(DEMO_COMMENTS);
+document.getElementById('commentForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const input = document.getElementById('commentInput');
+  if(!input.value.trim()) return;
+  DEMO_COMMENTS.unshift({name:'أنت', time:'الآن', text: input.value.trim()});
+  renderComments(DEMO_COMMENTS);
+  input.value = '';
+});
 
-console.log('[ONYX Player] Ready');
+loadMovie();
 </script>
-
 </body>
 </html>
