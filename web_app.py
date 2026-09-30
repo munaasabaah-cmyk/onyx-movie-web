@@ -86,53 +86,35 @@ def sec(r):
 # =========================================================
 REAL_SOURCES = [
     {
-        "name": "VidLink 4K",
+        "name": "VidCore 4K",
         "q": "4K",
-        "movie": "https://vidlink.pro/movie/{id}?quality=4k&sub=ar",
-        "tv": "https://vidlink.pro/tv/{id}/{s}/{e}?quality=4k&sub=ar",
+        "movie": "https://www.vidcore.org/embed/movie/{id}",
+        "tv": "https://www.vidcore.org/embed/series/{id}/{s}/{e}",
     },
     {
-        "name": "Videasy 4K",
+        "name": "Videasy Ultra",
         "q": "4K",
-        "movie": "https://player.videasy.net/movie/{id}?quality=4k&sub=ar",
-        "tv": "https://player.videasy.net/tv/{id}/{s}/{e}?quality=4k&sub=ar",
+        "movie": "https://videasy.xyz/embed/movie/{id}",
+        "tv": "https://videasy.xyz/embed/tv/{id}/{s}/{e}",
     },
     {
-        "name": "VidSrc 4K",
+        "name": "MultiEmbed HD+",
         "q": "4K",
-        "movie": "https://vidsrc.xyz/embed/movie?tmdb={id}&quality=4k&ds_lang=ar",
-        "tv": "https://vidsrc.xyz/embed/tv?tmdb={id}&season={s}&episode={e}&quality=4k&ds_lang=ar",
+        "movie": "https://multimbed.mov/directpass.php?video_id={id}&tmdb=1",
+        "tv": "https://multimbed.mov/directpass.php?video_id={id}&tmdb=1&s={s}&e={e}",
     },
     {
-        "name": "VidSrc ME",
-        "q": "HD",
-        "movie": "https://vidsrc.me/embed/movie?tmdb={id}",
-        "tv": "https://vidsrc.me/embed/tv?tmdb={id}&season={s}&episode={e}",
+        "name": "SuperEmbed Hub",
+        "q": "4K",
+        "movie": "https://superembed.stream/movie/{id}",
+        "tv": "https://superembed.stream/tv/{id}/{s}/{e}",
     },
     {
-        "name": "AutoEmbed",
-        "q": "HD",
+        "name": "AutoEmbed Pro",
+        "q": "HD/4K",
         "movie": "https://player.autoembed.cc/embed/movie/{id}",
         "tv": "https://player.autoembed.cc/embed/tv/{id}/{s}/{e}",
-    },
-    {
-        "name": "2Embed",
-        "q": "HD",
-        "movie": "https://www.2embed.to/embed/tmdb/movie?id={id}",
-        "tv": "https://www.2embed.to/embed/tmdb/tv?id={id}&s={s}&e={e}",
-    },
-    {
-        "name": "SmashyStream",
-        "q": "HD",
-        "movie": "https://player.smashy.stream/movie/{id}",
-        "tv": "https://player.smashy.stream/tv/{id}?s={s}&e={e}",
-    },
-    {
-        "name": "Embed.su",
-        "q": "HD",
-        "movie": "https://embed.su/embed/movie/{id}",
-        "tv": "https://embed.su/embed/tv/{id}/{s}/{e}",
-    },
+    }
 ]
 
 PLAYER_SOURCES = REAL_SOURCES
