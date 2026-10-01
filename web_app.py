@@ -86,34 +86,10 @@ def sec(r):
 # =========================================================
 REAL_SOURCES = [
     {
-        "name": "VidCore 4K",
+        "name": "CinemaBox / Albox Direct Stream",
         "q": "4K",
-        "movie": "https://www.vidcore.org/embed/movie/{id}",
-        "tv": "https://www.vidcore.org/embed/series/{id}/{s}/{e}",
-    },
-    {
-        "name": "Videasy Ultra",
-        "q": "4K",
-        "movie": "https://videasy.xyz/embed/movie/{id}",
-        "tv": "https://videasy.xyz/embed/tv/{id}/{s}/{e}",
-    },
-    {
-        "name": "MultiEmbed HD+",
-        "q": "4K",
-        "movie": "https://multimbed.mov/directpass.php?video_id={id}&tmdb=1",
-        "tv": "https://multimbed.mov/directpass.php?video_id={id}&tmdb=1&s={s}&e={e}",
-    },
-    {
-        "name": "SuperEmbed Hub",
-        "q": "4K",
-        "movie": "https://superembed.stream/movie/{id}",
-        "tv": "https://superembed.stream/tv/{id}/{s}/{e}",
-    },
-    {
-        "name": "AutoEmbed Pro",
-        "q": "HD/4K",
-        "movie": "https://player.autoembed.cc/embed/movie/{id}",
-        "tv": "https://player.autoembed.cc/embed/tv/{id}/{s}/{e}",
+        "movie": "https://smart.albox.co/movie/{id}",
+        "tv": "https://smart.albox.co/tv/{id}/{s}/{e}",
     }
 ]
 
