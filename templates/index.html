@@ -681,18 +681,13 @@ button{font-family:var(--font-u);cursor:pointer;border:none;background:none;colo
   <span>صُنع بـ ❤️ لسينما عربية حقيقية</span>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
-     حقن مفتاح TMDB من Flask
-     ═══════════════════════════════════════════════════════ -->
+<!-- حقن مفتاح TMDB من Flask -->
 <script>
   window.__TMDB_KEY__ = "{{ tmdb_key|e }}";
 </script>
 
-<!-- ═══════════════════════════════════════════════════════
-     JAVASCRIPT ENGINE
-     ═══════════════════════════════════════════════════════ -->
 <script>
-/* TU CENMA — Front-End Engine v3.0 */
+/* TU CENMA — Front-End Engine v3.1 (Discord-Ready) */
 
 const CFG = {
   apiKey:    window.__TMDB_KEY__ || '',
@@ -703,15 +698,16 @@ const CFG = {
   maxHero:   6,
 };
 
+/* ⚠️ تم استبدال https://api.themoviedb.org/3/ بـ /api/3/ ليعمل داخل Discord Activity */
 const TMDB = {
-  trending:  (type='movie',time='week') => `https://api.themoviedb.org/3/trending/${type}/${time}?api_key=${CFG.apiKey}&language=${CFG.lang}`,
-  popular:   (type='movie',page=1) => `https://api.themoviedb.org/3/${type}/popular?api_key=${CFG.apiKey}&language=${CFG.lang}&page=${page}`,
-  topRated:  (type='movie',page=1) => `https://api.themoviedb.org/3/${type}/top_rated?api_key=${CFG.apiKey}&language=${CFG.lang}&page=${page}`,
-  upcoming:  () => `https://api.themoviedb.org/3/movie/upcoming?api_key=${CFG.apiKey}&language=${CFG.lang}`,
-  nowPlay:   () => `https://api.themoviedb.org/3/movie/now_playing?api_key=${CFG.apiKey}&language=${CFG.lang}`,
-  genre:     (type='movie',genreId,page=1) => `https://api.themoviedb.org/3/discover/${type}?api_key=${CFG.apiKey}&language=${CFG.lang}&with_genres=${genreId}&sort_by=vote_average.desc&vote_count.gte=100&page=${page}`,
-  detail:    (type,id) => `https://api.themoviedb.org/3/${type}/${id}?api_key=${CFG.apiKey}&language=${CFG.lang}&append_to_response=videos,credits,similar`,
-  search:    (q,page=1) => `https://api.themoviedb.org/3/search/multi?api_key=${CFG.apiKey}&language=${CFG.lang}&query=${encodeURIComponent(q)}&page=${page}`,
+  trending:  (type='movie',time='week') => `/api/3/trending/${type}/${time}?api_key=${CFG.apiKey}&language=${CFG.lang}`,
+  popular:   (type='movie',page=1) => `/api/3/${type}/popular?api_key=${CFG.apiKey}&language=${CFG.lang}&page=${page}`,
+  topRated:  (type='movie',page=1) => `/api/3/${type}/top_rated?api_key=${CFG.apiKey}&language=${CFG.lang}&page=${page}`,
+  upcoming:  () => `/api/3/movie/upcoming?api_key=${CFG.apiKey}&language=${CFG.lang}`,
+  nowPlay:   () => `/api/3/movie/now_playing?api_key=${CFG.apiKey}&language=${CFG.lang}`,
+  genre:     (type='movie',genreId,page=1) => `/api/3/discover/${type}?api_key=${CFG.apiKey}&language=${CFG.lang}&with_genres=${genreId}&sort_by=vote_average.desc&vote_count.gte=100&page=${page}`,
+  detail:    (type,id) => `/api/3/${type}/${id}?api_key=${CFG.apiKey}&language=${CFG.lang}&append_to_response=videos,credits,similar`,
+  search:    (q,page=1) => `/api/3/search/multi?api_key=${CFG.apiKey}&language=${CFG.lang}&query=${encodeURIComponent(q)}&page=${page}`,
   img:       (path,size='w500') => path ? CFG.imgBase+size+path : 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 300%22%3E%3Crect fill=%22%23181924%22 width=%22200%22 height=%22300%22/%3E%3Ctext x=%22100%22 y=%22155%22 font-size=%2230%22 text-anchor=%22middle%22 fill=%22%235a5a6e%22%3E🎬%3C/text%3E%3C/svg%3E',
   backdrop:  (path,size='w1280') => path ? CFG.imgBase+size+path : '',
 };
