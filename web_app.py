@@ -3,8 +3,16 @@
 ONYX CINEMA v17.1 - Flask + Discord Bot + movie_api Integration
 Security hardened: no hardcoded keys, keys passed via template
 """
+
 from flask import Flask, jsonify, request, render_template
-import os, time, json, threading, subprocess, sys
+import os
+import time
+import json
+import threading
+import subprocess
+import sys
+import urllib.request
+import urllib.parse
 from collections import defaultdict
 from datetime import datetime
 
@@ -14,6 +22,7 @@ try:
 except ImportError:
     pass
 
+# Import movie_api
 try:
     import movie_api
     HAS_MOVIE_API = True
@@ -25,22 +34,22 @@ except ImportError as e:
 app = Flask(__name__)
 
 # =========================================================
-# CONFIG — لا تضع أي مفتاح هنا، فقط اقرأ من البيئة
+# CONFIG — لا تضع أي مفتاح هنا، فقط من البيئة
 # =========================================================
-TMDB_API_KEY = os.getenv("TMDB_API_KEY", "")  # ← أزلت القيمة الافتراضية
+TMDB_API_KEY = os.getenv("TMDB_API_KEY", "")
 TMDB_BASE    = "https://api.themoviedb.org/3"
 TMDB_IMG     = "https://image.tmdb.org/t/p"
 RUN_BOT      = os.getenv("RUN_BOT", "false").lower() == "true"
 
 if not TMDB_API_KEY:
-    print("[ONYX] WARNING: TMDB_API_KEY is not set in environment!")
+    print("[ONYX] WARNING: TMDB_API_KEY is not set!")
 
 # =========================================================
 # SECURITY
 # =========================================================
-_rate  = defaultdict(list)
+_rate   = defaultdict(list)
 _banned = {}
-_log   = defaultdict(int)
+_log    = defaultdict(int)
 
 
 def get_ip():
@@ -93,12 +102,8 @@ SOURCES_JSON   = json.dumps(PLAYER_SOURCES, ensure_ascii=False)
 
 
 # =========================================================
-# TMDB FALLBACK — استيرادات في الأعلى
+# TMDB FALLBACK
 # =========================================================
-import urllib.request
-import urllib.parse
-
-
 def tmdb_fallback(ep, params=None):
     if not TMDB_API_KEY:
         return {"error": "no key", "results": []}
@@ -151,15 +156,17 @@ def get_matches(league=None, date=None):
 
 
 # =========================================================
-# ROUTES — PAGES (هنا نمرر المفتاح للـ template)
+# ROUTES — PAGES (نمرر المفتاح للـ template)
 # =========================================================
 @app.route("/")
 def index():
     return render_template("index.html", tmdb_key=TMDB_API_KEY)
 
+
 @app.route("/player")
 def player():
     return render_template("player.html", tmdb_key=TMDB_API_KEY)
+
 
 @app.route("/match")
 def match_player():
@@ -329,6 +336,7 @@ def health():
 # DISCORD BOT
 # =========================================================
 _bot_started = False
+
 
 def start_discord_bot():
     global _bot_started
