@@ -24,43 +24,50 @@ body{background:var(--bg);color:var(--parch);font-family:var(--font-u);-webkit-f
 a{color:inherit;text-decoration:none}
 button{font-family:var(--font-u);cursor:pointer;border:none;background:none;color:inherit;padding:0}
 img{display:block;max-width:100%}
+::selection{background:var(--teal);color:var(--bg)}
 ::-webkit-scrollbar{height:6px;width:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
 :focus-visible{outline:2px solid var(--teal);outline-offset:3px}
 
-/* topbar */
+/* ═══ topbar ═══ */
 .topbar{
   position:fixed;top:0;inset-inline:0;z-index:200;
   display:flex;align-items:center;justify-content:space-between;
   padding:18px 5vw;
   background:linear-gradient(180deg,rgba(8,9,15,.95) 0%,transparent 100%);
   pointer-events:auto;
+  transition:opacity .4s,transform .4s var(--ease);
 }
+.topbar.hidden{opacity:0;transform:translateY(-100%);pointer-events:none}
 .brand{font-family:var(--font-d);font-size:20px;letter-spacing:.1em;color:var(--parch)}
 .brand em{color:var(--teal);font-style:normal}
 .back{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--parch-dim);transition:.2s}
 .back:hover{color:var(--teal)}
 .back svg{width:18px;height:18px}
+.top-actions{display:flex;gap:10px;align-items:center}
+.icon-btn{
+  width:38px;height:38px;border-radius:50%;
+  border:1px solid var(--line2);background:rgba(8,9,15,.6);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--parch-dim);transition:.2s;
+  backdrop-filter:blur(8px);
+}
+.icon-btn:hover{border-color:var(--teal);color:var(--teal)}
+.icon-btn svg{width:17px;height:17px}
 
-/* stage — full-screen player */
+/* ═══ stage ═══ */
 .stage{
   position:relative;width:100%;height:100vh;background:#000;overflow:hidden;
 }
 #video-frame{
-  position:absolute;inset:0;
-  width:100%;height:100%;
-  border:none;background:#000;
-  display:block;
+  position:absolute;inset:0;width:100%;height:100%;
+  border:none;background:#000;display:block;
 }
-
-/* loading overlay */
 .stage-loader{
   position:absolute;inset:0;z-index:8;
-  display:flex;align-items:center;justify-content:center;
-  background:#000;
-  transition:opacity .5s;
-  pointer-events:none;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:22px;
+  background:#000;transition:opacity .5s;pointer-events:none;
 }
 .stage-loader.gone{opacity:0}
 .spinner{
@@ -71,15 +78,41 @@ img{display:block;max-width:100%}
   animation:spin .9s linear infinite;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
+.loader-text{
+  font-family:var(--font-d);font-size:14px;
+  letter-spacing:.15em;color:var(--parch-dim);
+  animation:pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
 
-/* info below */
+/* ═══ server selector ═══ */
+.server-bar{
+  position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
+  z-index:9;display:flex;gap:8px;padding:8px;
+  background:rgba(8,9,15,.85);backdrop-filter:blur(12px);
+  border:1px solid var(--line2);border-radius:40px;
+  opacity:0;transition:opacity .3s var(--ease);
+  pointer-events:none;
+}
+.stage:hover .server-bar,
+.server-bar:hover{opacity:1;pointer-events:auto}
+.server-btn{
+  padding:7px 16px;border-radius:24px;font-size:12px;
+  color:var(--parch-dim);background:transparent;
+  border:1px solid transparent;transition:.2s;
+  white-space:nowrap;
+}
+.server-btn:hover{color:var(--parch);border-color:var(--line2)}
+.server-btn.active{background:var(--teal);color:var(--bg);font-weight:700}
+
+/* ═══ info ═══ */
 .info-wrap{max-width:1240px;margin:0 auto;padding:56px 5vw 100px}
 
-/* facts + poster */
 .info-top{display:grid;grid-template-columns:1.7fr 1fr;gap:50px;margin-bottom:60px}
 .info-poster{
   width:180px;aspect-ratio:2/3;border-radius:12px;overflow:hidden;
   border:1px solid var(--line2);flex-shrink:0;
+  background:var(--bg2);
 }
 .info-poster img{width:100%;height:100%;object-fit:cover}
 .info-main{display:flex;gap:24px}
@@ -98,36 +131,60 @@ img{display:block;max-width:100%}
   font-size:14px;line-height:1.9;color:var(--parch-dim);
   max-width:70ch;margin-bottom:20px;
 }
-.info-genres{display:flex;flex-wrap:wrap;gap:8px}
+.info-genres{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
 .info-genres span{
   background:rgba(0,200,200,.08);color:var(--teal);
   border:1px solid rgba(0,200,200,.2);border-radius:20px;
   padding:4px 14px;font-size:12px;
 }
+.info-actions{display:flex;gap:10px;flex-wrap:wrap}
+.action-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;
+  background:rgba(232,224,212,.08);color:var(--parch);
+  border:1px solid var(--line2);transition:.2s;
+}
+.action-btn:hover{background:rgba(232,224,212,.15);transform:translateY(-1px)}
+.action-btn.primary{background:var(--teal);color:var(--bg);border-color:transparent}
+.action-btn.primary:hover{background:#00e0e0}
+.action-btn svg{width:15px;height:15px}
+
 .info-facts{font-size:14px;color:var(--parch-dim)}
-.fact-row{margin-bottom:12px}
+.fact-row{margin-bottom:14px}
 .fact-row b{
   display:block;font-size:11px;font-weight:700;
-  color:var(--parch);letter-spacing:.06em;margin-bottom:2px;
+  color:var(--parch);letter-spacing:.06em;margin-bottom:3px;
+}
+.fact-row .imdb{
+  display:inline-flex;align-items:center;gap:6px;
+  color:var(--gold);font-weight:600;
+}
+.fact-row .imdb-badge{
+  background:var(--gold);color:var(--bg);
+  padding:1px 6px;border-radius:3px;
+  font-family:var(--font-d);font-size:10px;font-weight:900;
+  letter-spacing:.05em;
 }
 
-/* sections */
+/* ═══ sections ═══ */
 .sec-title{
   font-family:var(--font-d);font-size:20px;
   letter-spacing:.06em;margin-bottom:18px;
 }
 
-/* cast */
+/* ═══ cast ═══ */
 .cast-strip{display:flex;gap:14px;overflow-x:auto;padding-bottom:12px;margin-bottom:48px}
-.cast-card{flex:0 0 auto;width:90px;text-align:center}
+.cast-card{flex:0 0 auto;width:90px;text-align:center;cursor:pointer;transition:.2s}
+.cast-card:hover{transform:translateY(-3px)}
 .cast-card img{
   width:74px;height:74px;border-radius:50%;object-fit:cover;
-  margin:0 auto 7px;border:2px solid var(--line2);
+  margin:0 auto 7px;border:2px solid var(--line2);transition:border-color .2s;
 }
+.cast-card:hover img{border-color:var(--teal)}
 .cast-card .name{font-size:11px;color:var(--parch)}
 .cast-card .char{font-size:10px;color:var(--parch-dim);margin-top:2px}
 
-/* related */
+/* ═══ related ═══ */
 .related-rail{display:flex;gap:14px;overflow-x:auto;padding-bottom:12px;margin-bottom:48px}
 .rel-card{
   flex:0 0 auto;width:220px;aspect-ratio:16/9;border-radius:10px;overflow:hidden;
@@ -157,7 +214,7 @@ img{display:block;max-width:100%}
 .rel-card:hover .rel-play-btn{opacity:1;transform:translate(-50%,-50%) scale(1)}
 .rel-play-btn svg{width:16px;height:16px;fill:var(--bg)}
 
-/* comments */
+/* ═══ comments ═══ */
 .comments-wrap{margin-bottom:60px}
 .comment-form{display:flex;gap:14px;margin-bottom:28px}
 .who{
@@ -183,7 +240,7 @@ img{display:block;max-width:100%}
 .comment .who{background:var(--bg3);color:var(--parch-dim)}
 .comment .name{font-size:13px;color:var(--parch);margin-bottom:3px}
 .comment .name small{color:var(--parch-dim);font-weight:400;margin-inline-start:8px}
-.comment .text{font-size:14px;line-height:1.75;color:var(--parch-dim)}
+.comment .text{font-size:14px;line-height:1.75;color:var(--parch-dim);word-break:break-word}
 .comment-likes{display:flex;align-items:center;gap:8px;margin-top:8px}
 .like-btn{
   font-size:12px;color:var(--parch-dim);
@@ -191,8 +248,18 @@ img{display:block;max-width:100%}
   padding:3px 10px;transition:.2s;
 }
 .like-btn:hover{border-color:var(--teal);color:var(--teal)}
+.like-btn.liked{color:var(--teal);border-color:var(--teal)}
+.empty-msg{color:var(--parch-dim);font-size:13px;padding:24px 0}
 
-/* footer */
+/* ═══ skeleton ═══ */
+.skel-line{
+  height:14px;background:linear-gradient(100deg,var(--bg2) 28%,var(--bg3) 44%,var(--bg2) 60%);
+  background-size:280% 100%;animation:shimmer 1.7s infinite;
+  border-radius:5px;margin-bottom:10px;
+}
+@keyframes shimmer{from{background-position:160% 0}to{background-position:-60% 0}}
+
+/* ═══ footer ═══ */
 .player-footer{
   border-top:1px solid var(--line);padding:32px 5vw;
   display:flex;align-items:center;justify-content:space-between;
@@ -202,7 +269,7 @@ img{display:block;max-width:100%}
 .player-footer .logo em{color:var(--teal);font-style:normal}
 .player-footer p{font-size:12px;color:var(--parch-dim)}
 
-/* toast */
+/* ═══ toast ═══ */
 .toast{
   position:fixed;bottom:80px;left:50%;
   transform:translateX(-50%) translateY(16px);
@@ -218,6 +285,7 @@ img{display:block;max-width:100%}
   .info-top{grid-template-columns:1fr}
   .info-main{flex-direction:column}
   .info-poster{width:130px}
+  .top-actions .icon-btn{width:34px;height:34px}
 }
 @media(prefers-reduced-motion:reduce){
   *{transition:none!important;animation:none!important}
@@ -227,26 +295,43 @@ img{display:block;max-width:100%}
 <body>
 <div class="toast" id="toast"></div>
 
-<!-- topbar -->
+<!-- ═══ topbar ═══ -->
 <div class="topbar" id="topbar">
   <a class="back" href="/">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
     رجوع
   </a>
   <div class="brand">TU <em>CENMA</em></div>
-  <div style="width:70px"></div>
+  <div class="top-actions">
+    <button class="icon-btn" id="shareBtn" title="مشاركة">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    </button>
+    <button class="icon-btn" id="fullscreenBtn" title="ملء الشاشة">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+    </button>
+  </div>
 </div>
 
-<!-- stage -->
+<!-- ═══ stage ═══ -->
 <div class="stage" id="stage">
-  <div class="stage-loader" id="stageLoader"><div class="spinner"></div></div>
+  <div class="stage-loader" id="stageLoader">
+    <div class="spinner"></div>
+    <div class="loader-text">TU CENMA</div>
+  </div>
   <iframe id="video-frame"
           allowfullscreen
           allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-          referrerpolicy="origin"></iframe>
+          referrerpolicy="origin"
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation"></iframe>
+
+  <div class="server-bar" id="serverBar">
+    <button class="server-btn active" data-server="vidlink">VidLink 4K</button>
+    <button class="server-btn" data-server="vidsrc">VidSrc</button>
+    <button class="server-btn" data-server="autoembed">AutoEmbed</button>
+  </div>
 </div>
 
-<!-- info -->
+<!-- ═══ info ═══ -->
 <div class="info-wrap">
   <div class="info-top">
     <div class="info-main">
@@ -258,20 +343,18 @@ img{display:block;max-width:100%}
         <div class="info-meta" id="infoMeta"></div>
         <p class="info-desc" id="infoDesc"></p>
         <div class="info-genres" id="infoGenres"></div>
+        <div class="info-actions" id="infoActions"></div>
       </div>
     </div>
     <div class="info-facts" id="infoFacts"></div>
   </div>
 
-  <!-- cast -->
   <div class="sec-title">طاقم العمل</div>
   <div class="cast-strip" id="castStrip"></div>
 
-  <!-- related -->
   <div class="sec-title">قد يعجبك أيضاً</div>
   <div class="related-rail" id="relatedRail"></div>
 
-  <!-- comments -->
   <div class="comments-wrap">
     <div class="sec-title">التعليقات</div>
     <form class="comment-form" id="commentForm">
@@ -288,20 +371,34 @@ img{display:block;max-width:100%}
   <p>مدعوم من <b>TMDB API</b> — بث بجودة 4K</p>
 </footer>
 
+<!-- حقن مفتاح TMDB من Flask -->
+<script>
+  window.__TMDB_KEY__ = "{{ tmdb_key|e }}";
+</script>
+
 <script>
 /* ════════════════════════════════════════════════════
-   TU CENMA — Player Engine v4.0
-   Direct VidLink streaming (no local controls)
+   TU CENMA — Player Engine v4.1 (Discord-Ready)
+   Multi-server streaming + OMDb ratings + comments
    ════════════════════════════════════════════════════ */
 
 const params     = new URLSearchParams(location.search);
 const MEDIA_ID   = parseInt(params.get('id')) || 0;
 const MEDIA_TYPE = params.get('type') || 'movie';
 
-const API_KEY  = () => localStorage.getItem('tucentma_apikey') || 'a6288fc42fb7de2837e2756a101397e5';
-const IMG      = (p,s='w500')  => p ? `https://image.tmdb.org/t/p/${s}${p}` : '';
-const BACKDROP = (p,s='w1280') => p ? `https://image.tmdb.org/t/p/${s}${p}` : '';
-const DETAIL   = (type,id) => `https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY()}&language=ar-SA&append_to_response=credits,similar`;
+/* ⚠️ Discord Activity: استخدم /api/3/ بدل https://api.themoviedb.org/3/ */
+const API_KEY  = () => window.__TMDB_KEY__ || '';
+const IMG      = (p,s='w500')  => p ? `/img/t/p/${s}${p}` : '';
+const BACKDROP = (p,s='w1280') => p ? `/img/t/p/${s}${p}` : '';
+const DETAIL   = (type,id) => `/api/3/${type}/${id}?api_key=${API_KEY()}&language=ar-SA&append_to_response=credits,similar,external_ids`;
+
+/* ── servers config ── */
+const SERVERS = {
+  vidlink:   { label:'VidLink 4K', url:(id,t) => t==='tv' ? `https://vidlink.pro/tv/${id}/1/1?quality=4k&sub=ar` : `https://vidlink.pro/movie/${id}?quality=4k&sub=ar` },
+  vidsrc:    { label:'VidSrc',     url:(id,t) => t==='tv' ? `https://vidsrc.to/embed/tv/${id}/1/1` : `https://vidsrc.to/embed/movie/${id}` },
+  autoembed: { label:'AutoEmbed',  url:(id,t) => t==='tv' ? `https://player.autoembed.cc/embed/tv/${id}/1/1` : `https://player.autoembed.cc/embed/movie/${id}` },
+};
+let currentServer = localStorage.getItem('tucentma_server') || 'vidlink';
 
 /* ── toast ── */
 function toast(msg, dur=2400){
@@ -317,7 +414,7 @@ function runtime(m){ return m ? `${Math.floor(m/60)}س ${m%60}د` : '—'; }
 function year(d){ return d ? new Date(d).getFullYear() : '—'; }
 
 /* ─────────────────────────────────────────
-   STREAM — VidLink Direct
+   STREAM
    ───────────────────────────────────────── */
 function loadStream(){
   const frame = document.getElementById('video-frame');
@@ -328,18 +425,26 @@ function loadStream(){
     return;
   }
 
-  let url;
-  if(MEDIA_TYPE === 'tv'){
-    url = `https://vidlink.pro/tv/${MEDIA_ID}/1/1?quality=4k&sub=ar`;
-  } else {
-    url = `https://vidlink.pro/movie/${MEDIA_ID}?quality=4k&sub=ar`;
-  }
+  const server = SERVERS[currentServer] || SERVERS.vidlink;
+  frame.src = server.url(MEDIA_ID, MEDIA_TYPE);
 
-  frame.src = url;
-
-  /* hide loader after 2.5s regardless */
   setTimeout(() => loader.classList.add('gone'), 2500);
 }
+
+/* ─────────────────────────────────────────
+   SERVER SWITCHER
+   ───────────────────────────────────────── */
+document.querySelectorAll('.server-btn').forEach(btn => {
+  btn.classList.toggle('active', btn.dataset.server === currentServer);
+  btn.addEventListener('click', () => {
+    currentServer = btn.dataset.server;
+    localStorage.setItem('tucentma_server', currentServer);
+    document.querySelectorAll('.server-btn').forEach(b => b.classList.toggle('active', b === btn));
+    document.getElementById('stageLoader').classList.remove('gone');
+    loadStream();
+    toast(`تم التبديل إلى ${SERVERS[currentServer].label}`);
+  });
+});
 
 /* ─────────────────────────────────────────
    LOAD MEDIA DETAILS
@@ -349,20 +454,41 @@ async function loadMedia(){
     document.getElementById('infoTitle').textContent = 'لم يتم تحديد الفيلم';
     return;
   }
-
-  /* start stream immediately */
   loadStream();
 
   try{
     const m = await fetch(DETAIL(MEDIA_TYPE, MEDIA_ID)).then(r => r.json());
     if(m.status_code) throw new Error(m.status_message);
-
     hydrate(m);
+
+    /* جلب تقييم IMDb من OMDb إذا عنده imdb_id */
+    if(m.imdb_id) loadIMDbRating(m.imdb_id);
 
   }catch(e){
     console.warn('TMDB error:', e);
     document.getElementById('infoTitle').textContent = 'تعذر تحميل التفاصيل';
   }
+}
+
+/* ─────────────────────────────────────────
+   OMDb IMDb RATING
+   ───────────────────────────────────────── */
+async function loadIMDbRating(imdbId){
+  try{
+    const r = await fetch(`/api/omdb?i=${imdbId}`).then(r => r.json());
+    if(!r.imdbRating || r.imdbRating === 'N/A') return;
+    const facts = document.getElementById('infoFacts');
+    facts.insertAdjacentHTML('afterbegin', `
+      <div class="fact-row">
+        <b>تقييم IMDb</b>
+        <span class="imdb">
+          <span class="imdb-badge">IMDb</span>
+          ⭐ ${r.imdbRating} / 10
+          ${r.imdbVotes && r.imdbVotes !== 'N/A' ? `<small style="color:var(--parch-dim);font-weight:400">(${r.imdbVotes})</small>` : ''}
+        </span>
+      </div>
+    `);
+  }catch(e){ /* silent */ }
 }
 
 /* ─────────────────────────────────────────
@@ -386,7 +512,7 @@ function hydrate(m){
   document.getElementById('infoTitle').textContent = title;
   document.getElementById('infoDesc').textContent  = m.overview || 'لا يوجد وصف متاح.';
 
-  /* meta pills */
+  /* meta */
   const yr = year(m.release_date || m.first_air_date);
   const sc = m.vote_average ? m.vote_average.toFixed(1) : '—';
   document.getElementById('infoMeta').innerHTML =
@@ -399,6 +525,23 @@ function hydrate(m){
   /* genres */
   document.getElementById('infoGenres').innerHTML =
     (m.genres || []).map(g => `<span>${g.name}</span>`).join('');
+
+  /* actions */
+  document.getElementById('infoActions').innerHTML = `
+    <button class="action-btn primary" id="watchTopBtn">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      مشاهدة من الأعلى
+    </button>
+    <button class="action-btn" id="shareInfoBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      مشاركة
+    </button>
+  `;
+
+  document.getElementById('watchTopBtn').onclick = () => {
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+  document.getElementById('shareInfoBtn').onclick = shareLink;
 
   /* facts */
   document.getElementById('infoFacts').innerHTML = `
@@ -421,7 +564,7 @@ function hydrate(m){
           <div class="name">${c.name}</div>
           <div class="char">${c.character || ''}</div>
         </div>`).join('')
-    : '<div style="color:var(--parch-dim);font-size:13px">لا توجد معلومات عن الممثلين</div>';
+    : '<div class="empty-msg">لا توجد معلومات عن الممثلين</div>';
 
   /* related */
   const similar = (m.similar?.results || []).filter(x => x.poster_path || x.backdrop_path).slice(0, 10);
@@ -430,7 +573,7 @@ function hydrate(m){
         const relType = s.media_type || type;
         return `
           <div class="rel-card" data-id="${s.id}" data-type="${relType}" tabindex="0" role="button">
-            <img loading="lazy" src="${BACKDROP(s.backdrop_path, 'w780') || IMG(s.poster_path, 'w500')}" alt="${s.title || s.name}">
+            <img loading="lazy" src="${BACKDROP(s.backdrop_path, 'w780') || IMG(s.poster_path, 'w500')}" alt="${s.title || s.name}" onerror="this.src='${IMG(null)}'">
             <div class="rel-play-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
             <div class="rel-card-info">
               <div class="rel-card-title">${s.title || s.name}</div>
@@ -438,7 +581,7 @@ function hydrate(m){
             </div>
           </div>`;
       }).join('')
-    : '<div style="color:var(--parch-dim);font-size:13px">لا توجد اقتراحات</div>';
+    : '<div class="empty-msg">لا توجد اقتراحات</div>';
 
   document.querySelectorAll('.rel-card').forEach(c => {
     c.addEventListener('click', () => {
@@ -451,48 +594,109 @@ function hydrate(m){
 }
 
 /* ─────────────────────────────────────────
-   COMMENTS
+   SHARE
    ───────────────────────────────────────── */
-const COMMENTS = [
-  {who:'م', name:'محمد', time:'قبل يومين', text:'من أقوى ما شاهدته هذا العام — النهاية لم أتوقعها أبداً.', likes:24},
-  {who:'س', name:'سارة', time:'قبل 4 أيام', text:'الموسيقى التصويرية خرافية، تزيد من توتر المشاهد بشكل رهيب.', likes:17},
-  {who:'أ', name:'أحمد', time:'قبل أسبوع', text:'حبذا لو كانت المدة أطول، القصة تستحق.', likes:8},
+async function shareLink(){
+  const url = location.href;
+  if(navigator.share){
+    try{ await navigator.share({title: document.title, url}); }
+    catch(e){}
+  } else {
+    try{
+      await navigator.clipboard.writeText(url);
+      toast('تم نسخ الرابط 📋');
+    }catch(e){
+      toast('تعذر النسخ');
+    }
+  }
+}
+document.getElementById('shareBtn').onclick = shareLink;
+
+/* ─────────────────────────────────────────
+   FULLSCREEN
+   ───────────────────────────────────────── */
+document.getElementById('fullscreenBtn').onclick = () => {
+  const stage = document.getElementById('stage');
+  if(!document.fullscreenElement){
+    stage.requestFullscreen?.().catch(()=>toast('المتصفح لا يدعم ملء الشاشة'));
+  } else {
+    document.exitFullscreen?.();
+  }
+};
+
+/* ─────────────────────────────────────────
+   COMMENTS — localStorage persistence
+   ───────────────────────────────────────── */
+const COMMENTS_KEY = `tucentma_comments_${MEDIA_TYPE}_${MEDIA_ID}`;
+
+const DEFAULT_COMMENTS = [
+  {who:'م', name:'محمد', time:'قبل يومين', text:'من أقوى ما شاهدته هذا العام — النهاية لم أتوقعها أبداً.', likes:24, liked:false},
+  {who:'س', name:'سارة', time:'قبل 4 أيام', text:'الموسيقى التصويرية خرافية، تزيد من توتر المشاهد بشكل رهيب.', likes:17, liked:false},
+  {who:'أ', name:'أحمد', time:'قبل أسبوع', text:'حبذا لو كانت المدة أطول، القصة تستحق.', likes:8, liked:false},
 ];
 
-function renderComments(list){
-  document.getElementById('commentList').innerHTML = list.map(c => `
+let COMMENTS = [];
+function loadComments(){
+  try{
+    const raw = localStorage.getItem(COMMENTS_KEY);
+    COMMENTS = raw ? JSON.parse(raw) : [...DEFAULT_COMMENTS];
+  }catch(e){
+    COMMENTS = [...DEFAULT_COMMENTS];
+  }
+}
+function saveComments(){
+  try{ localStorage.setItem(COMMENTS_KEY, JSON.stringify(COMMENTS)); }catch(e){}
+}
+
+function renderComments(){
+  const list = document.getElementById('commentList');
+  if(!COMMENTS.length){
+    list.innerHTML = '<div class="empty-msg">لا توجد تعليقات بعد. كن أول من يشارك!</div>';
+    return;
+  }
+  list.innerHTML = COMMENTS.map((c, i) => `
     <div class="comment">
       <div class="who">${c.who}</div>
-      <div>
+      <div style="flex:1">
         <div class="name">${c.name} <small>${c.time}</small></div>
         <div class="text">${c.text}</div>
         <div class="comment-likes">
-          <button class="like-btn" data-likes="${c.likes}">👍 ${c.likes}</button>
+          <button class="like-btn${c.liked?' liked':''}" data-idx="${i}">👍 ${c.likes}</button>
         </div>
       </div>
     </div>`).join('');
 
-  document.querySelectorAll('.like-btn').forEach(btn => {
+  list.querySelectorAll('.like-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const cur = parseInt(btn.dataset.likes) || 0;
-      const next = cur + 1;
-      btn.dataset.likes = next;
-      btn.textContent = `👍 ${next}`;
-      btn.style.color = 'var(--teal)';
-      btn.style.borderColor = 'var(--teal)';
+      const i = +btn.dataset.idx;
+      if(COMMENTS[i].liked){
+        COMMENTS[i].likes = Math.max(0, COMMENTS[i].likes - 1);
+        COMMENTS[i].liked = false;
+      } else {
+        COMMENTS[i].likes += 1;
+        COMMENTS[i].liked = true;
+      }
+      saveComments();
+      renderComments();
     });
   });
 }
-
-renderComments(COMMENTS);
 
 document.getElementById('commentForm').addEventListener('submit', e => {
   e.preventDefault();
   const inp = document.getElementById('commentInput');
   const txt = inp.value.trim();
   if(!txt) return;
-  COMMENTS.unshift({who:'ت', name:'أنت', time:'الآن', text:txt, likes:0});
-  renderComments(COMMENTS);
+  COMMENTS.unshift({
+    who: 'ت',
+    name: 'أنت',
+    time: 'الآن',
+    text: txt.slice(0, 500),
+    likes: 0,
+    liked: false,
+  });
+  saveComments();
+  renderComments();
   inp.value = '';
   toast('تم نشر تعليقك ✓');
 });
@@ -507,12 +711,37 @@ document.getElementById('video-frame').addEventListener('load', () => {
 });
 
 /* ─────────────────────────────────────────
+   TOPBAR AUTO-HIDE ON SCROLL
+   ───────────────────────────────────────── */
+let lastScroll = 0;
+window.addEventListener('scroll', () => {
+  const topbar = document.getElementById('topbar');
+  if(window.scrollY > 200 && window.scrollY > lastScroll){
+    topbar.classList.add('hidden');
+  } else {
+    topbar.classList.remove('hidden');
+  }
+  lastScroll = window.scrollY;
+}, {passive:true});
+
+/* ─────────────────────────────────────────
+   KEYBOARD SHORTCUTS
+   ───────────────────────────────────────── */
+document.addEventListener('keydown', e => {
+  if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if(e.key === 'f' || e.key === 'F'){ document.getElementById('fullscreenBtn').click(); }
+  if(e.key === 'Escape' && document.fullscreenElement){ document.exitFullscreen?.(); }
+});
+
+/* ─────────────────────────────────────────
    BOOT
    ───────────────────────────────────────── */
+loadComments();
+renderComments();
 loadMedia();
 
-console.log('[TU CENMA Player] Loaded - Media:', MEDIA_TYPE, MEDIA_ID);
-console.log('[TU CENMA Player] Streaming via VidLink 4K');
+console.log('[TU CENMA Player] Loaded — Media:', MEDIA_TYPE, MEDIA_ID);
+console.log('[TU CENMA Player] Server:', currentServer);
 </script>
 </body>
 </html>
