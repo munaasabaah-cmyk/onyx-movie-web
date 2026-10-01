@@ -85,26 +85,6 @@ img{display:block;max-width:100%}
 }
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
 
-/* server selector */
-.server-bar{
-  position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
-  z-index:9;display:flex;gap:8px;padding:8px;
-  background:rgba(8,9,15,.85);backdrop-filter:blur(12px);
-  border:1px solid var(--line2);border-radius:40px;
-  opacity:0;transition:opacity .3s var(--ease);
-  pointer-events:none;
-}
-.stage:hover .server-bar,
-.server-bar:hover{opacity:1;pointer-events:auto}
-.server-btn{
-  padding:7px 16px;border-radius:24px;font-size:12px;
-  color:var(--parch-dim);background:transparent;
-  border:1px solid transparent;transition:.2s;
-  white-space:nowrap;
-}
-.server-btn:hover{color:var(--parch);border-color:var(--line2)}
-.server-btn.active{background:var(--teal);color:var(--bg);font-weight:700}
-
 /* info */
 .info-wrap{max-width:1240px;margin:0 auto;padding:56px 5vw 100px}
 .info-top{display:grid;grid-template-columns:1.7fr 1fr;gap:50px;margin-bottom:60px}
@@ -341,7 +321,7 @@ img{display:block;max-width:100%}
   </div>
 </div>
 
-<!-- stage -->
+<!-- stage — نظيف تماماً، بدون سيرفرات، بدون أزرار -->
 <div class="stage" id="stage">
   <div class="stage-loader" id="stageLoader">
     <div class="spinner"></div>
@@ -349,15 +329,8 @@ img{display:block;max-width:100%}
   </div>
   <iframe id="video-frame"
           allowfullscreen
-          allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-          referrerpolicy="origin"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-presentation"></iframe>
-
-  <div class="server-bar" id="serverBar">
-    <button class="server-btn active" data-server="vidlink">VidLink 4K</button>
-    <button class="server-btn" data-server="vidsrc">VidSrc</button>
-    <button class="server-btn" data-server="autoembed">AutoEmbed</button>
-  </div>
+          allow="autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write"
+          referrerpolicy="origin"></iframe>
 </div>
 
 <!-- info -->
@@ -381,7 +354,6 @@ img{display:block;max-width:100%}
   <div class="sec-title">طاقم العمل</div>
   <div class="cast-strip" id="castStrip"></div>
 
-  <!-- seasons & episodes (للمسلسلات فقط) -->
   <div id="seasonsSection" style="display:none">
     <div class="sec-title">المواسم والحلقات</div>
     <div class="seasons-bar" id="seasonsBar"></div>
@@ -404,7 +376,7 @@ img{display:block;max-width:100%}
 
 <footer class="player-footer">
   <div class="logo">TU <em>CENMA</em></div>
-  <p>مدعوم من <b>TMDB API</b> — بث بجودة 4K</p>
+  <p>جودة عالية · بدون إعلانات</p>
 </footer>
 
 <script>
@@ -413,8 +385,8 @@ img{display:block;max-width:100%}
 
 <script>
 /* ════════════════════════════════════════════════════
-   TU CENMA — Player Engine v4.2 (Discord-Ready)
-   Multi-server + Seasons + OMDb + Comments
+   TU CENMA — Player Engine v5.0 (Netflix-style)
+   Single high-quality source, no UI clutter
    ════════════════════════════════════════════════════ */
 
 const params     = new URLSearchParams(location.search);
@@ -426,18 +398,15 @@ const IMG      = (p,s='w500')  => p ? `/img/t/p/${s}${p}` : '';
 const BACKDROP = (p,s='w1280') => p ? `/img/t/p/${s}${p}` : '';
 const DETAIL   = (type,id) => `/api/3/${type}/${id}?api_key=${API_KEY()}&language=ar-SA&append_to_response=credits,similar,external_ids`;
 
-const SERVERS = {
-  vidlink:   { label:'VidLink 4K', url:(id,t,s=1,e=1) => t==='tv'
-    ? `https://vidlink.pro/tv/${id}/${s}/${e}?quality=4k&sub=ar`
-    : `https://vidlink.pro/movie/${id}?quality=4k&sub=ar` },
-  vidsrc:    { label:'VidSrc',     url:(id,t,s=1,e=1) => t==='tv'
-    ? `https://vidsrc.to/embed/tv/${id}/${s}/${e}`
-    : `https://vidsrc.to/embed/movie/${id}` },
-  autoembed: { label:'AutoEmbed',  url:(id,t,s=1,e=1) => t==='tv'
-    ? `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}`
-    : `https://player.autoembed.cc/embed/movie/${id}` },
-};
-let currentServer = localStorage.getItem('tucentma_server') || 'vidlink';
+/* ─────────────────────────────────────────
+   STREAM SOURCE — VidLink (high quality, no ads)
+   ───────────────────────────────────────── */
+function streamUrl(id, type, season = 1, episode = 1){
+  if(type === 'tv'){
+    return `https://vidlink.pro/tv/${id}/${season}/${episode}?quality=4k&sub=ar&autoplay=true`;
+  }
+  return `https://vidlink.pro/movie/${id}?quality=4k&sub=ar&autoplay=true`;
+}
 
 function toast(msg, dur=2400){
   const t = document.getElementById('toast');
@@ -450,26 +419,13 @@ function toast(msg, dur=2400){
 function runtime(m){ return m ? `${Math.floor(m/60)}س ${m%60}د` : '—'; }
 function year(d){ return d ? new Date(d).getFullYear() : '—'; }
 
-function loadStream(){
+function loadStream(season, episode){
   const frame = document.getElementById('video-frame');
   const loader = document.getElementById('stageLoader');
   if(!MEDIA_ID){ loader.classList.add('gone'); return; }
-  const server = SERVERS[currentServer] || SERVERS.vidlink;
-  frame.src = server.url(MEDIA_ID, MEDIA_TYPE);
+  frame.src = streamUrl(MEDIA_ID, MEDIA_TYPE, season, episode);
   setTimeout(() => loader.classList.add('gone'), 2500);
 }
-
-document.querySelectorAll('.server-btn').forEach(btn => {
-  btn.classList.toggle('active', btn.dataset.server === currentServer);
-  btn.addEventListener('click', () => {
-    currentServer = btn.dataset.server;
-    localStorage.setItem('tucentma_server', currentServer);
-    document.querySelectorAll('.server-btn').forEach(b => b.classList.toggle('active', b === btn));
-    document.getElementById('stageLoader').classList.remove('gone');
-    loadStream();
-    toast(`تم التبديل إلى ${SERVERS[currentServer].label}`);
-  });
-});
 
 async function loadMedia(){
   if(!MEDIA_ID){
@@ -536,7 +492,7 @@ function hydrate(m){
   document.getElementById('infoActions').innerHTML = `
     <button class="action-btn primary" id="watchTopBtn">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-      مشاهدة من الأعلى
+      إعادة التشغيل
     </button>
     <button class="action-btn" id="shareInfoBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
@@ -545,6 +501,8 @@ function hydrate(m){
   `;
 
   document.getElementById('watchTopBtn').onclick = () => {
+    document.getElementById('stageLoader').classList.remove('gone');
+    loadStream();
     window.scrollTo({top:0,behavior:'smooth'});
   };
   document.getElementById('shareInfoBtn').onclick = shareLink;
@@ -595,7 +553,6 @@ function hydrate(m){
     });
   });
 
-  /* جلب المواسم للمسلسلات */
   if(type === 'tv' && m.number_of_seasons){
     loadSeasons(m.id, m.number_of_seasons);
   }
@@ -658,11 +615,8 @@ async function loadEpisodes(tvId, seasonNum){
       card.addEventListener('click', () => {
         const s = card.dataset.season;
         const e = card.dataset.episode;
-        const frame = document.getElementById('video-frame');
-        const server = SERVERS[currentServer] || SERVERS.vidlink;
-        frame.src = server.url(MEDIA_ID, 'tv', s, e);
         document.getElementById('stageLoader').classList.remove('gone');
-        setTimeout(() => document.getElementById('stageLoader').classList.add('gone'), 2000);
+        loadStream(s, e);
         window.scrollTo({top:0,behavior:'smooth'});
         toast(`الموسم ${s} — الحلقة ${e}`);
       });
@@ -674,7 +628,7 @@ async function loadEpisodes(tvId, seasonNum){
 }
 
 /* ─────────────────────────────────────────
-   SHARE
+   SHARE + FULLSCREEN
    ───────────────────────────────────────── */
 async function shareLink(){
   const url = location.href;
@@ -805,7 +759,6 @@ renderComments();
 loadMedia();
 
 console.log('[TU CENMA Player] Loaded — Media:', MEDIA_TYPE, MEDIA_ID);
-console.log('[TU CENMA Player] Server:', currentServer);
 </script>
 </body>
 </html>
