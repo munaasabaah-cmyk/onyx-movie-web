@@ -1,401 +1,1129 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TU CENMA — سينما بلا حدود</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Cinzel:wght@400;600;900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@discord/embedded-app-sdk@latest/dist/discord-sdk.min.js"></script>
-<style>
-:root{
-  --bg:#08090f;--bg2:#10111a;--bg3:#181924;
-  --oxblood:#6b1f2a;--teal:#00c8c8;--teal-dim:#006f6f;
-  --parch:#e8e0d4;--parch-dim:#9a9187;
-  --line:rgba(232,224,212,.07);--line2:rgba(232,224,212,.14);
-  --gold:#c8a84b;--ease:cubic-bezier(.16,1,.3,1);--r:10px;
-  --font-d:'Cinzel',serif;--font-u:'Tajawal',sans-serif;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;font-size:16px}
-body{
-  background:var(--bg);color:var(--parch);font-family:var(--font-u);
-  overflow-x:hidden;-webkit-font-smoothing:antialiased;
-}
-img{display:block;max-width:100%}
-a{color:inherit;text-decoration:none}
-button{font-family:var(--font-u);cursor:pointer;border:none;background:none;color:inherit;padding:0}
-::selection{background:var(--teal);color:var(--bg)}
-::-webkit-scrollbar{height:6px;width:6px}
-::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
+const { createProxyMiddleware } = require('http-proxy-middleware');
+const fs = require('fs');
+const path = require('path');
+const { v4: uuidv4 } = require('uuid');
+const validator = require('validator');
+const winston = require('winston');
+const DailyRotateFile = require('winston-daily-rotate-file');
+const compression = require('compression');
+const { StatusCodes, ReasonPhrases } = require('http-status-codes');
+const Joi = require('joi');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { connect, connection } = require('mongoose');
+const redis = require('redis');
+const nodemailer = require('nodemailer');
+const multer = require('multer');
+const sharp = require('sharp');
+const { OAuth2Client } = require('google-auth-library');
+const axios = require('axios');
+const qs = require('querystring');
+const schedule = require('node-schedule');
+const { Queue, Worker, Job } = require('bullmq');
+const socketIO = require('socket.io');
+const http = require('http');
 
-.grain{
-  position:fixed;inset:0;pointer-events:none;z-index:1000;
-  opacity:.04;mix-blend-mode:screen;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
+// ==================================================
+// 🔑 نحصل على المفاتيح من ملف .env فقط
+// ==================================================
+const ENV = {
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  PORT: process.env.PORT || 5000,
+  API_KEY: process.env.API_KEY,
+  JWT_SECRET: process.env.JWT_SECRET,
+  JWT_EXPIRE: process.env.JWT_EXPIRE || '7d',
+  MONGO_URI: process.env.MONGO_URI,
+  REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379',
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+  SMTP_HOST: process.env.SMTP_HOST,
+  SMTP_PORT: process.env.SMTP_PORT,
+  SMTP_EMAIL: process.env.SMTP_EMAIL,
+  SMTP_PASSWORD: process.env.SMTP_PASSWORD,
+  SMTP_FROM: process.env.SMTP_FROM || 'noreply@example.com',
+  ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
+  FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
+  BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:5000',
+  BCRYPT_ROUNDS: parseInt(process.env.BCRYPT_ROUNDS) || 12,
+  RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000,
+  RATE_LIMIT_MAX: parseInt(process.env.RATE_LIMIT_MAX) || 100,
+};
 
-/* NAV */
-.nav{
-  position:fixed;top:0;inset-inline:0;z-index:500;
-  height:70px;display:flex;align-items:center;
-  padding:0 5vw;gap:40px;background:rgba(8,9,15,.95);
-  backdrop-filter:blur(16px);box-shadow:0 1px 0 var(--line);
-}
-.brand{font-family:var(--font-d);font-size:22px;letter-spacing:.12em;color:var(--parch)}
-.brand em{color:var(--teal);font-style:normal}
-.nav-links{display:flex;gap:28px}
-.nav-links a{font-size:15px;color:var(--parch-dim);transition:color .2s}
-.nav-links a:hover,.nav-links a.active{color:var(--parch)}
-
-.nav-right{margin-inline-start:auto;display:flex;align-items:center;gap:16px;position:relative}
-.avatar-btn{
-  width:40px;height:40px;border-radius:10px;
-  background:linear-gradient(135deg,var(--oxblood) 0%,#1a0a0d 100%);
-  border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;
-  font-family:var(--font-d);font-size:15px;color:var(--gold);cursor:pointer;overflow:hidden;
-}
-.avatar-btn img{width:100%;height:100%;object-fit:cover}
-
-/* USER MENU */
-.user-menu{
-  position:absolute;top:calc(100% + 12px);left:0;
-  background:var(--bg2);border:1px solid var(--line2);border-radius:12px;
-  min-width:240px;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(-8px);
-  transition:.25s var(--ease);box-shadow:0 20px 40px rgba(0,0,0,.5);z-index:100;
-}
-.user-menu.open{opacity:1;pointer-events:auto;transform:translateY(0)}
-.user-menu-header{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
-.user-menu-header img{width:38px;height:38px;border-radius:50%;object-fit:cover;background:var(--bg3)}
-.user-menu-header .info strong{display:block;font-size:14px;color:var(--parch)}
-.user-menu-header .info small{font-size:11px;color:var(--teal)}
-.user-menu a{
-  display:flex;align-items:center;gap:10px;padding:12px 18px;
-  font-size:14px;color:var(--parch-dim);transition:background .15s,color .15s;
-}
-.user-menu a:hover{background:var(--bg3);color:var(--parch)}
-
-/* HERO */
-.hero{
-  position:relative;height:100vh;min-height:600px;overflow:hidden;
-  display:flex;align-items:flex-end;
-}
-.hero-bg{
-  position:absolute;inset:0;background-size:cover;
-  background-position:center center;background-color:var(--bg2);
-}
-.hero-gradient{
-  position:absolute;inset:0;
-  background:linear-gradient(0deg,var(--bg) 0%,rgba(8,9,15,.05) 38%,rgba(8,9,15,.88) 100%);
-}
-.hero-content{
-  position:relative;z-index:2;padding:0 5vw 9vh;max-width:640px;
-}
-.hero-title{
-  font-family:var(--font-d);font-size:clamp(36px,6.5vw,82px);
-  color:var(--parch);margin-bottom:16px;line-height:1.02;
-}
-.hero-desc{font-size:15px;line-height:1.8;color:var(--parch-dim);margin-bottom:30px}
-
-.btn{
-  display:inline-flex;align-items:center;gap:9px;
-  padding:13px 28px;border-radius:8px;font-size:15px;font-weight:700;
-  cursor:pointer;background:var(--teal);color:var(--bg);transition:.2s;
-}
-.btn:hover{background:#00e8e8}
-
-.rows{position:relative;z-index:2;padding:40px 5vw 80px}
-.row-title{font-family:var(--font-d);font-size:22px;color:var(--parch);margin-bottom:18px}
-.rail{display:flex;gap:14px;overflow-x:auto;padding-bottom:20px}
-.card{
-  flex:0 0 auto;width:200px;aspect-ratio:2/3;border-radius:var(--r);overflow:hidden;
-  background:var(--bg2);cursor:pointer;border:1px solid var(--line);position:relative;
-}
-.card img{width:100%;height:100%;object-fit:cover}
-.card-body{position:absolute;inset-inline:0;bottom:0;padding:14px;background:linear-gradient(0deg,#08090f,transparent)}
-.card-title{font-family:var(--font-d);font-size:14px;color:var(--parch)}
-
-/* MODAL */
-.modal-backdrop{
-  position:fixed;inset:0;z-index:700;
-  background:rgba(4,5,10,.85);backdrop-filter:blur(6px);
-  display:flex;align-items:center;justify-content:center;padding:3vh 3vw;
-  opacity:0;pointer-events:none;transition:opacity .3s;
-}
-.modal-backdrop.open{opacity:1;pointer-events:auto}
-.modal{
-  width:min(920px,95vw);max-height:92vh;overflow-y:auto;
-  border-radius:16px;background:var(--bg2);border:1px solid var(--line2);
-  padding:30px;position:relative;
-}
-.modal-close{
-  position:absolute;top:20px;left:20px;background:none;border:none;
-  color:var(--parch);font-size:20px;cursor:pointer;
-}
-.modal h2{font-family:var(--font-d);font-size:28px;color:var(--parch);margin-bottom:10px}
-.modal p{color:var(--parch-dim);font-size:14px;line-height:1.7;margin-bottom:20px}
-
-.seasons-box{margin-top:20px;border-top:1px solid var(--line);padding-top:20px}
-.select-group{display:flex;gap:15px;margin-bottom:15px}
-select{
-  background:var(--bg3);color:var(--parch);border:1px solid var(--line2);
-  padding:10px 15px;border-radius:8px;font-family:var(--font-u);font-size:14px;outline:none;cursor:pointer;
+// التحقق من وجود المتغيرات الأساسية
+const requiredEnv = ['API_KEY', 'JWT_SECRET', 'MONGO_URI'];
+const missingEnv = requiredEnv.filter(key => !process.env[key]);
+if (missingEnv.length > 0) {
+  console.error(`❌ المتغيرات المطلوبة مفقودة في ملف .env: ${missingEnv.join(', ')}`);
+  process.exit(1);
 }
 
-/* PROFILE MODAL */
-.profile-modal{
-  width:min(450px,90vw);background:var(--bg2);border-radius:16px;padding:30px;
-  border:1px solid var(--line2);text-align:center;position:relative;
+// ==================================================
+// إعداد السجلات (اللوغات)
+// ==================================================
+const logDir = path.join(__dirname, 'logs');
+if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+
+const logger = winston.createLogger({
+  level: ENV.NODE_ENV === 'development' ? 'debug' : 'info',
+  format: winston.format.combine(
+    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  defaultMeta: { service: 'api-server' },
+  transports: [
+    new DailyRotateFile({
+      filename: path.join(logDir, 'error-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      level: 'error',
+      maxFiles: '90d',
+    }),
+    new DailyRotateFile({
+      filename: path.join(logDir, 'combined-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      maxFiles: '90d',
+    }),
+  ],
+  exceptionHandlers: [
+    new DailyRotateFile({
+      filename: path.join(logDir, 'exceptions-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      maxFiles: '90d',
+    }),
+  ],
+});
+
+if (ENV.NODE_ENV !== 'production') {
+  logger.add(new winston.transports.Console({
+    format: winston.format.combine(
+      winston.format.colorize(),
+      winston.format.simple()
+    ),
+  }));
 }
-.profile-avatar-large{
-  width:90px;height:90px;border-radius:50%;object-fit:cover;margin:0 auto 15px;
-  border:2px solid var(--teal);background:var(--bg3);
+
+// ==================================================
+// إنشاء التطبيق والخادم
+// ==================================================
+const app = express();
+const server = http.createServer(app);
+
+// ==================================================
+// الإعدادات الافتراضية والوسائط
+// ==================================================
+app.use(helmet({
+  contentSecurityPolicy: ENV.NODE_ENV === 'production' ? undefined : false,
+  crossOriginEmbedderPolicy: ENV.NODE_ENV === 'production',
+}));
+app.use(compression());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cors({
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      ENV.FRONTEND_URL,
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+    ];
+    if (!origin || allowedOrigins.includes(origin) || ENV.NODE_ENV === 'development') {
+      callback(null, true);
+    } else {
+      callback(new Error('غير مسموح بالوصول من هذا المصدر'), false);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'Accept-Language'],
+}));
+
+if (ENV.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+} else {
+  app.use(morgan('combined', {
+    stream: { write: (message) => logger.info(message.trim()) },
+  }));
 }
-.profile-modal input{
-  width:100%;background:var(--bg3);border:1px solid var(--line2);color:var(--parch);
-  padding:12px;border-radius:8px;margin-bottom:15px;text-align:center;font-size:15px;outline:none;
-}
-</style>
-</head>
-<body>
-<div class="grain"></div>
 
-<!-- NAV -->
-<nav class="nav">
-  <div class="brand">TU <em>CENMA</em></div>
-  <div class="nav-links">
-    <a href="#" class="active">الرئيسية</a>
-  </div>
-  <div class="nav-right">
-    <button class="avatar-btn" id="avatarBtn">
-      <img id="userAvatarImg" src="" alt="" style="display:none;" />
-      <span id="userAvatarText">T</span>
-    </button>
-    <div class="user-menu" id="userMenu">
-      <div class="user-menu-header">
-        <img id="menuAvatar" src="" alt="">
-        <div class="info">
-          <strong id="menuName">مستخدم زائر</strong>
-          <small id="menuSource">محلي</small>
-        </div>
-      </div>
-      <a href="#" onclick="openProfileModal()">الملف الشخصي والتحكم</a>
-      <a href="#" onclick="logoutDiscord()">تسجيل الخروج</a>
-    </div>
-  </div>
-</nav>
+// تحديد معدل الطلبات
+const limiter = rateLimit({
+  windowMs: ENV.RATE_LIMIT_WINDOW_MS,
+  max: ENV.RATE_LIMIT_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: 'error',
+    code: StatusCodes.TOO_MANY_REQUESTS,
+    message: 'لقد قمت بإرسال عدد كبير جدًا من الطلبات، يرجى المحاولة لاحقًا.',
+  },
+});
+app.use('/api/', limiter);
 
-<!-- HERO -->
-<header class="hero">
-  <div class="hero-bg" id="heroBg" style="background-image: url('https://image.tmdb.org/t/p/original/jZIYaISP3GBSrJOPCRpX8cu7Jq2.jpg')"></div>
-  <div class="hero-gradient"></div>
-  <div class="hero-content">
-    <h1 class="hero-title" id="heroTitle">Reacher</h1>
-    <p class="hero-desc" id="heroDesc">جاك ريتشر محقق عسكري سابق يخوض مغامرات خطيرة.</p>
-    <button class="btn" onclick="openModal(209137, 'tv')">مشاهدة المسلسل (4K)</button>
-  </div>
-</header>
+// ==================================================
+// ملفات ثابتة
+// ==================================================
+const publicDir = path.join(__dirname, 'public');
+if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
+app.use(express.static(publicDir, {
+  maxAge: ENV.NODE_ENV === 'production' ? '1d' : 0,
+  etag: true,
+}));
 
-<main class="rows">
-  <div class="row-title">مسلسلات وأفلام مقترحة بدقة 4K</div>
-  <div class="rail" id="rail">
-    <div class="card" onclick="openModal(209137, 'tv')">
-      <img src="https://image.tmdb.org/t/p/w500/jZIYaISP3GBSrJOPCRpX8cu7Jq2.jpg" alt="Reacher">
-      <div class="card-body"><div class="card-title">Reacher (مسلسل)</div></div>
-    </div>
-    <div class="card" onclick="openModal(872585, 'movie')">
-      <img src="https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg" alt="Oppenheimer">
-      <div class="card-body"><div class="card-title">Oppenheimer (فيلم)</div></div>
-    </div>
-  </div>
-</main>
-
-<!-- MODAL WATCH -->
-<div class="modal-backdrop" id="modalBackdrop">
-  <div class="modal" id="modalContent">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <h2 id="mTitle">عنوان العرض</h2>
-    <p id="mDesc">الوصف هنا...</p>
-    
-    <div id="seasonsContainer" class="seasons-box" style="display:none;">
-      <div class="select-group">
-        <div>
-          <label style="display:block;font-size:12px;color:var(--parch-dim);margin-bottom:5px;">الموسم</label>
-          <select id="seasonSelect" onchange="updateEpisodes()"></select>
-        </div>
-        <div>
-          <label style="display:block;font-size:12px;color:var(--parch-dim);margin-bottom:5px;">الحلقة</label>
-          <select id="episodeSelect"></select>
-        </div>
-      </div>
-    </div>
-
-    <button class="btn" style="margin-top:15px;" onclick="playSelected()">تشغيل مباشر (4K)</button>
-  </div>
-</div>
-
-<!-- PROFILE MODAL -->
-<div class="modal-backdrop" id="profileModalBackdrop">
-  <div class="profile-modal">
-    <button class="modal-close" onclick="closeProfileModal()">✕</button>
-    <img id="profileModalAvatar" class="profile-avatar-large" src="" alt="">
-    <h3 style="font-family:var(--font-d);color:var(--parch);margin-bottom:15px;">إعدادات الحساب</h3>
-    <label style="display:block;text-align:right;font-size:12px;color:var(--parch-dim);margin-bottom:5px;">اسم المستخدم</label>
-    <input type="text" id="profileNameInput" placeholder="أدخل اسمك الجديد">
-    <button class="btn" style="width:100%;justify-content:center;" onclick="saveProfile()">حفظ التعديلات</button>
-  </div>
-</div>
-
-<script>
-const DISCORD_CLIENT_ID = '1554929072885473330';
-const apiKey = 'a6288fc42fb7de2837e2756a101397e5';
-let currentId = null;
-let currentType = null;
-let tvData = null;
-
-// تفعيل قائمة البروفايل
-const avatarBtn = document.getElementById('avatarBtn');
-const userMenu = document.getElementById('userMenu');
-avatarBtn.addEventListener('click', e => { e.stopPropagation(); userMenu.classList.toggle('open'); });
-document.addEventListener('click', () => userMenu.classList.remove('open'));
-
-// تهيئة ديسكورد SDK وجلب صورة الحساب والاسم الحقيقي تلقائياً
-async function initDiscordUser() {
-  if (typeof window.DiscordSDK !== 'undefined') {
-    try {
-      const discordSdk = new window.DiscordSDK.DiscordSDK(DISCORD_CLIENT_ID);
-      await discordSdk.ready();
-      const { code } = await discordSdk.commands.authorize({
-        client_id: DISCORD_CLIENT_ID, response_type: 'code', state: '', prompt: 'none', scope: ['identify']
-      });
-      const auth = await discordSdk.commands.authenticate({ access_token: code });
-      if (auth && auth.user) {
-        const u = auth.user;
-        const avatarUrl = u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128` : null;
-        const userData = { name: u.global_name || u.username, avatar: avatarUrl, source: 'متصل بديسكورد' };
-        localStorage.setItem('tucentma_user', JSON.stringify(userData));
-        applyUser(userData);
-        return;
-      }
-    } catch (e) { console.log("Discord SDK mode fallback"); }
-  }
+// ==================================================
+// التحقق من مفتاح الـ API (من المتغير البيئي فقط)
+// ==================================================
+const validateApiKey = (req, res, next) => {
+  const incomingKey = req.headers['x-api-key'];
   
-  // الوضع المحلي أو المخزن مسبقاً
-  const saved = localStorage.getItem('tucentma_user');
-  if (saved) {
-    applyUser(JSON.parse(saved));
-  } else {
-    applyUser({ name: 'مستخدم زائر', avatar: null, source: 'محلي' });
-  }
-}
-
-function applyUser(user) {
-  const imgNav = document.getElementById('userAvatarImg');
-  const txtNav = document.getElementById('userAvatarText');
-  const menuImg = document.getElementById('menuAvatar');
-  const menuName = document.getElementById('menuName');
-  const menuSource = document.getElementById('menuSource');
-
-  if (user.avatar) {
-    imgNav.src = user.avatar;
-    imgNav.style.display = 'block';
-    txtNav.style.display = 'none';
-    menuImg.src = user.avatar;
-  } else {
-    imgNav.style.display = 'none';
-    txtNav.style.display = 'flex';
-    txtNav.textContent = (user.name || 'U')[0].toUpperCase();
-    menuImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect fill='%236b1f2a' width='40' height='40' rx='9'/%3E%3Ctext x='20' y='27' font-size='18' text-anchor='middle' fill='%23c8a84b' font-family='serif'%3ET%3C/text%3E%3C/svg%3E";
-  }
-  menuName.textContent = user.name;
-  menuSource.textContent = user.source;
-}
-
-function openProfileModal() {
-  const saved = JSON.parse(localStorage.getItem('tucentma_user') || '{}');
-  document.getElementById('profileNameInput').value = saved.name || 'مستخدم';
-  document.getElementById('profileModalAvatar').src = saved.avatar || document.getElementById('menuAvatar').src;
-  document.getElementById('profileModalBackdrop').classList.add('open');
-}
-
-function closeProfileModal() {
-  document.getElementById('profileModalBackdrop').classList.remove('open');
-}
-
-function saveProfile() {
-  const newName = document.getElementById('profileNameInput').value.trim();
-  let saved = JSON.parse(localStorage.getItem('tucentma_user') || '{}');
-  saved.name = newName || 'مستخدم';
-  localStorage.setItem('tucentma_user', JSON.stringify(saved));
-  applyUser(saved);
-  closeProfileModal();
-}
-
-function logoutDiscord() {
-  localStorage.removeItem('tucentma_user');
-  location.reload();
-}
-
-// Modal التشغيل والمسلسلات
-async function openModal(id, type){
-  currentId = id;
-  currentType = type;
-  document.getElementById('modalBackdrop').classList.add('open');
-  
-  const res = await fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${apiKey}&language=ar-SA`);
-  const data = await res.json();
-  
-  document.getElementById('mTitle').textContent = data.title || data.name;
-  document.getElementById('mDesc').textContent = data.overview;
-
-  const sBox = document.getElementById('seasonsContainer');
-  if(type === 'tv'){
-    sBox.style.display = 'block';
-    tvData = data;
-    let sSelect = document.getElementById('seasonSelect');
-    sSelect.innerHTML = '';
-    (data.seasons || []).forEach(s => {
-      if(s.season_number > 0){
-        sSelect.innerHTML += `<option value="${s.season_number}">الموسم ${s.season_number}</option>`;
-      }
+  if (!ENV.API_KEY) {
+    logger.error('مفتاح الـ API غير مُعرّف في ملف .env');
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      status: 'error',
+      message: 'خطأ في تكوين الخادم: مفتاح الوصول غير متوفر',
     });
-    updateEpisodes();
-  } else {
-    sBox.style.display = 'none';
   }
-}
 
-async function updateEpisodes(){
-  const sNum = document.getElementById('seasonSelect').value;
-  const res = await fetch(`https://api.themoviedb.org/3/tv/${currentId}/season/${sNum}?api_key=${apiKey}&language=ar-SA`);
-  const data = await res.json();
-  
-  let eSelect = document.getElementById('episodeSelect');
-  eSelect.innerHTML = '';
-  (data.episodes || []).forEach(e => {
-    eSelect.innerHTML += `<option value="${e.episode_number}">الحلقة ${e.episode_number}: ${e.name}</option>`;
+  if (!incomingKey || incomingKey !== ENV.API_KEY) {
+    logger.warn('محاولة وصول بمفتاح API غير صالح', { ip: req.ip, path: req.path });
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      status: 'error',
+      message: 'مفتاح الوصول غير صالح أو مفقود',
+    });
+  }
+
+  next();
+};
+
+// ==================================================
+// دوال مساعدة
+// ==================================================
+const successResponse = (res, data = {}, message = 'تمت العملية بنجاح', statusCode = StatusCodes.OK) => {
+  return res.status(statusCode).json({
+    status: 'success',
+    message,
+    data,
   });
-}
+};
 
-function closeModal(){
-  document.getElementById('modalBackdrop').classList.remove('open');
-}
+const errorResponse = (res, message = 'حدث خطأ', statusCode = StatusCodes.BAD_REQUEST, errors = null) => {
+  const response = {
+    status: 'error',
+    code: statusCode,
+    message,
+  };
+  if (errors) response.errors = errors;
+  return res.status(statusCode).json(response);
+};
 
-function playSelected(){
-  let url = '';
-  if(currentType === 'tv'){
-    const s = document.getElementById('seasonSelect').value;
-    const e = document.getElementById('episodeSelect').value;
-    url = `https://vidlink.pro/tv/${currentId}/${s}/${e}?quality=4k&sub=ar`;
-  } else {
-    url = `https://vidlink.pro/movie/${currentId}?quality=4k&sub=ar`;
+const asyncHandler = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+const generateRandomString = (length = 32) => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  window.open(url, '_blank');
-}
+  return result;
+};
 
-// تشغيل النظام عند التحميل
-initDiscordUser();
-</script>
-</body>
-</html>
+const hashData = async (data) => {
+  return bcrypt.hash(data, ENV.BCRYPT_ROUNDS);
+};
+
+const compareHash = async (plainData, hashedData) => {
+  return bcrypt.compare(plainData, hashedData);
+};
+
+const generateJwtToken = (payload, expiresIn = ENV.JWT_EXPIRE) => {
+  return jwt.sign(payload, ENV.JWT_SECRET, { expiresIn });
+};
+
+const verifyJwtToken = (token) => {
+  return jwt.verify(token, ENV.JWT_SECRET);
+};
+
+// ==================================================
+// الاتصال بقاعدة البيانات
+// ==================================================
+const connectDB = async () => {
+  try {
+    await connect(ENV.MONGO_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
+    logger.info('✅ تم الاتصال بقاعدة البيانات بنجاح');
+    
+    connection.on('error', (err) => {
+      logger.error('خطأ في اتصال قاعدة البيانات:', err);
+    });
+    
+    connection.on('disconnected', () => {
+      logger.warn('انقطع الاتصال بقاعدة البيانات');
+    });
+
+    connection.on('reconnected', () => {
+      logger.info('✅ تم إعادة الاتصال بقاعدة البيانات');
+    });
+  } catch (error) {
+    logger.error('❌ فشل الاتصال بقاعدة البيانات:', error);
+    process.exit(1);
+  }
+};
+
+// ==================================================
+// الاتصال بـ Redis
+// ==================================================
+let redisClient;
+const connectRedis = async () => {
+  try {
+    redisClient = redis.createClient({ url: ENV.REDIS_URL });
+    redisClient.on('error', (err) => logger.error('خطأ في Redis:', err));
+    redisClient.on('connect', () => logger.info('✅ تم الاتصال بـ Redis بنجاح'));
+    redisClient.on('ready', () => logger.info('🚀 Redis جاهز للاستخدام'));
+    await redisClient.connect();
+  } catch (error) {
+    logger.warn('فشل الاتصال بـ Redis، سيتم المتابعة بدون ذاكرة تخزين مؤقت:', error.message);
+    redisClient = null;
+  }
+};
+
+// ==================================================
+// إعداد البريد الإلكتروني
+// ==================================================
+let emailTransporter;
+const initEmailService = async () => {
+  if (ENV.SMTP_HOST && ENV.SMTP_USER && ENV.SMTP_PASSWORD) {
+    try {
+      emailTransporter = nodemailer.createTransport({
+        host: ENV.SMTP_HOST,
+        port: ENV.SMTP_PORT || 587,
+        secure: ENV.SMTP_PORT === '465',
+        auth: {
+          user: ENV.SMTP_EMAIL,
+          pass: ENV.SMTP_PASSWORD,
+        },
+      });
+      await emailTransporter.verify();
+      logger.info('✅ خدمة البريد الإلكتروني جاهزة');
+    } catch (error) {
+      logger.warn('فشل إعداد خدمة البريد الإلكتروني:', error.message);
+      emailTransporter = null;
+    }
+  } else {
+    logger.info('بيانات البريد الإلكتروني غير مكتملة، تم تعطيل الخدمة');
+  }
+};
+
+const sendEmail = async (options) => {
+  if (!emailTransporter) {
+    throw new Error('خدمة البريد الإلكتروني غير متاحة');
+  }
+  const mailOptions = {
+    from: `"النظام" <${ENV.SMTP_FROM}>`,
+    to: options.to,
+    subject: options.subject,
+    html: options.html,
+    text: options.text,
+  };
+  return emailTransporter.sendMail(mailOptions);
+};
+
+// ==================================================
+// نماذج التحقق من البيانات
+// ==================================================
+const schemas = {
+  register: Joi.object({
+    name: Joi.string().min(3).max(50).required().messages({
+      'string.empty': 'الاسم مطلوب',
+      'string.min': 'الاسم لا يقل عن 3 أحرف',
+      'string.max': 'الاسم لا يزيد عن 50 حرفًا',
+    }),
+    email: Joi.string().email().required().messages({
+      'string.email': 'يرجى إدخال بريد إلكتروني صالح',
+      'any.required': 'البريد الإلكتروني مطلوب',
+    }),
+    password: Joi.string().min(8).max(128).required().messages({
+      'string.min': 'كلمة المرور لا تقل عن 8 أحرف',
+      'any.required': 'كلمة المرور مطلوبة',
+    }),
+  }),
+  login: Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+  }),
+  updateProfile: Joi.object({
+    name: Joi.string().min(3).max(50()).optional(),
+    avatar: Joi.string().uri().optional(),
+    phone: Joi.string().optional(),
+  }),
+  changePassword: Joi.object({
+    currentPassword: Joi.string().required(),
+    newPassword: Joi.string().min(8).required(),
+  }),
+};
+
+const validate = (schema) => (req, res, next) => {
+  const { error } = schema.validate(req.body, { abortEarly: false });
+  if (error) {
+    const errors = error.details.map(d => d.message);
+    return errorResponse(res, 'بيانات غير صالحة', StatusCodes.UNPROCESSABLE_ENTITY, errors);
+  }
+  next();
+};
+
+// ==================================================
+// نماذج قاعدة البيانات
+// ==================================================
+const { Schema, model } = require('mongoose');
+
+const userSchema = new Schema({
+  _id: { type: Schema.Types.ObjectId, auto: true },
+  name: { type: String, required: true, trim: true },
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  password: { type: String, required: true },
+  avatar: { type: String, default: null },
+  phone: { type: String, default: null },
+  role: { type: String, enum: ['user', 'editor', 'admin'], default: 'user' },
+  isVerified: { type: Boolean, default: false },
+  verificationToken: { type: String, default: null },
+  verificationExpires: { type: Date, default: null },
+  resetPasswordToken: { type: String, default: null },
+  resetPasswordExpires: { type: Date, default: null },
+  lastLogin: { type: Date, default: null },
+  status: { type: String, enum: ['active', 'suspended', 'banned'], default: 'active' },
+  preferences: {
+    language: { type: String, default: 'ar' },
+    notifications: { type: Boolean, default: true },
+  },
+}, {
+  timestamps: true,
+  toJSON: {
+    transform: function(doc, ret) {
+      delete ret.password;
+      delete ret.__v;
+      return ret;
+    },
+  },
+});
+
+userSchema.index({ email: 1 });
+userSchema.index({ role: 1 });
+userSchema.index({ createdAt: -1 });
+
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  this.password = await hashData(this.password);
+  next();
+});
+
+userSchema.methods.matchPassword = async function(enteredPassword) {
+  return compareHash(enteredPassword, this.password);
+};
+
+userSchema.methods.getSignedJwtToken = function() {
+  return generateJwtToken({ id: this._id, role: this.role });
+};
+
+userSchema.methods.generateVerificationToken = function() {
+  const token = generateRandomString();
+  this.verificationToken = require('crypto').createHash('sha256').update(token).digest('hex');
+  this.verificationExpires = Date.now() + 24 * 60 * 60 * 1000;
+  return token;
+};
+
+userSchema.methods.generateResetPasswordToken = function() {
+  const token = generateRandomString();
+  this.resetPasswordToken = require('crypto').createHash('sha256').update(token).digest('hex');
+  this.resetPasswordExpires = Date.now() + 60 * 60 * 1000;
+  return token;
+};
+
+const User = model('User', userSchema);
+
+// --- نموذج الجلسات ---
+const sessionSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  token: { type: String, required: true },
+  ip: { type: String },
+  userAgent: { type: String },
+  device: { type: String },
+  platform: { type: String },
+  expiresAt: { type: Date, required: true },
+}, { timestamps: true });
+
+sessionSchema.index({ userId: 1 });
+sessionSchema.index({ token: 1 }, { unique: true });
+sessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
+const Session = model('Session', sessionSchema);
+
+// --- نموذج سجلات النظام ---
+const auditLogSchema = new Schema({
+  userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+  action: { type: String, required: true },
+  module: { type: String, required: true },
+  ip: { type: String },
+  userAgent: { type: String },
+  details: { type: Schema.Types.Mixed, default: {} },
+  status: { type: String, enum: ['success', 'failure', 'warning'], default: 'success' },
+}, { timestamps: true });
+
+auditLogSchema.index({ userId: 1, createdAt: -1 });
+auditLogSchema.index({ action: 1, createdAt: -1 });
+
+const AuditLog = model('AuditLog', auditLogSchema);
+
+// --- نماذج إضافية ---
+const categorySchema = new Schema({
+  name: { type: String, required: true, trim: true },
+  slug: { type: String, required: true, unique: true },
+  description: { type: String, default: '' },
+  icon: { type: String, default: null },
+  parentId: { type: Schema.Types.ObjectId, ref: 'Category', default: null },
+  sortOrder: { type: Number, default: 0 },
+  isActive: { type: Boolean, default: true },
+}, { timestamps: true });
+
+categorySchema.index({ slug: 1 });
+categorySchema.index({ isActive: 1, sortOrder: 1 });
+
+const Category = model('Category', categorySchema);
+
+const productSchema = new Schema({
+  name: { type: String, required: true, trim: true },
+  slug: { type: String, required: true, unique: true },
+  description: { type: String, default: '' },
+  price: { type: Number, required: true, min: 0 },
+  discountPrice: { type: Number, min: 0, default: null },
+  stock: { type: Number, required: true, min: 0, default: 0 },
+  categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+  images: [{ type: String }],
+  mainImage: { type: String, default: null },
+  features: [{ type: String }],
+  specifications: { type: Schema.Types.Mixed, default: {} },
+  isActive: { type: Boolean, default: true },
+  isFeatured: { type: Boolean, default: false },
+  views: { type: Number, default: 0 },
+  createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+}, { timestamps: true });
+
+productSchema.index({ name: 'text', description: 'text' });
+productSchema.index({ categoryId: 1, createdAt: -1 });
+productSchema.index({ isActive: 1, isFeatured: 1 });
+
+const Product = model('Product', productSchema);
+
+const orderSchema = new Schema({
+  orderNumber: { type: String, unique: true },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  items: [{
+    productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+    name: String,
+    price: Number,
+    quantity: { type: Number, required: true, min: 1 },
+    image: String,
+  }],
+  totalAmount: { type: Number, required: true, min: 0 },
+  shippingAddress: {
+    fullName: String,
+    street: String,
+    city: String,
+    governorate: String,
+    postalCode: String,
+    phone: String,
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'],
+    default: 'pending',
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['unpaid', 'paid', 'failed', 'refunded'],
+    default: 'unpaid',
+  },
+  paymentMethod: { type: String, default: null },
+  notes: { type: String, default: '' },
+}, { timestamps: true });
+
+orderSchema.pre('save', function(next) {
+  if (!this.orderNumber) {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const random = Math.floor(Math.random() * 900000) + 100000;
+    this.orderNumber = `${year}${month}-${random}`;
+  }
+  next();
+});
+
+orderSchema.index({ userId: 1, createdAt: -1 });
+orderSchema.index({ orderNumber: 1 });
+orderSchema.index({ status: 1, createdAt: -1 });
+
+const Order = model('Order', orderSchema);
+
+// ==================================================
+// الوسائط المخصصة
+// ==================================================
+const protect = asyncHandler(async (req, res, next) => {
+  let token;
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies?.token) {
+    token = req.cookies.token;
+  }
+
+  if (!token) {
+    return errorResponse(res, 'غير مصرح بالوصول، يرجى تسجيل الدخول', StatusCodes.UNAUTHORIZED);
+  }
+
+  try {
+    const decoded = verifyJwtToken(token);
+    const user = await User.findById(decoded.id).select('-password');
+    
+    if (!user) {
+      return errorResponse(res, 'المستخدم غير موجود', StatusCodes.UNAUTHORIZED);
+    }
+    
+    if (user.status !== 'active') {
+      return errorResponse(res, 'حسابك معطل، يرجى التواصل مع الدعم', StatusCodes.FORBIDDEN);
+    }
+
+    const session = await Session.findOne({ token, userId: decoded.id });
+    if (!session && ENV.NODE_ENV === 'production') {
+      return errorResponse(res, 'الجلسة منتهية، يرجى تسجيل الدخول مرة أخرى', StatusCodes.UNAUTHORIZED);
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    return errorResponse(res, 'جلسة غير صالحة أو منتهية', StatusCodes.UNAUTHORIZED);
+  }
+});
+
+const restrictTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return errorResponse(res, 'ليس لديك صلاحية لتنفيذ هذا الإجراء', StatusCodes.FORBIDDEN);
+    }
+    next();
+  };
+};
+
+const logActivity = (action, module) => async (req, res, next) => {
+  res.on('finish', async () => {
+    try {
+      await AuditLog.create({
+        userId: req.user?._id || null,
+        action,
+        module,
+        ip: req.ip || req.connection.remoteAddress,
+        userAgent: req.headers['user-agent'] || 'Unknown',
+        details: {
+          method: req.method,
+          path: req.path,
+          statusCode: res.statusCode,
+          body: Object.keys(req.body || {}).length > 0 ? '[تم تضمين البيانات]' : 'فارغ',
+        },
+        status: res.statusCode < 400 ? 'success' : 'failure',
+      });
+    } catch (logErr) {
+      logger.error('خطأ في تسجيل النشاط:', logErr);
+    }
+  });
+  next();
+};
+
+const cache = (ttl = 300) => async (req, res, next) => {
+  if (!redisClient || ENV.NODE_ENV === 'development') return next();
+  const key = `cache:${req.method}:${req.originalUrl}`;
+  try {
+    const cached = await redisClient.get(key);
+    if (cached) {
+      return res.json(JSON.parse(cached));
+    }
+    res.sendResponse = res.json;
+    res.json = (body) => {
+      res.sendResponse(body);
+      redisClient.setEx(key, ttl, JSON.stringify(body)).catch(() => {});
+    };
+  } catch (err) {
+    logger.debug('خطأ في التخزين المؤقت:', err.message);
+  }
+  next();
+};
+
+// ==================================================
+// مسارات المصادقة
+// ==================================================
+app.post('/api/v1/auth/register', validate(schemas.register), asyncHandler(async (req, res) => {
+  const { name, email, password } = req.body;
+
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return errorResponse(res, 'هذا البريد الإلكتروني مسجل بالفعل', StatusCodes.CONFLICT);
+  }
+
+  const user = await User.create({ name, email, password });
+  const verificationToken = user.generateVerificationToken();
+  await user.save();
+
+  if (emailTransporter) {
+    try {
+      const verifyUrl = `${ENV.BACKEND_URL}/api/v1/auth/verify/${verificationToken}`;
+      await sendEmail({
+        to: user.email,
+        subject: 'تأكيد حسابك',
+        html: `
+          <h2>مرحبًا ${user.name}</h2>
+          <p>شكرًا لانضمامك إلينا، يرجى النقر على الرابط أدناه لتأكيد حسابك:</p>
+          <a href="${verifyUrl}" style="padding: 10px 20px; background: #007bff; color: white; border-radius: 5px; text-decoration: none;">تأكيد الحساب</a>
+          <p>إذا لم تقم بإنشاء هذا الحساب، يمكنك تجاهل هذه الرسالة.</p>
+          <p>الرابط صالح لمدة 24 ساعة.</p>
+        `,
+      });
+    } catch (emailErr) {
+      logger.error('خطأ في إرسال بريد التأكيد:', emailErr);
+      user.verificationToken = undefined;
+      user.verificationExpires = undefined;
+      await user.save();
+    }
+  }
+
+  const token = user.getSignedJwtToken();
+  await Session.create({
+    userId: user._id,
+    token,
+    ip: req.ip,
+    userAgent: req.headers['user-agent'],
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  });
+
+  successResponse(res, { user, token }, 'تم إنشاء الحساب بنجاح، يرجى التحقق من بريدك الإلكتروني', StatusCodes.CREATED);
+}));
+
+app.post('/api/v1/auth/login', validate(schemas.login), asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user || !(await user.matchPassword(password))) {
+    await AuditLog.create({
+      action: 'login_failed',
+      module: 'auth',
+      ip: req.ip,
+      details: { email },
+    });
+    return errorResponse(res, 'بريد إلكتروني أو كلمة مرور غير صحيحة', StatusCodes.UNAUTHORIZED);
+  }
+
+  if (user.status !== 'active') {
+    return errorResponse(res, 'حسابك معطل، يرجى التواصل مع الدعم', StatusCodes.FORBIDDEN);
+  }
+
+  user.lastLogin = new Date();
+  await user.save();
+
+  const token = user.getSignedJwtToken();
+  await Session.create({
+    userId: user._id,
+    token,
+    ip: req.ip,
+    userAgent: req.headers['user-agent'],
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  });
+
+  res.cookie('token', token, {
+    httpOnly: true,
+    secure: ENV.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  successResponse(res, { user, token }, 'تم تسجيل الدخول بنجاح');
+}));
+
+app.get('/api/v1/auth/verify/:token', asyncHandler(async (req, res) => {
+  const hashedToken = require('crypto').createHash('sha256').update(req.params.token).digest('hex');
+  
+  const user = await User.findOne({
+    verificationToken: hashedToken,
+    verificationExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return errorResponse(res, 'الرابط غير صالح أو منتهي الصلاحية', StatusCodes.BAD_REQUEST);
+  }
+
+  user.isVerified = true;
+  user.verificationToken = undefined;
+  user.verificationExpires = undefined;
+  await user.save();
+
+  successResponse(res, { email: user.email }, 'تم تأكيد حسابك بنجاح');
+}));
+
+app.post('/api/v1/auth/forgot-password', asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (!email) return errorResponse(res, 'البريد الإلكتروني مطلوب');
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return successResponse(res, {}, 'تم إرسال رابط إعادة التعيين إذا كان البريد مسجلاً');
+  }
+
+  const resetToken = user.generateResetPasswordToken();
+  await user.save({ validateBeforeSave: false });
+
+  if (emailTransporter) {
+    try {
+      const resetUrl = `${ENV.FRONTEND_URL}/reset-password/${resetToken}`;
+      await sendEmail({
+        to: user.email,
+        subject: 'إعادة تعيين كلمة المرور',
+        html: `
+          <h2>طلب إعادة تعيين كلمة المرور</h2>
+          <p>لقد استلمنا طلبًا لتغيير كلمة مرورك، انقر على الرابط أدناه للمتابعة:</p>
+          <a href="${resetUrl}" style="padding: 10px 20px; background: #28a745; color: white; border-radius: 5px; text-decoration: none;">إعادة تعيين كلمة المرور</a>
+          <p>الرابط صالح لمدة ساعة واحدة فقط.</p>
+          <p>إذا لم تقم بهذا الطلب، يرجى تجاهل الرسالة.</p>
+        `,
+      });
+    } catch (err) {
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save({ validateBeforeSave: false });
+      return errorResponse(res, 'فشل إرسال البريد، يرجى المحاولة لاحقًا', StatusCodes.SERVICE_UNAVAILABLE);
+    }
+  }
+
+  successResponse(res, {}, 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني');
+}));
+
+app.put('/api/v1/auth/reset-password/:token', asyncHandler(async (req, res) => {
+  const { password } = req.body;
+  if (!password || password.length < 8) {
+    return errorResponse(res, 'كلمة المرور لا تقل عن 8 أحرف');
+  }
+
+  const hashedToken = require('crypto').createHash('sha256').update(req.params.token).digest('hex');
+  const user = await User.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return errorResponse(res, 'الرابط غير صالح أو منتهي الصلاحية', StatusCodes.BAD_REQUEST);
+  }
+
+  user.password = password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+  await user.save();
+
+  await Session.deleteMany({ userId: user._id });
+
+  successResponse(res, {}, 'تم تغيير كلمة المرور بنجاح، يرجى تسجيل الدخول');
+}));
+
+app.post('/api/v1/auth/logout', protect, asyncHandler(async (req, res) => {
+  await Session.deleteMany({ userId: req.user._id });
+  res.clearCookie('token');
+  successResponse(res, {}, 'تم تسجيل الخروج بنجاح');
+}));
+
+app.get('/api/v1/auth/me', protect, asyncHandler(async (req, res) => {
+  successResponse(res, { user: req.user }, 'تم جلب بيانات المستخدم');
+}));
+
+app.put('/api/v1/auth/change-password', protect, validate(schemas.changePassword), asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const user = await User.findById(req.user._id);
+
+  if (!(await user.matchPassword(currentPassword))) {
+    return errorResponse(res, 'كلمة المرور الحالية غير صحيحة', StatusCodes.BAD_REQUEST);
+  }
+
+  user.password = newPassword;
+  await user.save();
+  await Session.deleteMany({ userId: req.user._id });
+
+  successResponse(res, {}, 'تم تغيير كلمة المرور بنجاح');
+}));
+
+// ==================================================
+// مسارات المستخدمين
+// ==================================================
+app.get('/api/v1/users', protect, restrictTo('admin'), logActivity('list', 'users'), cache(60), asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 20;
+  const skip = (page - 1) * limit;
+  const search = req.query.search || '';
+  const role = req.query.role;
+  const status = req.query.status;
+
+  const filter = {};
+  if (search) filter.$or = [
+    { name: { $regex: search, $options: 'i' } },
+    { email: { $regex: search, $options: 'i' } },
+  ];
+  if (role) filter.role = role;
+  if (status) filter.status = status;
+
+  const users = await User.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 });
+  const total = await User.countDocuments(filter);
+
+  successResponse(res, {
+    users,
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+  });
+}));
+
+app.get('/api/v1/users/:id', protect, asyncHandler(async (req, res) => {
+  if (req.user._id.toString() !== req.params.id && req.user.role !== 'admin') {
+    return errorResponse(res, 'غير مسموح بالوصول لهذه البيانات', StatusCodes.FORBIDDEN);
+  }
+  const user = await User.findById(req.params.id);
+  if (!user) return errorResponse(res, 'المستخدم غير موجود', StatusCodes.NOT_FOUND);
+  successResponse(res, { user });
+}));
+
+app.put('/api/v1/users/profile', protect, validate(schemas.updateProfile), asyncHandler(async (req, res) => {
+  const { name, avatar, phone } = req.body;
+  const updateData = {};
+  if (name !== undefined) updateData.name = name;
+  if (avatar !== undefined) updateData.avatar = avatar;
+  if (phone !== undefined) updateData.phone = phone;
+
+  const user = await User.findByIdAndUpdate(req.user._id, updateData, {
+    new: true,
+    runValidators: true,
+  });
+
+  successResponse(res, { user }, 'تم تحديث البيانات بنجاح');
+}));
+
+app.delete('/api/v1/users/:id', protect, restrictTo('admin'), asyncHandler(async (req, res) => {
+  if (req.user._id.toString() === req.params.id) {
+    return errorResponse(res, 'لا يمكن حذف حسابك من هنا', StatusCodes.BAD_REQUEST);
+  }
+  const user = await User.findByIdAndDelete(req.params.id);
+  if (!user) return errorResponse(res, 'المستخدم غير موجود', StatusCodes.NOT_FOUND);
+  await Session.deleteMany({ userId: req.params.id });
+  successResponse(res, {}, 'تم حذف المستخدم بنجاح');
+}));
+
+// ==================================================
+// مسارات الفئات
+// ==================================================
+app.post('/api/v1/categories', protect, restrictTo('admin', 'editor'), asyncHandler(async (req, res) => {
+  const { name, description, parentId, sortOrder, isActive } = req.body;
+  if (!name) return errorResponse(res, 'اسم الفئة مطلوب');
+
+  const slug = name.toLowerCase().trim().replace(/[^a-z0-9\u0600-\u06FF]+/g, '-').replace(/^-|-$/g, '');
+  const existing = await Category.findOne({ slug });
+  if (existing) return errorResponse(res, 'هذه الفئة موجودة بالفعل', StatusCodes.CONFLICT);
+
+  const category = await Category.create({
+    name, slug, description, parentId, sortOrder, isActive,
+  });
+
+  successResponse(res, { category }, 'تم إنشاء الفئة بنجاح', StatusCodes.CREATED);
+}));
+
+app.get('/api/v1/categories', cache(300), asyncHandler(async (req, res) => {
+  const showInactive = req.query.showInactive === 'true' && req.user?.role === 'admin';
+  const filter = showInactive ? {} : { isActive: true };
+  const categories = await Category.find(filter).sort({ sortOrder: 1, name: 1 });
+  successResponse(res, { categories });
+}));
+
+app.put('/api/v1/categories/:id', protect, restrictTo('admin', 'editor'), asyncHandler(async (req, res) => {
+  const { name, description, parentId, sortOrder, isActive } = req.body;
+  const category = await Category.findById(req.params.id);
+  if (!category) return errorResponse(res, 'الفئة غير موجودة', StatusCodes.NOT_FOUND);
+
+  if (name) {
+    const slug = name.toLowerCase().trim().replace(/[^a-z0-9\u0600-\u06FF]+/g, '-').replace(/^-|-$/g, '');
+    const existing = await Category.findOne({ slug, _id: { $ne: req.params.id } });
+    if (existing) return errorResponse(res, 'اسم الفئة مكرر', StatusCodes.CONFLICT);
+    category.name = name;
+    category.slug = slug;
+  }
+  if (description !== undefined) category.description = description;
+  if (parentId !== undefined) category.parentId = parentId;
+  if (sortOrder !== undefined) category.sortOrder = sortOrder;
+  if (isActive !== undefined) category.isActive = isActive;
+
+  await category.save();
+  successResponse(res, { category }, 'تم تحديث الفئة بنجاح');
+}));
+
+app.delete('/api/v1/categories/:id', protect, restrictTo('admin'), asyncHandler(async (req, res) => {
+  const category = await Category.findById(req.params.id);
+  if (!category) return errorResponse(res, 'الفئة غير موجودة', StatusCodes.NOT_FOUND);
+  
+  const hasProducts = await Product.exists({ categoryId: req.params.id });
+  if (hasProducts) return errorResponse(res, 'لا يمكن حذف الفئة لوجود منتجات مرتبطة بها', StatusCodes.CONFLICT);
+
+  await Category.findByIdAndDelete(req.params.id);
+  successResponse(res, {}, 'تم حذف الفئة بنجاح');
+}));
+
+// ==================================================
+// مسارات المنتجات
+// ==================================================
+app.post('/api/v1/products', protect, restrictTo('admin', 'editor'), asyncHandler(async (req, res) => {
+  const { name, description, price, discountPrice, stock, categoryId, images, mainImage, features, specifications, isActive, isFeatured } = req.body;
+  
+  if (!name || !price || !categoryId) {
+    return errorResponse(res, 'الاسم والسعر والفئة مطلوبة', StatusCodes.BAD_REQUEST);
+  }
+
+  const slug = name.toLowerCase().trim().replace(/[^a-z0-9\u0600-\u06FF]+/g, '-').replace(/^-|-$/g, '');
+  const existing = await Product.findOne({ slug });
+  if (existing) return errorResponse(res, 'المنتج موجود بالفعل', StatusCodes.CONFLICT);
+
+  const product = await Product.create({
+    name, slug, description, price, discountPrice, stock, categoryId,
+    images, mainImage, features, specifications, isActive, isFeatured,
+    createdBy: req.user._id,
+  });
+
+  successResponse(res, { product }, 'تم إضافة المنتج بنجاح', StatusCodes.CREATED);
+}));
+
+app.get('/api/v1/products', cache(120), asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 12;
+  const skip = (page - 1) * limit;
+  const search = req.query.search || '';
+  const category = req.query.category;
+  const minPrice = parseFloat(req.query.minPrice);
+  const maxPrice = parseFloat(req.query.maxPrice);
+  const featured = req.query.featured === 'true';
+
+  const filter = { isActive: true };
+  if (search) filter.$text = { $search: search };
+  if (category) filter.categoryId = category;
+  if (!isNaN(minPrice)) filter.price = { ...filter.price, $gte: minPrice };
+  if (!isNaN(maxPrice)) filter.price = { ...filter.price, $lte: maxPrice };
+  if (featured) filter.isFeatured = true;
+
+  const sortBy = req.query.sortBy || '-createdAt';
+  const products = await Product.find(filter).skip(skip).limit(limit).sort(sortBy).populate('categoryId', 'name slug');
+  const total = await Product.countDocuments(filter);
+
+  successResponse(res, {
+    products,
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+  });
+}));
+
+app.get('/api/v1/products/:id', asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id).populate('categoryId', 'name slug');
+  if (!product || !product.isActive) {
+    return errorResponse(res, 'المنتج غير متاح', StatusCodes.NOT_FOUND);
+  }
+  await Product.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } });
+  successResponse(res, { product });
+}));
+
+app.put('/api/v1/products/:id', protect, restrictTo('admin', 'editor'), asyncHandler(async (req, res) => {
+  const { name, description, price, discountPrice, stock, categoryId, images, mainImage, features, specifications, isActive, isFeatured } = req.body;
+  const product = await Product.findById(req.params.id);
+  if (!product) return errorResponse(res, 'المنتج غير موجود', StatusCodes.NOT_FOUND);
+
+  if (name) {
+    const slug = name.toLowerCase().trim().replace(/[^a-z0-9\u0600-\u06FF]+/g, '-').replace(/^-|-$/g, '');
+    const existing = await Product.findOne({ slug, _id: { $ne: req.params.id } });
+    if (existing) return errorResponse(res, 'اسم المنتج مكرر', StatusCodes.CONFLICT);
+    product.name = name;
+    product.slug = slug;
+  }
+  if (description !== undefined) product.description = description;
+  if (price !== undefined) product.price = price;
+  if (discountPrice !== undefined) product.discountPrice = discountPrice;
+  if (stock !== undefined) product.stock = stock;
+  if (categoryId !== undefined) product.categoryId = categoryId;
+  if (images !== undefined) product.images = images;
+  if (mainImage !== undefined) product.mainImage = mainImage;
+  if (features !== undefined) product.features = features;
+  if (specifications !== undefined) product.specifications = specifications;
+  if (isActive !== undefined) product.isActive = isActive;
+  if (isFeatured !== undefined) product.isFeatured = isFeatured;
+
+  await product.save();
+  successResponse(res, { product }, 'تم تحديث المنتج بنجاح');
+}));
+
+app.delete('/api/v1/products/:id', protect, restrictTo('admin'), asyncHandler(async (req, res) => {
+  const product = await Product.findByIdAndDelete(req.params.id);
+  if (!product) return errorResponse(res, 'المنتج غير موجود', StatusCodes.NOT_FOUND);
+  successResponse(res, {}, 'تم حذف المنتج بنجاح');
+}));
+
+// ==================================================
+// مسارات الطلبات
+// ==================================================
+app.post('/api/v1/orders', protect, asyncHandler(async (req, res) => {
+  const { items, shippingAddress, notes } = req.body;
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    return errorResponse(res, 'المنتجات مطلوبة لإنشاء الطلب', StatusCodes.BAD_REQUEST);
+  }
+  if (!shippingAddress) return errorResponse(res, 'عنوان الشحن مطلوب');
+
+  let totalAmount = 0;
+  const orderItems = [];
+
+  for (const item of items) {
+    const product = await Product.findById(item.productId);
+    if (!product || !product.isActive) {
+      return errorResponse(res, `المنتج برقم ${item.productId} غير متاح`, StatusCodes.BAD_REQUEST);
+    }
+    if (product.stock < item.quantity) {
+      return errorResponse(res, `الكمية المطلوبة من "${product.name}" غير متوفرة`, StatusCodes.BAD_REQUEST);
+    }
+
+    const price = product.discountPrice || product.price;
+    totalAmount += price * item.quantity;
+    orderItems.push({
+      productId: product._id,
+      name: product.name,
+      price,
+      quantity: item.quantity,
+      image: product.mainImage,
+    });
+
+    product.stock -= item.quantity;
+    await product.save();
+  }
+
+  const order = await Order.create({
+    userId: req.user._id,
+    items: orderItems,
+    totalAmount,
+    shippingAddress,
+    notes,
+  });
+
+  successResponse(res, { order }, 'تم إنشاء الطلب بنجاح', StatusCodes.CREATED);
+}));
+
+app.get('/api/v1/orders', protect, asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+  const status = req.query.status;
+
+  const filter = req.user.role === 'admin' ? {} : { userId: req.user._id };
+  if (status) filter.status = status;
+
+  const orders = await Order.find(filter).skip(skip).limit(limit).
