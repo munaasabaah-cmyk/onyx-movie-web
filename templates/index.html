@@ -797,12 +797,6 @@ button{font-family:var(--font-u);cursor:pointer;border:none;background:none;colo
      ═══════════════════════════════════════════════════════ -->
 <script>
 /* ══════════════════════════════════════════════════════════
-   ██████╗  ██████╗ ██╗    ██╗███████╗██████╗
-   ██╔══██╗██╔═══██╗██║    ██║██╔════╝██╔══██╗
-   ██████╔╝██║   ██║██║ █╗ ██║█████╗  ██████╔╝
-   ██╔═══╝ ██║   ██║██║███╗██║██╔══╝  ██╔══██╗
-   ██║     ╚██████╔╝╚███╔███╔╝███████╗██║  ██║
-   ╚═╝      ╚═════╝  ╚══╝╚══╝ ╚══════╝╚═╝  ╚═╝
    TU CENMA — Front-End Engine v3.0
    Powered by TMDB API (themoviedb.org)
    ══════════════════════════════════════════════════════════ */
@@ -811,8 +805,8 @@ button{font-family:var(--font-u);cursor:pointer;border:none;background:none;colo
    1.  CONFIGURATION
    ────────────────────────────────────────────── */
 const CFG = {
-  /* TMDB v3 API key — should be provided via environment (e.g. .env + proxy) */
-  apiKey:    'YOUR_TMDB_API_KEY', // ← ضع الـ key هنا أو استخدم متغير بيئة
+  /* TMDB v3 API key — المفتاح موجود في ملف .env ويتم حقنه عبر proxy */
+  apiKey:    window.__TMDB_KEY__ || '', 
   lang:      'ar-SA',
   fallbackLang: 'en-US',
   imgBase:   'https://image.tmdb.org/t/p/',
@@ -932,7 +926,7 @@ async function doSearch(q){
     bindCards(searchGrid);
   }catch(e){
     searchGrid.innerHTML='';
-    showToast('فشل البحث — تحقق من الـ API Key');
+    showToast('فشل البحث، حاول مرة أخرى');
   }
 }
 
@@ -1270,8 +1264,7 @@ function setFeatureBanner(m, type='movie'){
    14. MAIN DATA LOADER
    ────────────────────────────────────────────── */
 async function loadAll(){
-  if(!CFG.apiKey || CFG.apiKey === 'YOUR_TMDB_API_KEY'){
-    showToast('أدخل TMDB API Key في ملف الإعدادات', 4000);
+  if(!CFG.apiKey){
     loadDemoMode();
     return;
   }
@@ -1415,7 +1408,7 @@ document.querySelectorAll('#navLinks a').forEach(a=>{
 async function switchTab(tab){
   const rows  = document.getElementById('rows');
   const rows2 = document.getElementById('rows2');
-  if(!CFG.apiKey || CFG.apiKey === 'YOUR_TMDB_API_KEY'){ showToast('أدخل API Key أولاً'); return; }
+  if(!CFG.apiKey){ showToast('الخدمة غير متوفرة حالياً'); return; }
 
   if(tab==='movies'){
     rows.innerHTML = [
