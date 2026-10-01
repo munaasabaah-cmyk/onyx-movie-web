@@ -30,7 +30,7 @@ img{display:block;max-width:100%}
 ::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
 :focus-visible{outline:2px solid var(--teal);outline-offset:3px}
 
-/* ═══ topbar ═══ */
+/* topbar */
 .topbar{
   position:fixed;top:0;inset-inline:0;z-index:200;
   display:flex;align-items:center;justify-content:space-between;
@@ -56,7 +56,7 @@ img{display:block;max-width:100%}
 .icon-btn:hover{border-color:var(--teal);color:var(--teal)}
 .icon-btn svg{width:17px;height:17px}
 
-/* ═══ stage ═══ */
+/* stage */
 .stage{
   position:relative;width:100%;height:100vh;background:#000;overflow:hidden;
 }
@@ -85,7 +85,7 @@ img{display:block;max-width:100%}
 }
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
 
-/* ═══ server selector ═══ */
+/* server selector */
 .server-bar{
   position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
   z-index:9;display:flex;gap:8px;padding:8px;
@@ -105,9 +105,8 @@ img{display:block;max-width:100%}
 .server-btn:hover{color:var(--parch);border-color:var(--line2)}
 .server-btn.active{background:var(--teal);color:var(--bg);font-weight:700}
 
-/* ═══ info ═══ */
+/* info */
 .info-wrap{max-width:1240px;margin:0 auto;padding:56px 5vw 100px}
-
 .info-top{display:grid;grid-template-columns:1.7fr 1fr;gap:50px;margin-bottom:60px}
 .info-poster{
   width:180px;aspect-ratio:2/3;border-radius:12px;overflow:hidden;
@@ -148,7 +147,6 @@ img{display:block;max-width:100%}
 .action-btn.primary{background:var(--teal);color:var(--bg);border-color:transparent}
 .action-btn.primary:hover{background:#00e0e0}
 .action-btn svg{width:15px;height:15px}
-
 .info-facts{font-size:14px;color:var(--parch-dim)}
 .fact-row{margin-bottom:14px}
 .fact-row b{
@@ -166,13 +164,13 @@ img{display:block;max-width:100%}
   letter-spacing:.05em;
 }
 
-/* ═══ sections ═══ */
+/* sections */
 .sec-title{
   font-family:var(--font-d);font-size:20px;
   letter-spacing:.06em;margin-bottom:18px;
 }
 
-/* ═══ cast ═══ */
+/* cast */
 .cast-strip{display:flex;gap:14px;overflow-x:auto;padding-bottom:12px;margin-bottom:48px}
 .cast-card{flex:0 0 auto;width:90px;text-align:center;cursor:pointer;transition:.2s}
 .cast-card:hover{transform:translateY(-3px)}
@@ -184,7 +182,46 @@ img{display:block;max-width:100%}
 .cast-card .name{font-size:11px;color:var(--parch)}
 .cast-card .char{font-size:10px;color:var(--parch-dim);margin-top:2px}
 
-/* ═══ related ═══ */
+/* seasons */
+.seasons-bar{
+  display:flex;gap:8px;overflow-x:auto;padding-bottom:16px;margin-bottom:24px;
+}
+.season-btn{
+  flex:0 0 auto;padding:10px 20px;border-radius:8px;
+  border:1px solid var(--line2);background:var(--bg2);
+  color:var(--parch-dim);font-size:13px;font-weight:600;
+  transition:.2s;white-space:nowrap;
+}
+.season-btn:hover{border-color:var(--teal-dim);color:var(--parch)}
+.season-btn.active{
+  background:var(--teal);color:var(--bg);border-color:transparent;
+}
+.episodes-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:12px;margin-bottom:48px;
+}
+.episode-card{
+  background:var(--bg2);border:1px solid var(--line);border-radius:10px;
+  padding:16px;cursor:pointer;transition:.2s var(--ease);
+  display:flex;gap:12px;align-items:center;
+}
+.episode-card:hover{
+  border-color:var(--teal-dim);transform:translateY(-2px);
+  background:var(--bg3);
+}
+.episode-num{
+  flex:0 0 auto;width:44px;height:44px;border-radius:8px;
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-d);font-size:16px;font-weight:700;color:var(--teal);
+}
+.episode-info{flex:1;min-width:0}
+.episode-title{
+  font-size:14px;color:var(--parch);font-weight:600;
+  margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.episode-meta{font-size:11px;color:var(--parch-dim)}
+
+/* related */
 .related-rail{display:flex;gap:14px;overflow-x:auto;padding-bottom:12px;margin-bottom:48px}
 .rel-card{
   flex:0 0 auto;width:220px;aspect-ratio:16/9;border-radius:10px;overflow:hidden;
@@ -214,7 +251,7 @@ img{display:block;max-width:100%}
 .rel-card:hover .rel-play-btn{opacity:1;transform:translate(-50%,-50%) scale(1)}
 .rel-play-btn svg{width:16px;height:16px;fill:var(--bg)}
 
-/* ═══ comments ═══ */
+/* comments */
 .comments-wrap{margin-bottom:60px}
 .comment-form{display:flex;gap:14px;margin-bottom:28px}
 .who{
@@ -251,15 +288,7 @@ img{display:block;max-width:100%}
 .like-btn.liked{color:var(--teal);border-color:var(--teal)}
 .empty-msg{color:var(--parch-dim);font-size:13px;padding:24px 0}
 
-/* ═══ skeleton ═══ */
-.skel-line{
-  height:14px;background:linear-gradient(100deg,var(--bg2) 28%,var(--bg3) 44%,var(--bg2) 60%);
-  background-size:280% 100%;animation:shimmer 1.7s infinite;
-  border-radius:5px;margin-bottom:10px;
-}
-@keyframes shimmer{from{background-position:160% 0}to{background-position:-60% 0}}
-
-/* ═══ footer ═══ */
+/* footer */
 .player-footer{
   border-top:1px solid var(--line);padding:32px 5vw;
   display:flex;align-items:center;justify-content:space-between;
@@ -269,7 +298,7 @@ img{display:block;max-width:100%}
 .player-footer .logo em{color:var(--teal);font-style:normal}
 .player-footer p{font-size:12px;color:var(--parch-dim)}
 
-/* ═══ toast ═══ */
+/* toast */
 .toast{
   position:fixed;bottom:80px;left:50%;
   transform:translateX(-50%) translateY(16px);
@@ -295,7 +324,7 @@ img{display:block;max-width:100%}
 <body>
 <div class="toast" id="toast"></div>
 
-<!-- ═══ topbar ═══ -->
+<!-- topbar -->
 <div class="topbar" id="topbar">
   <a class="back" href="/">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
@@ -312,7 +341,7 @@ img{display:block;max-width:100%}
   </div>
 </div>
 
-<!-- ═══ stage ═══ -->
+<!-- stage -->
 <div class="stage" id="stage">
   <div class="stage-loader" id="stageLoader">
     <div class="spinner"></div>
@@ -331,7 +360,7 @@ img{display:block;max-width:100%}
   </div>
 </div>
 
-<!-- ═══ info ═══ -->
+<!-- info -->
 <div class="info-wrap">
   <div class="info-top">
     <div class="info-main">
@@ -352,6 +381,13 @@ img{display:block;max-width:100%}
   <div class="sec-title">طاقم العمل</div>
   <div class="cast-strip" id="castStrip"></div>
 
+  <!-- seasons & episodes (للمسلسلات فقط) -->
+  <div id="seasonsSection" style="display:none">
+    <div class="sec-title">المواسم والحلقات</div>
+    <div class="seasons-bar" id="seasonsBar"></div>
+    <div class="episodes-grid" id="episodesGrid"></div>
+  </div>
+
   <div class="sec-title">قد يعجبك أيضاً</div>
   <div class="related-rail" id="relatedRail"></div>
 
@@ -371,36 +407,38 @@ img{display:block;max-width:100%}
   <p>مدعوم من <b>TMDB API</b> — بث بجودة 4K</p>
 </footer>
 
-<!-- حقن مفتاح TMDB من Flask -->
 <script>
   window.__TMDB_KEY__ = "{{ tmdb_key|e }}";
 </script>
 
 <script>
 /* ════════════════════════════════════════════════════
-   TU CENMA — Player Engine v4.1 (Discord-Ready)
-   Multi-server streaming + OMDb ratings + comments
+   TU CENMA — Player Engine v4.2 (Discord-Ready)
+   Multi-server + Seasons + OMDb + Comments
    ════════════════════════════════════════════════════ */
 
 const params     = new URLSearchParams(location.search);
 const MEDIA_ID   = parseInt(params.get('id')) || 0;
 const MEDIA_TYPE = params.get('type') || 'movie';
 
-/* ⚠️ Discord Activity: استخدم /api/3/ بدل https://api.themoviedb.org/3/ */
 const API_KEY  = () => window.__TMDB_KEY__ || '';
 const IMG      = (p,s='w500')  => p ? `/img/t/p/${s}${p}` : '';
 const BACKDROP = (p,s='w1280') => p ? `/img/t/p/${s}${p}` : '';
 const DETAIL   = (type,id) => `/api/3/${type}/${id}?api_key=${API_KEY()}&language=ar-SA&append_to_response=credits,similar,external_ids`;
 
-/* ── servers config ── */
 const SERVERS = {
-  vidlink:   { label:'VidLink 4K', url:(id,t) => t==='tv' ? `https://vidlink.pro/tv/${id}/1/1?quality=4k&sub=ar` : `https://vidlink.pro/movie/${id}?quality=4k&sub=ar` },
-  vidsrc:    { label:'VidSrc',     url:(id,t) => t==='tv' ? `https://vidsrc.to/embed/tv/${id}/1/1` : `https://vidsrc.to/embed/movie/${id}` },
-  autoembed: { label:'AutoEmbed',  url:(id,t) => t==='tv' ? `https://player.autoembed.cc/embed/tv/${id}/1/1` : `https://player.autoembed.cc/embed/movie/${id}` },
+  vidlink:   { label:'VidLink 4K', url:(id,t,s=1,e=1) => t==='tv'
+    ? `https://vidlink.pro/tv/${id}/${s}/${e}?quality=4k&sub=ar`
+    : `https://vidlink.pro/movie/${id}?quality=4k&sub=ar` },
+  vidsrc:    { label:'VidSrc',     url:(id,t,s=1,e=1) => t==='tv'
+    ? `https://vidsrc.to/embed/tv/${id}/${s}/${e}`
+    : `https://vidsrc.to/embed/movie/${id}` },
+  autoembed: { label:'AutoEmbed',  url:(id,t,s=1,e=1) => t==='tv'
+    ? `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}`
+    : `https://player.autoembed.cc/embed/movie/${id}` },
 };
 let currentServer = localStorage.getItem('tucentma_server') || 'vidlink';
 
-/* ── toast ── */
 function toast(msg, dur=2400){
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -409,31 +447,18 @@ function toast(msg, dur=2400){
   t._t = setTimeout(()=>t.classList.remove('show'), dur);
 }
 
-/* ── helpers ── */
 function runtime(m){ return m ? `${Math.floor(m/60)}س ${m%60}د` : '—'; }
 function year(d){ return d ? new Date(d).getFullYear() : '—'; }
 
-/* ─────────────────────────────────────────
-   STREAM
-   ───────────────────────────────────────── */
 function loadStream(){
   const frame = document.getElementById('video-frame');
   const loader = document.getElementById('stageLoader');
-
-  if(!MEDIA_ID){
-    loader.classList.add('gone');
-    return;
-  }
-
+  if(!MEDIA_ID){ loader.classList.add('gone'); return; }
   const server = SERVERS[currentServer] || SERVERS.vidlink;
   frame.src = server.url(MEDIA_ID, MEDIA_TYPE);
-
   setTimeout(() => loader.classList.add('gone'), 2500);
 }
 
-/* ─────────────────────────────────────────
-   SERVER SWITCHER
-   ───────────────────────────────────────── */
 document.querySelectorAll('.server-btn').forEach(btn => {
   btn.classList.toggle('active', btn.dataset.server === currentServer);
   btn.addEventListener('click', () => {
@@ -446,33 +471,23 @@ document.querySelectorAll('.server-btn').forEach(btn => {
   });
 });
 
-/* ─────────────────────────────────────────
-   LOAD MEDIA DETAILS
-   ───────────────────────────────────────── */
 async function loadMedia(){
   if(!MEDIA_ID){
     document.getElementById('infoTitle').textContent = 'لم يتم تحديد الفيلم';
     return;
   }
   loadStream();
-
   try{
     const m = await fetch(DETAIL(MEDIA_TYPE, MEDIA_ID)).then(r => r.json());
     if(m.status_code) throw new Error(m.status_message);
     hydrate(m);
-
-    /* جلب تقييم IMDb من OMDb إذا عنده imdb_id */
     if(m.imdb_id) loadIMDbRating(m.imdb_id);
-
   }catch(e){
     console.warn('TMDB error:', e);
     document.getElementById('infoTitle').textContent = 'تعذر تحميل التفاصيل';
   }
 }
 
-/* ─────────────────────────────────────────
-   OMDb IMDb RATING
-   ───────────────────────────────────────── */
 async function loadIMDbRating(imdbId){
   try{
     const r = await fetch(`/api/omdb?i=${imdbId}`).then(r => r.json());
@@ -488,19 +503,14 @@ async function loadIMDbRating(imdbId){
         </span>
       </div>
     `);
-  }catch(e){ /* silent */ }
+  }catch(e){}
 }
 
-/* ─────────────────────────────────────────
-   HYDRATE UI
-   ───────────────────────────────────────── */
 function hydrate(m){
   const type  = MEDIA_TYPE;
   const title = m.title || m.name || '—';
-
   document.title = `${title} — TU CENMA`;
 
-  /* poster */
   const posterEl = document.getElementById('infoPosterImg');
   if(m.poster_path){
     posterEl.src = IMG(m.poster_path, 'w342');
@@ -508,11 +518,9 @@ function hydrate(m){
     posterEl.style.display = 'none';
   }
 
-  /* title + desc */
   document.getElementById('infoTitle').textContent = title;
   document.getElementById('infoDesc').textContent  = m.overview || 'لا يوجد وصف متاح.';
 
-  /* meta */
   const yr = year(m.release_date || m.first_air_date);
   const sc = m.vote_average ? m.vote_average.toFixed(1) : '—';
   document.getElementById('infoMeta').innerHTML =
@@ -522,11 +530,9 @@ function hydrate(m){
      ${m.runtime ? `<span class="pill">${runtime(m.runtime)}</span>` : ''}
      ${m.number_of_seasons ? `<span class="pill">${m.number_of_seasons} مواسم</span>` : ''}`;
 
-  /* genres */
   document.getElementById('infoGenres').innerHTML =
     (m.genres || []).map(g => `<span>${g.name}</span>`).join('');
 
-  /* actions */
   document.getElementById('infoActions').innerHTML = `
     <button class="action-btn primary" id="watchTopBtn">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -543,7 +549,6 @@ function hydrate(m){
   };
   document.getElementById('shareInfoBtn').onclick = shareLink;
 
-  /* facts */
   document.getElementById('infoFacts').innerHTML = `
     <div class="fact-row"><b>التقييم</b>⭐ ${sc} / 10 (${(m.vote_count || 0).toLocaleString('ar')} تصويت)</div>
     <div class="fact-row"><b>السنة</b>${yr}</div>
@@ -555,25 +560,23 @@ function hydrate(m){
     ${(m.production_companies || []).length ? `<div class="fact-row"><b>الإنتاج</b>${m.production_companies.slice(0,2).map(c => c.name).join('، ')}</div>` : ''}
   `;
 
-  /* cast */
   const cast = (m.credits?.cast || []).slice(0, 12);
   document.getElementById('castStrip').innerHTML = cast.length
     ? cast.map(c => `
         <div class="cast-card">
-          <img loading="lazy" src="${IMG(c.profile_path, 'w185')}" alt="${c.name}" onerror="this.src='${IMG(null)}'">
+          <img loading="lazy" src="${IMG(c.profile_path, 'w185')}" alt="${c.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23181924%22/%3E%3Ctext x=%2250%22 y=%2258%22 text-anchor=%22middle%22 fill=%22%235a5a6e%22 font-size=%2230%22%3E👤%3C/text%3E%3C/svg%3E'">
           <div class="name">${c.name}</div>
           <div class="char">${c.character || ''}</div>
         </div>`).join('')
     : '<div class="empty-msg">لا توجد معلومات عن الممثلين</div>';
 
-  /* related */
   const similar = (m.similar?.results || []).filter(x => x.poster_path || x.backdrop_path).slice(0, 10);
   document.getElementById('relatedRail').innerHTML = similar.length
     ? similar.map(s => {
         const relType = s.media_type || type;
         return `
           <div class="rel-card" data-id="${s.id}" data-type="${relType}" tabindex="0" role="button">
-            <img loading="lazy" src="${BACKDROP(s.backdrop_path, 'w780') || IMG(s.poster_path, 'w500')}" alt="${s.title || s.name}" onerror="this.src='${IMG(null)}'">
+            <img loading="lazy" src="${BACKDROP(s.backdrop_path, 'w780') || IMG(s.poster_path, 'w500')}" alt="${s.title || s.name}">
             <div class="rel-play-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
             <div class="rel-card-info">
               <div class="rel-card-title">${s.title || s.name}</div>
@@ -591,6 +594,83 @@ function hydrate(m){
       if(e.key === 'Enter') c.click();
     });
   });
+
+  /* جلب المواسم للمسلسلات */
+  if(type === 'tv' && m.number_of_seasons){
+    loadSeasons(m.id, m.number_of_seasons);
+  }
+}
+
+/* ─────────────────────────────────────────
+   SEASONS & EPISODES
+   ───────────────────────────────────────── */
+async function loadSeasons(tvId, numberOfSeasons){
+  const section = document.getElementById('seasonsSection');
+  const bar = document.getElementById('seasonsBar');
+  if(!numberOfSeasons || numberOfSeasons < 1) return;
+  section.style.display = 'block';
+
+  bar.innerHTML = Array.from({length: numberOfSeasons}, (_, i) =>
+    `<button class="season-btn${i===0?' active':''}" data-season="${i+1}">
+      الموسم ${i+1}
+    </button>`
+  ).join('');
+
+  await loadEpisodes(tvId, 1);
+
+  bar.querySelectorAll('.season-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      bar.querySelectorAll('.season-btn').forEach(b => b.classList.toggle('active', b === btn));
+      await loadEpisodes(tvId, +btn.dataset.season);
+    });
+  });
+}
+
+async function loadEpisodes(tvId, seasonNum){
+  const grid = document.getElementById('episodesGrid');
+  grid.innerHTML = '<div class="empty-msg">جاري تحميل الحلقات…</div>';
+
+  try{
+    const r = await fetch(`/api/3/tv/${tvId}/season/${seasonNum}?api_key=${API_KEY()}&language=ar-SA`);
+    const data = await r.json();
+    const eps = data.episodes || [];
+
+    if(!eps.length){
+      grid.innerHTML = '<div class="empty-msg">لا توجد حلقات</div>';
+      return;
+    }
+
+    grid.innerHTML = eps.map(ep => `
+      <div class="episode-card" data-season="${seasonNum}" data-episode="${ep.episode_number}">
+        <div class="episode-num">${ep.episode_number}</div>
+        <div class="episode-info">
+          <div class="episode-title">${ep.name || 'حلقة ' + ep.episode_number}</div>
+          <div class="episode-meta">
+            ${ep.air_date ? new Date(ep.air_date).getFullYear() : ''}
+            ${ep.runtime ? ' · ' + ep.runtime + 'د' : ''}
+            ⭐ ${ep.vote_average ? ep.vote_average.toFixed(1) : '—'}
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('.episode-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const s = card.dataset.season;
+        const e = card.dataset.episode;
+        const frame = document.getElementById('video-frame');
+        const server = SERVERS[currentServer] || SERVERS.vidlink;
+        frame.src = server.url(MEDIA_ID, 'tv', s, e);
+        document.getElementById('stageLoader').classList.remove('gone');
+        setTimeout(() => document.getElementById('stageLoader').classList.add('gone'), 2000);
+        window.scrollTo({top:0,behavior:'smooth'});
+        toast(`الموسم ${s} — الحلقة ${e}`);
+      });
+    });
+
+  }catch(e){
+    grid.innerHTML = '<div class="empty-msg">تعذر تحميل الحلقات</div>';
+  }
 }
 
 /* ─────────────────────────────────────────
@@ -612,9 +692,6 @@ async function shareLink(){
 }
 document.getElementById('shareBtn').onclick = shareLink;
 
-/* ─────────────────────────────────────────
-   FULLSCREEN
-   ───────────────────────────────────────── */
 document.getElementById('fullscreenBtn').onclick = () => {
   const stage = document.getElementById('stage');
   if(!document.fullscreenElement){
@@ -625,29 +702,24 @@ document.getElementById('fullscreenBtn').onclick = () => {
 };
 
 /* ─────────────────────────────────────────
-   COMMENTS — localStorage persistence
+   COMMENTS
    ───────────────────────────────────────── */
 const COMMENTS_KEY = `tucentma_comments_${MEDIA_TYPE}_${MEDIA_ID}`;
-
 const DEFAULT_COMMENTS = [
   {who:'م', name:'محمد', time:'قبل يومين', text:'من أقوى ما شاهدته هذا العام — النهاية لم أتوقعها أبداً.', likes:24, liked:false},
   {who:'س', name:'سارة', time:'قبل 4 أيام', text:'الموسيقى التصويرية خرافية، تزيد من توتر المشاهد بشكل رهيب.', likes:17, liked:false},
   {who:'أ', name:'أحمد', time:'قبل أسبوع', text:'حبذا لو كانت المدة أطول، القصة تستحق.', likes:8, liked:false},
 ];
-
 let COMMENTS = [];
 function loadComments(){
   try{
     const raw = localStorage.getItem(COMMENTS_KEY);
     COMMENTS = raw ? JSON.parse(raw) : [...DEFAULT_COMMENTS];
-  }catch(e){
-    COMMENTS = [...DEFAULT_COMMENTS];
-  }
+  }catch(e){ COMMENTS = [...DEFAULT_COMMENTS]; }
 }
 function saveComments(){
   try{ localStorage.setItem(COMMENTS_KEY, JSON.stringify(COMMENTS)); }catch(e){}
 }
-
 function renderComments(){
   const list = document.getElementById('commentList');
   if(!COMMENTS.length){
@@ -681,20 +753,12 @@ function renderComments(){
     });
   });
 }
-
 document.getElementById('commentForm').addEventListener('submit', e => {
   e.preventDefault();
   const inp = document.getElementById('commentInput');
   const txt = inp.value.trim();
   if(!txt) return;
-  COMMENTS.unshift({
-    who: 'ت',
-    name: 'أنت',
-    time: 'الآن',
-    text: txt.slice(0, 500),
-    likes: 0,
-    liked: false,
-  });
+  COMMENTS.unshift({who:'ت', name:'أنت', time:'الآن', text: txt.slice(0,500), likes:0, liked:false});
   saveComments();
   renderComments();
   inp.value = '';
@@ -702,7 +766,7 @@ document.getElementById('commentForm').addEventListener('submit', e => {
 });
 
 /* ─────────────────────────────────────────
-   IFRAME LOAD LISTENER
+   IFRAME LOAD
    ───────────────────────────────────────── */
 document.getElementById('video-frame').addEventListener('load', () => {
   setTimeout(() => {
@@ -711,7 +775,7 @@ document.getElementById('video-frame').addEventListener('load', () => {
 });
 
 /* ─────────────────────────────────────────
-   TOPBAR AUTO-HIDE ON SCROLL
+   TOPBAR AUTO-HIDE
    ───────────────────────────────────────── */
 let lastScroll = 0;
 window.addEventListener('scroll', () => {
@@ -725,7 +789,7 @@ window.addEventListener('scroll', () => {
 }, {passive:true});
 
 /* ─────────────────────────────────────────
-   KEYBOARD SHORTCUTS
+   KEYBOARD
    ───────────────────────────────────────── */
 document.addEventListener('keydown', e => {
   if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
