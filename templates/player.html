@@ -3,762 +3,1259 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TU CENMA — المشغل</title>
+<title>TU CENMA — مشاهدة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Cinzel:wght@400;600;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#08090f;--bg2:#10111a;--bg3:#181924;
-  --teal:#00c8c8;--teal-dim:#006f6f;
-  --parch:#e8e0d4;--parch-dim:#9a9187;
-  --gold:#c8a84b;--gold-dim:#7a6530;
-  --oxblood:#6b1f2a;--ox-glow:#a32e3e;
-  --line:rgba(232,224,212,.07);--line2:rgba(232,224,212,.14);
-  --ease:cubic-bezier(.16,1,.3,1);
-  --font-d:'Cinzel',serif;--font-u:'Tajawal',sans-serif;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{background:var(--bg);color:var(--parch);font-family:var(--font-u);-webkit-font-smoothing:antialiased;overflow-x:hidden}
-a{color:inherit;text-decoration:none}
-button{font-family:var(--font-u);cursor:pointer;border:none;background:none;color:inherit;padding:0}
-img{display:block;max-width:100%}
-::selection{background:var(--teal);color:var(--bg)}
-::-webkit-scrollbar{height:6px;width:6px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
-:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
-
-/* topbar */
-.topbar{
-  position:fixed;top:0;inset-inline:0;z-index:200;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:18px 5vw;
-  background:linear-gradient(180deg,rgba(8,9,15,.95) 0%,transparent 100%);
-  pointer-events:auto;
-  transition:opacity .4s,transform .4s var(--ease);
-}
-.topbar.hidden{opacity:0;transform:translateY(-100%);pointer-events:none}
-.brand{font-family:var(--font-d);font-size:20px;letter-spacing:.1em;color:var(--parch)}
-.brand em{color:var(--teal);font-style:normal}
-.back{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--parch-dim);transition:.2s}
-.back:hover{color:var(--teal)}
-.back svg{width:18px;height:18px}
-.top-actions{display:flex;gap:10px;align-items:center}
-.icon-btn{
-  width:38px;height:38px;border-radius:50%;
-  border:1px solid var(--line2);background:rgba(8,9,15,.6);
-  display:flex;align-items:center;justify-content:center;
-  color:var(--parch-dim);transition:.2s;
-  backdrop-filter:blur(8px);
-}
-.icon-btn:hover{border-color:var(--teal);color:var(--teal)}
-.icon-btn svg{width:17px;height:17px}
-
-/* stage */
-.stage{
-  position:relative;width:100%;height:100vh;background:#000;overflow:hidden;
-}
-#video-frame{
-  position:absolute;inset:0;width:100%;height:100%;
-  border:none;background:#000;display:block;
-}
-.stage-loader{
-  position:absolute;inset:0;z-index:8;
-  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:22px;
-  background:#000;transition:opacity .5s;pointer-events:none;
-}
-.stage-loader.gone{opacity:0}
-.spinner{
-  width:48px;height:48px;
-  border:3px solid var(--line2);
-  border-top-color:var(--teal);
-  border-radius:50%;
-  animation:spin .9s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loader-text{
-  font-family:var(--font-d);font-size:14px;
-  letter-spacing:.15em;color:var(--parch-dim);
-  animation:pulse 1.6s ease-in-out infinite;
-}
-@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
-
-/* info */
-.info-wrap{max-width:1240px;margin:0 auto;padding:56px 5vw 100px}
-.info-top{display:grid;grid-template-columns:1.7fr 1fr;gap:50px;margin-bottom:60px}
-.info-poster{
-  width:180px;aspect-ratio:2/3;border-radius:12px;overflow:hidden;
-  border:1px solid var(--line2);flex-shrink:0;
-  background:var(--bg2);
-}
-.info-poster img{width:100%;height:100%;object-fit:cover}
-.info-main{display:flex;gap:24px}
-.info-title{
-  font-family:var(--font-d);font-size:clamp(24px,3.5vw,42px);
-  letter-spacing:.05em;margin-bottom:12px;
-}
-.info-meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
-.pill{
-  border:1px solid var(--line2);border-radius:5px;
-  padding:3px 10px;font-size:13px;color:var(--parch-dim);
-}
-.pill.teal{border-color:var(--teal-dim);color:var(--teal)}
-.pill.gold{border-color:var(--gold-dim);color:var(--gold)}
-.info-desc{
-  font-size:14px;line-height:1.9;color:var(--parch-dim);
-  max-width:70ch;margin-bottom:20px;
-}
-.info-genres{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
-.info-genres span{
-  background:rgba(0,200,200,.08);color:var(--teal);
-  border:1px solid rgba(0,200,200,.2);border-radius:20px;
-  padding:4px 14px;font-size:12px;
-}
-.info-actions{display:flex;gap:10px;flex-wrap:wrap}
-.action-btn{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;
-  background:rgba(232,224,212,.08);color:var(--parch);
-  border:1px solid var(--line2);transition:.2s;
-}
-.action-btn:hover{background:rgba(232,224,212,.15);transform:translateY(-1px)}
-.action-btn.primary{background:var(--teal);color:var(--bg);border-color:transparent}
-.action-btn.primary:hover{background:#00e0e0}
-.action-btn svg{width:15px;height:15px}
-.info-facts{font-size:14px;color:var(--parch-dim)}
-.fact-row{margin-bottom:14px}
-.fact-row b{
-  display:block;font-size:11px;font-weight:700;
-  color:var(--parch);letter-spacing:.06em;margin-bottom:3px;
-}
-.fact-row .imdb{
-  display:inline-flex;align-items:center;gap:6px;
-  color:var(--gold);font-weight:600;
-}
-.fact-row .imdb-badge{
-  background:var(--gold);color:var(--bg);
-  padding:1px 6px;border-radius:3px;
-  font-family:var(--font-d);font-size:10px;font-weight:900;
-  letter-spacing:.05em;
+/* ════════════════════════════════════════════════════════════
+   TU CENMA Player v4.0 — Design System (shared with index)
+   ════════════════════════════════════════════════════════════ */
+:root {
+  --void:       #050508;
+  --depth:      #0a0b10;
+  --surface:    #0f1018;
+  --lift:       #161720;
+  --raised:     #1d1e2a;
+  --border:     #ffffff0d;
+  --border-mid: #ffffff18;
+  --border-hi:  #ffffff28;
+  --gold:       #d4a843;
+  --gold-soft:  #d4a84355;
+  --gold-dim:   #d4a84322;
+  --teal:       #00b4b4;
+  --teal-soft:  #00b4b444;
+  --teal-dim:   #00b4b422;
+  --crimson:    #8b1a2a;
+  --crimson-hi: #b52238;
+  --text:       #e8e4dd;
+  --text-mid:   #9a9590;
+  --text-dim:   #5a5752;
+  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  --nav-h:      60px;
+  --gutter:     clamp(16px, 4vw, 56px);
+  --font-d:     'Playfair Display', Georgia, serif;
+  --font-ui:    'IBM Plex Sans Arabic', Arial, sans-serif;
+  --r-sm:       6px;
+  --r-md:       10px;
+  --r-lg:       14px;
 }
 
-/* sections */
-.sec-title{
-  font-family:var(--font-d);font-size:20px;
-  letter-spacing:.06em;margin-bottom:18px;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; color-scheme: dark; }
+body {
+  background: var(--void); color: var(--text);
+  font-family: var(--font-ui); overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+img   { display: block; max-width: 100%; }
+a     { color: inherit; text-decoration: none; }
+button { font-family: var(--font-ui); cursor: pointer; border: none; background: none; color: inherit; }
+
+::selection { background: var(--gold); color: var(--void); }
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--raised); border-radius: 2px; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+/* ── Grain ── */
+.grain {
+  position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+  opacity: 0.022;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  animation: grain-shift 8s steps(10) infinite;
+}
+@keyframes grain-shift {
+  0%,100%{transform:translate(0,0)}10%{transform:translate(-2%,-3%)}
+  20%{transform:translate(3%,1%)}30%{transform:translate(-1%,2%)}
+  40%{transform:translate(2%,-1%)}50%{transform:translate(-3%,3%)}
+  60%{transform:translate(1%,-2%)}70%{transform:translate(-2%,1%)}
+  80%{transform:translate(3%,-3%)}90%{transform:translate(-1%,2%)}
 }
 
-/* cast */
-.cast-strip{display:flex;gap:14px;overflow-x:auto;padding-bottom:12px;margin-bottom:48px}
-.cast-card{flex:0 0 auto;width:90px;text-align:center;cursor:pointer;transition:.2s}
-.cast-card:hover{transform:translateY(-3px)}
-.cast-card img{
-  width:74px;height:74px;border-radius:50%;object-fit:cover;
-  margin:0 auto 7px;border:2px solid var(--line2);transition:border-color .2s;
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 80px; left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  z-index: 5000; background: var(--raised);
+  border: 1px solid var(--border-hi); border-radius: var(--r-md);
+  padding: 10px 20px; font-size: 13px; color: var(--text); white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s, transform .3s var(--ease-out);
+  box-shadow: 0 12px 32px rgba(0,0,0,.5);
 }
-.cast-card:hover img{border-color:var(--teal)}
-.cast-card .name{font-size:11px;color:var(--parch)}
-.cast-card .char{font-size:10px;color:var(--parch-dim);margin-top:2px}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* seasons */
-.seasons-bar{
-  display:flex;gap:8px;overflow-x:auto;padding-bottom:16px;margin-bottom:24px;
+/* ════════════════════════════════════════════════════════════
+   NAV
+   ════════════════════════════════════════════════════════════ */
+.nav {
+  position: fixed; top: 0; inset-inline: 0; z-index: 500;
+  height: var(--nav-h);
+  display: flex; align-items: center;
+  padding: 0 var(--gutter); gap: 20px;
+  background: rgba(5,5,8,.94);
+  backdrop-filter: blur(20px) saturate(1.4);
+  border-bottom: 1px solid var(--border);
 }
-.season-btn{
-  flex:0 0 auto;padding:10px 20px;border-radius:8px;
-  border:1px solid var(--line2);background:var(--bg2);
-  color:var(--parch-dim);font-size:13px;font-weight:600;
-  transition:.2s;white-space:nowrap;
+.nav-logo {
+  display: flex; align-items: center; gap: 9px; flex-shrink: 0;
 }
-.season-btn:hover{border-color:var(--teal-dim);color:var(--parch)}
-.season-btn.active{
-  background:var(--teal);color:var(--bg);border-color:transparent;
+.nav-logo-mark {
+  width: 30px; height: 30px; border-radius: var(--r-sm);
+  background: linear-gradient(135deg, var(--gold), #906028);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-d); font-size: 13px; color: var(--void); font-weight: 900;
 }
-.episodes-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
-  gap:12px;margin-bottom:48px;
+.nav-logo-text {
+  font-family: var(--font-d); font-size: 17px; font-weight: 700;
+  color: var(--text); letter-spacing: .02em;
 }
-.episode-card{
-  background:var(--bg2);border:1px solid var(--line);border-radius:10px;
-  padding:16px;cursor:pointer;transition:.2s var(--ease);
-  display:flex;gap:12px;align-items:center;
+.nav-logo-text span { color: var(--gold); }
+.nav-back {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; color: var(--text-mid); padding: 6px 12px;
+  border-radius: var(--r-sm); border: 1px solid transparent;
+  transition: .2s;
 }
-.episode-card:hover{
-  border-color:var(--teal-dim);transform:translateY(-2px);
-  background:var(--bg3);
+.nav-back:hover { color: var(--text); border-color: var(--border-mid); background: var(--border); }
+.nav-back svg { width: 15px; height: 15px; }
+.nav-title {
+  font-size: 14px; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 40vw;
 }
-.episode-num{
-  flex:0 0 auto;width:44px;height:44px;border-radius:8px;
-  background:var(--bg3);display:flex;align-items:center;justify-content:center;
-  font-family:var(--font-d);font-size:16px;font-weight:700;color:var(--teal);
+.nav-sub {
+  font-size: 12px; color: var(--text-dim); font-family: var(--font-d);
 }
-.episode-info{flex:1;min-width:0}
-.episode-title{
-  font-size:14px;color:var(--parch);font-weight:600;
-  margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+.nav-end { margin-inline-start: auto; display: flex; align-items: center; gap: 8px; }
+.nav-icon-btn {
+  width: 34px; height: 34px; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-mid); border: 1px solid transparent; transition: .2s;
 }
-.episode-meta{font-size:11px;color:var(--parch-dim)}
+.nav-icon-btn:hover { color: var(--text); border-color: var(--border-mid); background: var(--border); }
+.nav-icon-btn svg { width: 16px; height: 16px; }
+.nav-icon-btn.active { color: var(--teal); border-color: var(--teal-soft); }
 
-/* related */
-.related-rail{display:flex;gap:14px;overflow-x:auto;padding-bottom:12px;margin-bottom:48px}
-.rel-card{
-  flex:0 0 auto;width:220px;aspect-ratio:16/9;border-radius:10px;overflow:hidden;
-  background:var(--bg2);cursor:pointer;position:relative;
-  border:1px solid var(--line);transition:transform .3s var(--ease);
+/* ════════════════════════════════════════════════════════════
+   PLAYER STAGE
+   ════════════════════════════════════════════════════════════ */
+.player-stage {
+  position: relative;
+  margin-top: var(--nav-h);
+  background: #000;
+  width: 100%;
+  aspect-ratio: 16/9;
+  max-height: calc(100vh - var(--nav-h));
+  overflow: hidden;
 }
-.rel-card:hover{transform:translateY(-5px)}
-.rel-card img{width:100%;height:100%;object-fit:cover;transition:filter .3s}
-.rel-card:hover img{filter:brightness(.55)}
-.rel-card-info{
-  position:absolute;inset:0;padding:12px;
-  display:flex;flex-direction:column;justify-content:flex-end;
-  background:linear-gradient(0deg,rgba(8,9,15,.95) 0%,transparent 50%);
-  opacity:0;transition:.3s;
-}
-.rel-card:hover .rel-card-info{opacity:1}
-.rel-card-title{font-family:var(--font-d);font-size:14px;letter-spacing:.04em;color:var(--parch)}
-.rel-card-meta{font-size:11px;color:var(--teal);margin-top:3px}
-.rel-play-btn{
-  position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%) scale(.7);
-  width:40px;height:40px;border-radius:50%;
-  background:rgba(0,200,200,.85);
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;transition:.28s var(--ease);
-}
-.rel-card:hover .rel-play-btn{opacity:1;transform:translate(-50%,-50%) scale(1)}
-.rel-play-btn svg{width:16px;height:16px;fill:var(--bg)}
 
-/* comments */
-.comments-wrap{margin-bottom:60px}
-.comment-form{display:flex;gap:14px;margin-bottom:28px}
-.who{
-  width:40px;height:40px;border-radius:9px;flex:0 0 auto;
-  background:linear-gradient(135deg,var(--oxblood),#1a0a0d);
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--font-d);color:var(--gold);font-size:16px;
+/* ── Theater Mode ── */
+body.theater-mode .player-stage {
+  position: fixed; inset: 0; margin: 0; z-index: 300;
+  max-height: 100vh; aspect-ratio: unset; height: 100vh;
 }
-.comment-form textarea{
-  flex:1;background:var(--bg2);border:1px solid var(--line);
-  border-radius:8px;color:var(--parch);padding:12px 14px;
-  font-family:inherit;font-size:14px;resize:vertical;min-height:46px;
-  transition:border-color .2s;
-}
-.comment-form textarea:focus{outline:none;border-color:var(--teal-dim)}
-.comment-form button{
-  align-self:flex-end;background:var(--teal);color:var(--bg);
-  padding:10px 20px;border-radius:6px;font-size:13px;
-  font-weight:700;transition:.2s;
-}
-.comment-form button:hover{background:#00e0e0}
-.comment{display:flex;gap:14px;margin-bottom:22px}
-.comment .who{background:var(--bg3);color:var(--parch-dim)}
-.comment .name{font-size:13px;color:var(--parch);margin-bottom:3px}
-.comment .name small{color:var(--parch-dim);font-weight:400;margin-inline-start:8px}
-.comment .text{font-size:14px;line-height:1.75;color:var(--parch-dim);word-break:break-word}
-.comment-likes{display:flex;align-items:center;gap:8px;margin-top:8px}
-.like-btn{
-  font-size:12px;color:var(--parch-dim);
-  border:1px solid var(--line);border-radius:20px;
-  padding:3px 10px;transition:.2s;
-}
-.like-btn:hover{border-color:var(--teal);color:var(--teal)}
-.like-btn.liked{color:var(--teal);border-color:var(--teal)}
-.empty-msg{color:var(--parch-dim);font-size:13px;padding:24px 0}
+body.theater-mode .player-below { margin-top: 100vh; }
+body.theater-mode .nav { z-index: 400; background: transparent; }
+body.theater-mode .nav:hover { background: rgba(5,5,8,.94); }
 
-/* footer */
-.player-footer{
-  border-top:1px solid var(--line);padding:32px 5vw;
-  display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:14px;
+/* ── Player Frame ── */
+.player-frame {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  border: none; display: block;
+  background: #000;
 }
-.player-footer .logo{font-family:var(--font-d);font-size:16px;letter-spacing:.1em}
-.player-footer .logo em{color:var(--teal);font-style:normal}
-.player-footer p{font-size:12px;color:var(--parch-dim)}
+.player-frame.hidden { display: none; }
 
-/* toast */
-.toast{
-  position:fixed;bottom:80px;left:50%;
-  transform:translateX(-50%) translateY(16px);
-  z-index:3000;background:var(--bg3);
-  border:1px solid var(--line2);border-radius:8px;
-  padding:11px 22px;font-size:13px;color:var(--parch);
-  opacity:0;pointer-events:none;
-  transition:opacity .3s,transform .3s var(--ease);
+/* ── Loading Overlay ── */
+.player-loading {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: rgba(5,5,8,.92);
+  z-index: 10; gap: 18px;
+  transition: opacity .4s;
 }
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.player-loading.done { opacity: 0; pointer-events: none; }
 
-@media(max-width:860px){
-  .info-top{grid-template-columns:1fr}
-  .info-main{flex-direction:column}
-  .info-poster{width:130px}
-  .top-actions .icon-btn{width:34px;height:34px}
+.spinner {
+  width: 48px; height: 48px;
+  border: 3px solid var(--border-hi);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin .9s linear infinite;
 }
-@media(prefers-reduced-motion:reduce){
-  *{transition:none!important;animation:none!important}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+  font-family: var(--font-d); font-size: 14px;
+  color: var(--text-mid); text-align: center;
+}
+.loading-src { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+/* ── Error Overlay ── */
+.player-error {
+  position: absolute; inset: 0;
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: rgba(5,5,8,.95); z-index: 11; gap: 16px;
+  padding: 24px; text-align: center;
+}
+.player-error.show { display: flex; }
+.player-error-icon { font-size: 52px; }
+.player-error h3 {
+  font-family: var(--font-d); font-size: 20px;
+  color: var(--text); margin-bottom: 6px;
+}
+.player-error p { font-size: 13px; color: var(--text-mid); max-width: 40ch; }
+
+/* ── Theater Controls Overlay ── */
+.theater-controls {
+  position: absolute; bottom: 0; inset-inline: 0; z-index: 20;
+  background: linear-gradient(0deg, rgba(5,5,8,.9) 0%, transparent 100%);
+  padding: 20px 24px 16px;
+  display: flex; align-items: center; gap: 12px;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s;
+}
+body.theater-mode .player-stage:hover .theater-controls,
+body.theater-mode .theater-controls.visible {
+  opacity: 1; pointer-events: auto;
+}
+.tc-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,.12);
+  border: 1px solid var(--border-mid);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text); transition: .2s; cursor: pointer; flex-shrink: 0;
+}
+.tc-btn:hover { background: var(--gold); color: var(--void); border-color: transparent; }
+.tc-btn svg { width: 16px; height: 16px; }
+.tc-meta {
+  flex: 1; overflow: hidden;
+}
+.tc-title { font-family: var(--font-d); font-size: 15px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tc-ep   { font-size: 12px; color: var(--text-mid); margin-top: 2px; }
+.tc-spacer { flex: 1; }
+.tc-src-name { font-size: 11px; color: var(--gold); }
+
+/* ── Keyboard hint ── */
+.kb-hint {
+  position: absolute; top: 14px; left: 14px; z-index: 15;
+  font-size: 11px; color: var(--text-dim);
+  background: rgba(5,5,8,.6); border-radius: var(--r-sm);
+  padding: 5px 10px; border: 1px solid var(--border);
+  opacity: 0; transition: opacity .3s;
+  pointer-events: none;
+}
+.player-stage:hover .kb-hint { opacity: 1; }
+
+/* ════════════════════════════════════════════════════════════
+   BELOW PLAYER
+   ════════════════════════════════════════════════════════════ */
+.player-below {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 24px;
+  padding: 24px var(--gutter) 60px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ── Info Column ── */
+.info-col {}
+
+.info-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 16px;
+  margin-bottom: 20px;
+}
+.info-title-block {}
+.info-title {
+  font-family: var(--font-d); font-size: clamp(20px, 3vw, 32px);
+  font-weight: 900; color: var(--text);
+  line-height: 1; margin-bottom: 8px;
+}
+.info-meta {
+  display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
+}
+.info-meta-item {
+  font-size: 12px; color: var(--text-mid);
+  display: flex; align-items: center; gap: 4px;
+}
+.info-meta-item + .info-meta-item::before {
+  content: '·'; color: var(--text-dim); margin-left: -8px;
+}
+.info-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  padding: 3px 9px; border-radius: 20px;
+  border: 1px solid var(--border-mid);
+}
+.info-badge.gold { border-color: var(--gold-soft); color: var(--gold); }
+.info-badge.teal { border-color: var(--teal-soft); color: var(--teal); }
+
+.info-desc {
+  font-size: 14px; line-height: 1.85; color: var(--text-mid);
+  max-width: 72ch; margin-bottom: 22px;
+}
+
+.info-genres {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;
+}
+.genre-chip {
+  font-size: 11px; color: var(--teal); font-weight: 500;
+  border: 1px solid var(--teal-soft); border-radius: 20px;
+  padding: 3px 12px;
+}
+
+.info-actions {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 32px;
+}
+
+/* Buttons (same as index) */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 22px; border-radius: var(--r-md);
+  font-size: 13.5px; font-weight: 600; font-family: var(--font-ui);
+  white-space: nowrap; transition: transform .25s var(--ease-out), box-shadow .25s, background .2s;
+  cursor: pointer; border: none;
+}
+.btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+.btn:active { transform: scale(.97) !important; }
+.btn-gold { background: var(--gold); color: var(--void); }
+.btn-gold:hover { background: #e0b84f; transform: translateY(-2px); box-shadow: 0 10px 28px var(--gold-soft); }
+.btn-ghost { background: rgba(255,255,255,.08); color: var(--text); border: 1px solid var(--border-mid); }
+.btn-ghost:hover { background: rgba(255,255,255,.14); transform: translateY(-2px); }
+.btn-ghost.active { border-color: var(--teal-soft); color: var(--teal); }
+
+/* ── Cast ── */
+.section-heading {
+  font-family: var(--font-d); font-size: 16px; font-weight: 700;
+  color: var(--text); letter-spacing: .02em; margin-bottom: 14px;
+}
+
+.cast-rail {
+  display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px;
+  -ms-overflow-style: none; scrollbar-width: none;
+}
+.cast-rail::-webkit-scrollbar { display: none; }
+.cast-card {
+  flex: 0 0 auto; width: 78px; text-align: center; cursor: pointer;
+}
+.cast-card img {
+  width: 62px; height: 62px; border-radius: 50%;
+  object-fit: cover; margin: 0 auto 6px;
+  border: 2px solid var(--border-mid); transition: border-color .2s;
+}
+.cast-card:hover img { border-color: var(--gold-soft); }
+.cast-name { font-size: 11px; color: var(--text); line-height: 1.3; font-weight: 500; }
+.cast-char { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+/* ── Similar / Recommended ── */
+.similar-section { margin-top: 32px; }
+.card-mini-rail {
+  display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px;
+  -ms-overflow-style: none; scrollbar-width: none;
+}
+.card-mini-rail::-webkit-scrollbar { display: none; }
+.card-mini {
+  flex: 0 0 auto; width: 108px; aspect-ratio: 2/3;
+  border-radius: var(--r-md); overflow: hidden; cursor: pointer;
+  border: 1px solid var(--border); transition: .25s;
+}
+.card-mini:hover { transform: scale(1.07); border-color: var(--gold-soft); }
+.card-mini img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ════════════════════════════════════════════════════════════
+   SIDEBAR
+   ════════════════════════════════════════════════════════════ */
+.sidebar-col {
+  display: flex; flex-direction: column; gap: 18px;
+}
+
+/* ── Panel base ── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.panel-head {
+  padding: 14px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.panel-head-title {
+  font-family: var(--font-d); font-size: 13px; font-weight: 700;
+  color: var(--text); letter-spacing: .03em;
+}
+.panel-head-sub { font-size: 11px; color: var(--text-dim); }
+.panel-body { padding: 12px; }
+
+/* ── Source Switcher ── */
+.source-list { display: flex; flex-direction: column; gap: 6px; }
+.source-btn {
+  width: 100%; text-align: right; padding: 10px 12px;
+  border-radius: var(--r-md); border: 1px solid var(--border-mid);
+  cursor: pointer; transition: .2s;
+  display: flex; align-items: center; gap: 10px;
+  background: transparent;
+}
+.source-btn:hover { border-color: var(--gold-soft); background: var(--lift); }
+.source-btn.active {
+  border-color: var(--gold); background: var(--gold-dim);
+}
+.source-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  background: var(--text-dim); transition: background .2s;
+}
+.source-btn.active .source-dot { background: var(--gold); }
+.source-info { flex: 1; text-align: right; }
+.source-name { font-size: 12px; color: var(--text); font-weight: 500; }
+.source-qual { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.source-badge {
+  font-size: 9px; font-weight: 700; letter-spacing: .06em;
+  padding: 2px 6px; border-radius: 4px;
+  background: var(--teal-dim); color: var(--teal); border: 1px solid var(--teal-soft);
+  flex-shrink: 0;
+}
+
+/* ── Season / Episode Picker ── */
+.ep-panel {}
+.season-tabs {
+  display: flex; gap: 4px; overflow-x: auto; padding: 10px 12px 0;
+  -ms-overflow-style: none; scrollbar-width: none;
+}
+.season-tabs::-webkit-scrollbar { display: none; }
+.season-tab {
+  flex-shrink: 0; padding: 6px 14px; border-radius: 20px;
+  font-size: 12px; color: var(--text-mid);
+  border: 1px solid transparent; transition: .2s; cursor: pointer;
+  white-space: nowrap;
+}
+.season-tab:hover { color: var(--text); border-color: var(--border-mid); }
+.season-tab.active { background: var(--gold); color: var(--void); font-weight: 700; }
+
+.ep-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 5px; padding: 10px 12px;
+  max-height: 200px; overflow-y: auto;
+}
+.ep-btn {
+  aspect-ratio: 1; border-radius: var(--r-sm);
+  background: var(--lift); border: 1px solid var(--border);
+  font-size: 12px; font-weight: 600; color: var(--text-mid);
+  transition: .2s; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+}
+.ep-btn:hover { border-color: var(--gold-soft); color: var(--text); }
+.ep-btn.active { background: var(--gold); color: var(--void); border-color: transparent; }
+.ep-btn.watched { border-color: var(--teal-soft); color: var(--teal); }
+.ep-btn.watched::after { content: '✓'; font-size: 8px; position: absolute; bottom: 2px; right: 2px; }
+.ep-btn { position: relative; }
+
+/* ── Keyboard Shortcuts Panel ── */
+.kb-panel .kb-list { display: flex; flex-direction: column; gap: 8px; padding: 12px; }
+.kb-row { display: flex; align-items: center; justify-content: space-between; }
+.kb-key {
+  font-size: 10px; font-weight: 700;
+  background: var(--lift); border: 1px solid var(--border-hi);
+  border-radius: 4px; padding: 3px 7px;
+  color: var(--text-mid); font-family: monospace;
+}
+.kb-action { font-size: 12px; color: var(--text-dim); }
+
+/* ── Facts Panel ── */
+.facts-list { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.fact-row { display: flex; align-items: baseline; gap: 10px; }
+.fact-key { font-size: 10px; font-weight: 700; letter-spacing: .08em; color: var(--text-dim); text-transform: uppercase; min-width: 60px; font-family: var(--font-d); }
+.fact-val { font-size: 12.5px; color: var(--text); }
+
+/* ── Skeleton ── */
+.skel {
+  background: linear-gradient(110deg, var(--surface) 28%, var(--lift) 44%, var(--surface) 60%);
+  background-size: 300% 100%; animation: skel .9s ease-in-out infinite;
+  border-radius: var(--r-md);
+}
+@keyframes skel { from{background-position:180% 0} to{background-position:-80% 0} }
+
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════════ */
+@media (max-width: 860px) {
+  .player-below { grid-template-columns: 1fr; }
+  .sidebar-col { flex-direction: column; }
+  :root { --gutter: 14px; }
+}
+@media (max-width: 480px) {
+  .info-title { font-size: 22px; }
+  .ep-grid { grid-template-columns: repeat(5, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+  .grain { display: none; }
 }
 </style>
 </head>
 <body>
-<div class="toast" id="toast"></div>
 
-<!-- topbar -->
-<div class="topbar" id="topbar">
-  <a class="back" href="/">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
+<div class="grain" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ══ NAV ══════════════════════════════════════════════════ -->
+<nav class="nav" id="nav">
+  <a href="/" class="nav-logo" aria-label="TU CENMA — الرئيسية">
+    <div class="nav-logo-mark" aria-hidden="true">TC</div>
+    <div class="nav-logo-text">TU <span>CENMA</span></div>
+  </a>
+  <a href="javascript:history.back()" class="nav-back" aria-label="رجوع">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <polyline points="15 18 9 12 15 6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
     رجوع
   </a>
-  <div class="brand">TU <em>CENMA</em></div>
-  <div class="top-actions">
-    <button class="icon-btn" id="shareBtn" title="مشاركة">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+  <div style="width:1px; height:20px; background:var(--border-mid)"></div>
+  <div>
+    <div class="nav-title" id="navTitle">جاري التحميل…</div>
+    <div class="nav-sub" id="navSub"></div>
+  </div>
+  <div class="nav-end">
+    <button class="nav-icon-btn" id="btnTheater" title="وضع المسرح (T)" aria-label="وضع المسرح">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="2" y="5" width="20" height="14" rx="2"/>
+        <path d="M8 5v14M16 5v14" stroke-linecap="round"/>
+      </svg>
     </button>
-    <button class="icon-btn" id="fullscreenBtn" title="ملء الشاشة">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+    <button class="nav-icon-btn" id="btnWl" title="أضف لقائمتي" aria-label="أضف لقائمتي">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button class="nav-icon-btn" id="btnShare" title="مشاركة" aria-label="مشاركة">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke-linecap="round"/>
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke-linecap="round"/>
+      </svg>
     </button>
   </div>
-</div>
+</nav>
 
-<!-- stage — نظيف تماماً، بدون سيرفرات، بدون أزرار -->
-<div class="stage" id="stage">
-  <div class="stage-loader" id="stageLoader">
-    <div class="spinner"></div>
-    <div class="loader-text">TU CENMA</div>
+<!-- ══ PLAYER STAGE ═══════════════════════════════════════════ -->
+<div class="player-stage" id="playerStage" role="main" aria-label="مشغل الفيديو">
+
+  <!-- Loading -->
+  <div class="player-loading" id="playerLoading">
+    <div class="spinner" aria-label="جاري التحميل"></div>
+    <div class="loading-text">جاري تحميل المشغل</div>
+    <div class="loading-src" id="loadingSrc"></div>
   </div>
-  <iframe id="video-frame"
-          allowfullscreen
-          allow="autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write"
-          referrerpolicy="origin"></iframe>
+
+  <!-- Error -->
+  <div class="player-error" id="playerError" role="alert">
+    <div class="player-error-icon">⚠️</div>
+    <h3>تعذّر تحميل المشغل</h3>
+    <p id="errorMsg">تحقق من اتصالك أو جرّب مصدراً آخر من القائمة الجانبية</p>
+    <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; justify-content:center">
+      <button class="btn btn-gold" id="errorRetry">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 4v6h-6M1 20v-6h6" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke-linecap="round"/>
+        </svg>
+        إعادة المحاولة
+      </button>
+      <button class="btn btn-ghost" id="errorNext">المصدر التالي</button>
+    </div>
+  </div>
+
+  <!-- Main iframe -->
+  <iframe
+    class="player-frame hidden"
+    id="playerFrame"
+    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+    allowfullscreen
+    title="مشغل الفيديو"
+  ></iframe>
+
+  <!-- Theater controls overlay -->
+  <div class="theater-controls" id="theaterCtrl">
+    <button class="tc-btn" id="tcPrev" title="الحلقة السابقة" aria-label="الحلقة السابقة">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <div class="tc-meta">
+      <div class="tc-title" id="tcTitle"></div>
+      <div class="tc-ep"   id="tcEp"></div>
+    </div>
+    <span class="tc-src-name" id="tcSrcName"></span>
+    <div class="tc-spacer"></div>
+    <button class="tc-btn" id="tcNext" title="الحلقة التالية" aria-label="الحلقة التالية">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="9 18 15 12 9 6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button class="tc-btn" id="tcExit" title="خروج من وضع المسرح" aria-label="خروج من وضع المسرح">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3M21 3h-3a2 2 0 0 1-2 2v3M3 16v3a2 2 0 0 0 2 2h3M21 16v3a2 2 0 0 1-2 2h-3" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Keyboard hint -->
+  <div class="kb-hint" aria-hidden="true">T: وضع مسرح · S: مصدر تالٍ · N: حلقة تالية</div>
+
 </div>
 
-<!-- info -->
-<div class="info-wrap">
-  <div class="info-top">
-    <div class="info-main">
-      <div class="info-poster">
-        <img id="infoPosterImg" src="" alt="">
-      </div>
-      <div class="info-text">
-        <h1 class="info-title" id="infoTitle">جار التحميل…</h1>
-        <div class="info-meta" id="infoMeta"></div>
-        <p class="info-desc" id="infoDesc"></p>
-        <div class="info-genres" id="infoGenres"></div>
-        <div class="info-actions" id="infoActions"></div>
+<!-- ══ BELOW PLAYER ═══════════════════════════════════════════ -->
+<div class="player-below" id="playerBelow">
+
+  <!-- ── Info Column ─────────────────────────────────────── -->
+  <div class="info-col">
+    <div class="info-header">
+      <div class="info-title-block">
+        <div class="skel" style="width:280px;height:32px;margin-bottom:10px"></div>
+        <div class="skel" style="width:200px;height:16px"></div>
       </div>
     </div>
-    <div class="info-facts" id="infoFacts"></div>
+    <div class="skel" style="height:80px;margin-bottom:22px;border-radius:8px"></div>
   </div>
 
-  <div class="sec-title">طاقم العمل</div>
-  <div class="cast-strip" id="castStrip"></div>
-
-  <div id="seasonsSection" style="display:none">
-    <div class="sec-title">المواسم والحلقات</div>
-    <div class="seasons-bar" id="seasonsBar"></div>
-    <div class="episodes-grid" id="episodesGrid"></div>
+  <!-- ── Sidebar ─────────────────────────────────────────── -->
+  <div class="sidebar-col" id="sidebar">
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-head-title">مصادر المشاهدة</span>
+        <span class="panel-head-sub" id="sourceCount"></span>
+      </div>
+      <div class="panel-body">
+        <div class="source-list" id="sourceList">
+          <div class="skel" style="height:52px;margin-bottom:6px"></div>
+          <div class="skel" style="height:52px;margin-bottom:6px"></div>
+          <div class="skel" style="height:52px"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="sec-title">قد يعجبك أيضاً</div>
-  <div class="related-rail" id="relatedRail"></div>
-
-  <div class="comments-wrap">
-    <div class="sec-title">التعليقات</div>
-    <form class="comment-form" id="commentForm">
-      <div class="who">ت</div>
-      <textarea id="commentInput" placeholder="شاركنا رأيك…" rows="1"></textarea>
-      <button type="submit">نشر</button>
-    </form>
-    <div id="commentList"></div>
-  </div>
 </div>
 
-<footer class="player-footer">
-  <div class="logo">TU <em>CENMA</em></div>
-  <p>جودة عالية · بدون إعلانات</p>
-</footer>
-
+<!-- ═══════════════════════════════════════════════════════════
+     TU CENMA PLAYER ENGINE v4.0
+     ─────────────────────────────────────────────────────────
+     Injected by Flask:
+       window.__TMDB_KEY__  — TMDB API key
+       window.__SOURCES__   — JSON array of stream sources
+     ═══════════════════════════════════════════════════════════ -->
 <script>
+  /* Keys injected at render time — never hard-code values here */
   window.__TMDB_KEY__ = "{{ tmdb_key|e }}";
+  window.__SOURCES__  = {{ sources|safe }};
 </script>
-
 <script>
-/* ════════════════════════════════════════════════════
-   TU CENMA — Player Engine v5.0 (Netflix-style)
-   Single high-quality source, no UI clutter
-   ════════════════════════════════════════════════════ */
+(function () {
+'use strict';
 
-const params     = new URLSearchParams(location.search);
-const MEDIA_ID   = parseInt(params.get('id')) || 0;
-const MEDIA_TYPE = params.get('type') || 'movie';
+/* ════════════════════════════════════════════════════════════
+   CONFIG
+   ════════════════════════════════════════════════════════════ */
+const API_KEY  = window.__TMDB_KEY__ || '';
+const SOURCES  = Array.isArray(window.__SOURCES__) ? window.__SOURCES__ : [];
+const TMDB_B   = 'https://api.themoviedb.org/3';
+const IMG_B    = 'https://image.tmdb.org/t/p/';
+const LANG     = 'ar-SA';
 
-const API_KEY  = () => window.__TMDB_KEY__ || '';
-const IMG      = (p,s='w500')  => p ? `/img/t/p/${s}${p}` : '';
-const BACKDROP = (p,s='w1280') => p ? `/img/t/p/${s}${p}` : '';
-const DETAIL   = (type,id) => `/api/3/${type}/${id}?api_key=${API_KEY()}&language=ar-SA&append_to_response=credits,similar,external_ids`;
+/* ── URL parsers ── */
+const QS = new URLSearchParams(location.search);
+const CONTENT_ID   = parseInt(QS.get('id')   || '0', 10);
+const CONTENT_TYPE = (QS.get('type') || 'movie').toLowerCase();
 
-/* ─────────────────────────────────────────
-   STREAM SOURCE — VidLink (high quality, no ads)
-   ───────────────────────────────────────── */
-function streamUrl(id, type, season = 1, episode = 1){
-  if(type === 'tv'){
-    return `https://vidlink.pro/tv/${id}/${season}/${episode}?quality=4k&sub=ar&autoplay=true`;
+/* ── State ── */
+let currentSeason  = 1;
+let currentEpisode = 1;
+let currentSrcIdx  = 0;
+let totalEpisodes  = 0;
+let totalSeasons   = 0;
+let theaterMode    = false;
+let contentData    = null;
+let watchedEps     = loadWatched();
+let retryCount     = 0;
+const MAX_RETRY    = 2;
+
+/* ════════════════════════════════════════════════════════════
+   HELPERS
+   ════════════════════════════════════════════════════════════ */
+function img(p, s = 'w500') { return p ? IMG_B + s + p : ''; }
+function fmtScore(v) { return v ? v.toFixed(1) : '—'; }
+function fmtYear(d) { return d ? new Date(d).getFullYear() : '—'; }
+function fmtRuntime(m) { return m ? `${Math.floor(m/60)}س ${m%60}د` : '—'; }
+
+async function tmdb(ep, params = {}) {
+  const p = { api_key: API_KEY, language: LANG, ...params };
+  const qs = new URLSearchParams(p).toString();
+  const r = await fetch(`${TMDB_B}${ep}?${qs}`);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+
+/* ── Toast ── */
+function toast(msg, ms = 2800) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+/* ── Watchlist ── */
+const WL_KEY = 'tucentma_wl_v4';
+function wlGet() { try { return JSON.parse(localStorage.getItem(WL_KEY) || '[]'); } catch { return []; } }
+function wlHas(id) { return wlGet().some(x => x.id === id); }
+function wlToggle(item) {
+  const list = wlGet(); const idx = list.findIndex(x => x.id === item.id);
+  if (idx > -1) { list.splice(idx, 1); toast('تمت الإزالة من قائمتك'); }
+  else { list.push(item); toast('أُضيف إلى قائمتك ✓'); }
+  try { localStorage.setItem(WL_KEY, JSON.stringify(list)); } catch {}
+  refreshWlBtn();
+}
+function refreshWlBtn() {
+  const btn = document.getElementById('btnWl');
+  btn.classList.toggle('active', wlHas(CONTENT_ID));
+}
+
+/* ── Watched episodes ── */
+const WE_KEY = `tucentma_we_${CONTENT_ID}`;
+function loadWatched() { try { return JSON.parse(localStorage.getItem(WE_KEY) || '[]'); } catch { return []; } }
+function markWatched(s, e) {
+  const key = `${s}x${e}`;
+  if (!watchedEps.includes(key)) {
+    watchedEps.push(key);
+    try { localStorage.setItem(WE_KEY, JSON.stringify(watchedEps)); } catch {}
   }
-  return `https://vidlink.pro/movie/${id}?quality=4k&sub=ar&autoplay=true`;
+}
+function isWatched(s, e) { return watchedEps.includes(`${s}x${e}`); }
+
+/* ════════════════════════════════════════════════════════════
+   SOURCE BUILDER
+   ════════════════════════════════════════════════════════════ */
+function buildStreamURL(srcIdx, id, type, season, episode) {
+  const src = SOURCES[srcIdx];
+  if (!src) return '';
+  if (type === 'movie') {
+    return src.movie.replace('{id}', id);
+  }
+  return src.tv.replace('{id}', id).replace('{s}', season).replace('{e}', episode);
 }
 
-function toast(msg, dur=2400){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._t);
-  t._t = setTimeout(()=>t.classList.remove('show'), dur);
+/* ════════════════════════════════════════════════════════════
+   PLAYER CONTROL
+   ════════════════════════════════════════════════════════════ */
+const frame   = document.getElementById('playerFrame');
+const loading = document.getElementById('playerLoading');
+const errDiv  = document.getElementById('playerError');
+
+function loadPlayer(srcIdx) {
+  if (!CONTENT_ID) { showError('لم يتم تحديد محتوى للمشاهدة'); return; }
+  if (!SOURCES.length) { showError('لا توجد مصادر متاحة'); return; }
+
+  currentSrcIdx = Math.max(0, Math.min(srcIdx, SOURCES.length - 1));
+  const url = buildStreamURL(currentSrcIdx, CONTENT_ID, CONTENT_TYPE, currentSeason, currentEpisode);
+
+  if (!url) { showError('رابط المصدر غير متاح'); return; }
+
+  /* Show loading */
+  loading.classList.remove('done');
+  frame.classList.add('hidden');
+  errDiv.classList.remove('show');
+  retryCount = 0;
+
+  const src = SOURCES[currentSrcIdx];
+  document.getElementById('loadingSrc').textContent = src?.name || '';
+
+  /* Delay slightly so loading spinner shows */
+  setTimeout(() => {
+    frame.src = url;
+    frame.classList.remove('hidden');
+
+    /* Timeout fallback */
+    const timeout = setTimeout(() => {
+      if (!loading.classList.contains('done')) {
+        loading.classList.add('done');
+      }
+    }, 12000);
+
+    frame.onload = () => {
+      clearTimeout(timeout);
+      loading.classList.add('done');
+      if (CONTENT_TYPE === 'tv') {
+        markWatched(currentSeason, currentEpisode);
+        refreshEpGrid();
+      }
+    };
+    frame.onerror = () => {
+      clearTimeout(timeout);
+      if (retryCount < MAX_RETRY) {
+        retryCount++;
+        setTimeout(() => loadPlayer(currentSrcIdx), 1500);
+      } else {
+        loading.classList.add('done');
+        showError('فشل تحميل هذا المصدر. جرّب مصدراً آخر.');
+      }
+    };
+  }, 200);
+
+  /* Highlight active source btn */
+  document.querySelectorAll('.source-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === currentSrcIdx);
+  });
+
+  /* Update theater bar */
+  updateTheaterBar();
 }
 
-function runtime(m){ return m ? `${Math.floor(m/60)}س ${m%60}د` : '—'; }
-function year(d){ return d ? new Date(d).getFullYear() : '—'; }
-
-function loadStream(season, episode){
-  const frame = document.getElementById('video-frame');
-  const loader = document.getElementById('stageLoader');
-  if(!MEDIA_ID){ loader.classList.add('gone'); return; }
-  frame.src = streamUrl(MEDIA_ID, MEDIA_TYPE, season, episode);
-  setTimeout(() => loader.classList.add('gone'), 2500);
+function showError(msg) {
+  loading.classList.add('done');
+  errDiv.classList.add('show');
+  document.getElementById('errorMsg').textContent = msg || 'تعذّر تحميل المشغل';
+  frame.classList.add('hidden');
 }
 
-async function loadMedia(){
-  if(!MEDIA_ID){
-    document.getElementById('infoTitle').textContent = 'لم يتم تحديد الفيلم';
+function nextSource() {
+  const next = (currentSrcIdx + 1) % SOURCES.length;
+  loadPlayer(next);
+  toast(`المصدر: ${SOURCES[next]?.name || next + 1}`);
+}
+
+/* ════════════════════════════════════════════════════════════
+   THEATER MODE
+   ════════════════════════════════════════════════════════════ */
+function toggleTheater() {
+  theaterMode = !theaterMode;
+  document.body.classList.toggle('theater-mode', theaterMode);
+  document.getElementById('btnTheater').classList.toggle('active', theaterMode);
+  if (theaterMode) {
+    toast('وضع المسرح — اضغط T للخروج');
+    document.getElementById('theaterCtrl').classList.add('visible');
+    setTimeout(() => document.getElementById('theaterCtrl').classList.remove('visible'), 3000);
+  }
+}
+
+function updateTheaterBar() {
+  const title = contentData?.title || contentData?.name || '—';
+  document.getElementById('tcTitle').textContent = title;
+  document.getElementById('tcSrcName').textContent = SOURCES[currentSrcIdx]?.name || '';
+  if (CONTENT_TYPE === 'tv') {
+    document.getElementById('tcEp').textContent = `الموسم ${currentSeason} · الحلقة ${currentEpisode}`;
+  } else {
+    document.getElementById('tcEp').textContent = '';
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   EPISODE NAVIGATION
+   ════════════════════════════════════════════════════════════ */
+function loadEpisode(s, e) {
+  currentSeason  = s;
+  currentEpisode = e;
+  loadPlayer(currentSrcIdx);
+  refreshEpGrid();
+  const epText = `الموسم ${s} · الحلقة ${e}`;
+  document.getElementById('navSub').textContent = epText;
+  toast(epText);
+}
+
+function prevEpisode() {
+  if (currentEpisode > 1) { loadEpisode(currentSeason, currentEpisode - 1); }
+  else if (currentSeason > 1) { loadEpisode(currentSeason - 1, 1); }
+  else { toast('هذه أولى الحلقات'); }
+}
+
+function nextEpisode() {
+  if (currentEpisode < totalEpisodes) { loadEpisode(currentSeason, currentEpisode + 1); }
+  else if (currentSeason < totalSeasons) { loadEpisode(currentSeason + 1, 1); }
+  else { toast('انتهت الحلقات المتاحة'); }
+}
+
+/* ════════════════════════════════════════════════════════════
+   UI BUILDERS
+   ════════════════════════════════════════════════════════════ */
+function buildSourceList() {
+  const el = document.getElementById('sourceList');
+  if (!SOURCES.length) {
+    el.innerHTML = '<div style="color:var(--text-dim);font-size:13px;padding:8px">لا توجد مصادر متاحة</div>';
     return;
   }
-  loadStream();
-  try{
-    const m = await fetch(DETAIL(MEDIA_TYPE, MEDIA_ID)).then(r => r.json());
-    if(m.status_code) throw new Error(m.status_message);
-    hydrate(m);
-    if(m.imdb_id) loadIMDbRating(m.imdb_id);
-  }catch(e){
-    console.warn('TMDB error:', e);
-    document.getElementById('infoTitle').textContent = 'تعذر تحميل التفاصيل';
-  }
-}
-
-async function loadIMDbRating(imdbId){
-  try{
-    const r = await fetch(`/api/omdb?i=${imdbId}`).then(r => r.json());
-    if(!r.imdbRating || r.imdbRating === 'N/A') return;
-    const facts = document.getElementById('infoFacts');
-    facts.insertAdjacentHTML('afterbegin', `
-      <div class="fact-row">
-        <b>تقييم IMDb</b>
-        <span class="imdb">
-          <span class="imdb-badge">IMDb</span>
-          ⭐ ${r.imdbRating} / 10
-          ${r.imdbVotes && r.imdbVotes !== 'N/A' ? `<small style="color:var(--parch-dim);font-weight:400">(${r.imdbVotes})</small>` : ''}
-        </span>
+  document.getElementById('sourceCount').textContent = `${SOURCES.length} مصدر`;
+  el.innerHTML = SOURCES.map((s, i) => `
+    <button class="source-btn${i === 0 ? ' active' : ''}" data-idx="${i}"
+            aria-label="تشغيل من ${s.name}" title="${s.notes || ''}">
+      <div class="source-dot"></div>
+      <div class="source-info">
+        <div class="source-name">${s.name}</div>
+        <div class="source-qual">${s.quality}</div>
       </div>
-    `);
-  }catch(e){}
+      ${s.no_ads ? '<span class="source-badge">بدون إعلانات</span>' : ''}
+    </button>`).join('');
+
+  el.querySelectorAll('.source-btn').forEach(btn => {
+    btn.addEventListener('click', () => loadPlayer(+btn.dataset.idx));
+  });
 }
 
-function hydrate(m){
-  const type  = MEDIA_TYPE;
+function buildInfoColumn(m) {
+  const col = document.querySelector('.info-col');
   const title = m.title || m.name || '—';
-  document.title = `${title} — TU CENMA`;
+  const yr    = fmtYear(m.release_date || m.first_air_date);
+  const sc    = fmtScore(m.vote_average);
+  const type  = CONTENT_TYPE === 'tv' ? 'مسلسل' : 'فيلم';
+  const desc  = m.overview || 'لا يوجد وصف متاح.';
 
-  const posterEl = document.getElementById('infoPosterImg');
-  if(m.poster_path){
-    posterEl.src = IMG(m.poster_path, 'w342');
-  } else {
-    posterEl.style.display = 'none';
-  }
-
-  document.getElementById('infoTitle').textContent = title;
-  document.getElementById('infoDesc').textContent  = m.overview || 'لا يوجد وصف متاح.';
-
-  const yr = year(m.release_date || m.first_air_date);
-  const sc = m.vote_average ? m.vote_average.toFixed(1) : '—';
-  document.getElementById('infoMeta').innerHTML =
-    `<span class="pill">${yr}</span>
-     <span class="pill gold">⭐ ${sc}</span>
-     <span class="pill teal">${type === 'tv' ? 'مسلسل' : 'فيلم'}</span>
-     ${m.runtime ? `<span class="pill">${runtime(m.runtime)}</span>` : ''}
-     ${m.number_of_seasons ? `<span class="pill">${m.number_of_seasons} مواسم</span>` : ''}`;
-
-  document.getElementById('infoGenres').innerHTML =
-    (m.genres || []).map(g => `<span>${g.name}</span>`).join('');
-
-  document.getElementById('infoActions').innerHTML = `
-    <button class="action-btn primary" id="watchTopBtn">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-      إعادة التشغيل
-    </button>
-    <button class="action-btn" id="shareInfoBtn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-      مشاركة
-    </button>
-  `;
-
-  document.getElementById('watchTopBtn').onclick = () => {
-    document.getElementById('stageLoader').classList.remove('gone');
-    loadStream();
-    window.scrollTo({top:0,behavior:'smooth'});
-  };
-  document.getElementById('shareInfoBtn').onclick = shareLink;
-
-  document.getElementById('infoFacts').innerHTML = `
-    <div class="fact-row"><b>التقييم</b>⭐ ${sc} / 10 (${(m.vote_count || 0).toLocaleString('ar')} تصويت)</div>
-    <div class="fact-row"><b>السنة</b>${yr}</div>
-    ${m.runtime ? `<div class="fact-row"><b>المدة</b>${runtime(m.runtime)}</div>` : ''}
-    ${m.number_of_seasons ? `<div class="fact-row"><b>المواسم</b>${m.number_of_seasons}</div>` : ''}
-    ${m.number_of_episodes ? `<div class="fact-row"><b>الحلقات</b>${m.number_of_episodes}</div>` : ''}
-    ${(m.spoken_languages || []).length ? `<div class="fact-row"><b>اللغة</b>${m.spoken_languages.map(l => l.name).join('، ')}</div>` : ''}
-    ${m.status ? `<div class="fact-row"><b>الحالة</b>${m.status}</div>` : ''}
-    ${(m.production_companies || []).length ? `<div class="fact-row"><b>الإنتاج</b>${m.production_companies.slice(0,2).map(c => c.name).join('، ')}</div>` : ''}
-  `;
-
-  const cast = (m.credits?.cast || []).slice(0, 12);
-  document.getElementById('castStrip').innerHTML = cast.length
-    ? cast.map(c => `
-        <div class="cast-card">
-          <img loading="lazy" src="${IMG(c.profile_path, 'w185')}" alt="${c.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23181924%22/%3E%3Ctext x=%2250%22 y=%2258%22 text-anchor=%22middle%22 fill=%22%235a5a6e%22 font-size=%2230%22%3E👤%3C/text%3E%3C/svg%3E'">
-          <div class="name">${c.name}</div>
-          <div class="char">${c.character || ''}</div>
-        </div>`).join('')
-    : '<div class="empty-msg">لا توجد معلومات عن الممثلين</div>';
-
-  const similar = (m.similar?.results || []).filter(x => x.poster_path || x.backdrop_path).slice(0, 10);
-  document.getElementById('relatedRail').innerHTML = similar.length
-    ? similar.map(s => {
-        const relType = s.media_type || type;
-        return `
-          <div class="rel-card" data-id="${s.id}" data-type="${relType}" tabindex="0" role="button">
-            <img loading="lazy" src="${BACKDROP(s.backdrop_path, 'w780') || IMG(s.poster_path, 'w500')}" alt="${s.title || s.name}">
-            <div class="rel-play-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
-            <div class="rel-card-info">
-              <div class="rel-card-title">${s.title || s.name}</div>
-              <div class="rel-card-meta">⭐ ${s.vote_average?.toFixed(1) || '—'}</div>
-            </div>
-          </div>`;
-      }).join('')
-    : '<div class="empty-msg">لا توجد اقتراحات</div>';
-
-  document.querySelectorAll('.rel-card').forEach(c => {
-    c.addEventListener('click', () => {
-      location.href = `/player?id=${c.dataset.id}&type=${c.dataset.type}`;
-    });
-    c.addEventListener('keydown', e => {
-      if(e.key === 'Enter') c.click();
-    });
-  });
-
-  if(type === 'tv' && m.number_of_seasons){
-    loadSeasons(m.id, m.number_of_seasons);
-  }
-}
-
-/* ─────────────────────────────────────────
-   SEASONS & EPISODES
-   ───────────────────────────────────────── */
-async function loadSeasons(tvId, numberOfSeasons){
-  const section = document.getElementById('seasonsSection');
-  const bar = document.getElementById('seasonsBar');
-  if(!numberOfSeasons || numberOfSeasons < 1) return;
-  section.style.display = 'block';
-
-  bar.innerHTML = Array.from({length: numberOfSeasons}, (_, i) =>
-    `<button class="season-btn${i===0?' active':''}" data-season="${i+1}">
-      الموسم ${i+1}
-    </button>`
-  ).join('');
-
-  await loadEpisodes(tvId, 1);
-
-  bar.querySelectorAll('.season-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      bar.querySelectorAll('.season-btn').forEach(b => b.classList.toggle('active', b === btn));
-      await loadEpisodes(tvId, +btn.dataset.season);
-    });
-  });
-}
-
-async function loadEpisodes(tvId, seasonNum){
-  const grid = document.getElementById('episodesGrid');
-  grid.innerHTML = '<div class="empty-msg">جاري تحميل الحلقات…</div>';
-
-  try{
-    const r = await fetch(`/api/3/tv/${tvId}/season/${seasonNum}?api_key=${API_KEY()}&language=ar-SA`);
-    const data = await r.json();
-    const eps = data.episodes || [];
-
-    if(!eps.length){
-      grid.innerHTML = '<div class="empty-msg">لا توجد حلقات</div>';
-      return;
-    }
-
-    grid.innerHTML = eps.map(ep => `
-      <div class="episode-card" data-season="${seasonNum}" data-episode="${ep.episode_number}">
-        <div class="episode-num">${ep.episode_number}</div>
-        <div class="episode-info">
-          <div class="episode-title">${ep.name || 'حلقة ' + ep.episode_number}</div>
-          <div class="episode-meta">
-            ${ep.air_date ? new Date(ep.air_date).getFullYear() : ''}
-            ${ep.runtime ? ' · ' + ep.runtime + 'د' : ''}
-            ⭐ ${ep.vote_average ? ep.vote_average.toFixed(1) : '—'}
-          </div>
-        </div>
-      </div>
-    `).join('');
-
-    grid.querySelectorAll('.episode-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const s = card.dataset.season;
-        const e = card.dataset.episode;
-        document.getElementById('stageLoader').classList.remove('gone');
-        loadStream(s, e);
-        window.scrollTo({top:0,behavior:'smooth'});
-        toast(`الموسم ${s} — الحلقة ${e}`);
-      });
-    });
-
-  }catch(e){
-    grid.innerHTML = '<div class="empty-msg">تعذر تحميل الحلقات</div>';
-  }
-}
-
-/* ─────────────────────────────────────────
-   SHARE + FULLSCREEN
-   ───────────────────────────────────────── */
-async function shareLink(){
-  const url = location.href;
-  if(navigator.share){
-    try{ await navigator.share({title: document.title, url}); }
-    catch(e){}
-  } else {
-    try{
-      await navigator.clipboard.writeText(url);
-      toast('تم نسخ الرابط 📋');
-    }catch(e){
-      toast('تعذر النسخ');
-    }
-  }
-}
-document.getElementById('shareBtn').onclick = shareLink;
-
-document.getElementById('fullscreenBtn').onclick = () => {
-  const stage = document.getElementById('stage');
-  if(!document.fullscreenElement){
-    stage.requestFullscreen?.().catch(()=>toast('المتصفح لا يدعم ملء الشاشة'));
-  } else {
-    document.exitFullscreen?.();
-  }
-};
-
-/* ─────────────────────────────────────────
-   COMMENTS
-   ───────────────────────────────────────── */
-const COMMENTS_KEY = `tucentma_comments_${MEDIA_TYPE}_${MEDIA_ID}`;
-const DEFAULT_COMMENTS = [
-  {who:'م', name:'محمد', time:'قبل يومين', text:'من أقوى ما شاهدته هذا العام — النهاية لم أتوقعها أبداً.', likes:24, liked:false},
-  {who:'س', name:'سارة', time:'قبل 4 أيام', text:'الموسيقى التصويرية خرافية، تزيد من توتر المشاهد بشكل رهيب.', likes:17, liked:false},
-  {who:'أ', name:'أحمد', time:'قبل أسبوع', text:'حبذا لو كانت المدة أطول، القصة تستحق.', likes:8, liked:false},
-];
-let COMMENTS = [];
-function loadComments(){
-  try{
-    const raw = localStorage.getItem(COMMENTS_KEY);
-    COMMENTS = raw ? JSON.parse(raw) : [...DEFAULT_COMMENTS];
-  }catch(e){ COMMENTS = [...DEFAULT_COMMENTS]; }
-}
-function saveComments(){
-  try{ localStorage.setItem(COMMENTS_KEY, JSON.stringify(COMMENTS)); }catch(e){}
-}
-function renderComments(){
-  const list = document.getElementById('commentList');
-  if(!COMMENTS.length){
-    list.innerHTML = '<div class="empty-msg">لا توجد تعليقات بعد. كن أول من يشارك!</div>';
-    return;
-  }
-  list.innerHTML = COMMENTS.map((c, i) => `
-    <div class="comment">
-      <div class="who">${c.who}</div>
-      <div style="flex:1">
-        <div class="name">${c.name} <small>${c.time}</small></div>
-        <div class="text">${c.text}</div>
-        <div class="comment-likes">
-          <button class="like-btn${c.liked?' liked':''}" data-idx="${i}">👍 ${c.likes}</button>
-        </div>
-      </div>
+  const genres = (m.genres || []).map(g => `<span class="genre-chip">${g.name}</span>`).join('');
+  const cast   = (m.credits?.cast || []).slice(0, 12).map(c => `
+    <div class="cast-card" tabindex="0" role="button" aria-label="${c.name}">
+      <img loading="lazy" src="${img(c.profile_path, 'w185')}" alt="${c.name}"
+           onerror="this.src=''" style="background:var(--surface)">
+      <div class="cast-name">${c.name}</div>
+      <div class="cast-char">${c.character}</div>
     </div>`).join('');
 
-  list.querySelectorAll('.like-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const i = +btn.dataset.idx;
-      if(COMMENTS[i].liked){
-        COMMENTS[i].likes = Math.max(0, COMMENTS[i].likes - 1);
-        COMMENTS[i].liked = false;
-      } else {
-        COMMENTS[i].likes += 1;
-        COMMENTS[i].liked = true;
-      }
-      saveComments();
-      renderComments();
+  const similar = (m.similar?.results || m.recommendations?.results || [])
+    .filter(x => x.poster_path).slice(0, 12).map(s => `
+    <div class="card-mini" data-id="${s.id}" data-type="${CONTENT_TYPE}"
+         tabindex="0" role="button" aria-label="${s.title || s.name}">
+      <img loading="lazy" src="${img(s.poster_path, 'w185')}" alt="${s.title || s.name}">
+    </div>`).join('');
+
+  col.innerHTML = `
+    <div class="info-header">
+      <div class="info-title-block">
+        <h1 class="info-title">${title}</h1>
+        <div class="info-meta">
+          <span class="info-meta-item">${yr}</span>
+          <span class="info-meta-item info-badge gold">⭐ ${sc}</span>
+          <span class="info-meta-item info-badge teal">${type}</span>
+          ${m.runtime ? `<span class="info-meta-item">${fmtRuntime(m.runtime)}</span>` : ''}
+          ${m.number_of_seasons ? `<span class="info-meta-item">${m.number_of_seasons} موسم</span>` : ''}
+          ${m.number_of_episodes ? `<span class="info-meta-item">${m.number_of_episodes} حلقة</span>` : ''}
+        </div>
+      </div>
+    </div>
+    <p class="info-desc">${desc}</p>
+    ${genres ? `<div class="info-genres">${genres}</div>` : ''}
+    <div class="info-actions">
+      <button class="btn btn-ghost" id="infoNextSrc">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        المصدر التالي
+      </button>
+      ${CONTENT_TYPE === 'tv' ? `
+      <button class="btn btn-ghost" id="infoNextEp">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5 4 15 12 5 20 5 4" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="19" y1="5" x2="19" y2="19" stroke-linecap="round"/>
+        </svg>
+        الحلقة التالية
+      </button>` : ''}
+    </div>
+    ${cast ? `
+    <div style="margin-bottom:32px">
+      <div class="section-heading">طاقم العمل</div>
+      <div class="cast-rail">${cast}</div>
+    </div>` : ''}
+    ${similar ? `
+    <div class="similar-section">
+      <div class="section-heading">قد يعجبك أيضاً</div>
+      <div class="card-mini-rail" id="similarRail">${similar}</div>
+    </div>` : ''}
+  `;
+
+  /* Bind action buttons */
+  document.getElementById('infoNextSrc')?.addEventListener('click', nextSource);
+  document.getElementById('infoNextEp')?.addEventListener('click', nextEpisode);
+
+  /* Similar thumbs */
+  document.querySelectorAll('.card-mini').forEach(el => {
+    el.addEventListener('click', () => {
+      location.href = `/player?id=${el.dataset.id}&type=${el.dataset.type}`;
     });
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') el.click(); });
   });
 }
-document.getElementById('commentForm').addEventListener('submit', e => {
-  e.preventDefault();
-  const inp = document.getElementById('commentInput');
-  const txt = inp.value.trim();
-  if(!txt) return;
-  COMMENTS.unshift({who:'ت', name:'أنت', time:'الآن', text: txt.slice(0,500), likes:0, liked:false});
-  saveComments();
-  renderComments();
-  inp.value = '';
-  toast('تم نشر تعليقك ✓');
-});
 
-/* ─────────────────────────────────────────
-   IFRAME LOAD
-   ───────────────────────────────────────── */
-document.getElementById('video-frame').addEventListener('load', () => {
-  setTimeout(() => {
-    document.getElementById('stageLoader').classList.add('gone');
-  }, 800);
-});
+function buildSidebar(m) {
+  const sidebar = document.getElementById('sidebar');
 
-/* ─────────────────────────────────────────
-   TOPBAR AUTO-HIDE
-   ───────────────────────────────────────── */
-let lastScroll = 0;
-window.addEventListener('scroll', () => {
-  const topbar = document.getElementById('topbar');
-  if(window.scrollY > 200 && window.scrollY > lastScroll){
-    topbar.classList.add('hidden');
-  } else {
-    topbar.classList.remove('hidden');
+  /* Runtime facts */
+  const factsHTML = `
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-head-title">معلومات العمل</span>
+      </div>
+      <div class="facts-list">
+        <div class="fact-row"><span class="fact-key">النوع</span><span class="fact-val">${CONTENT_TYPE === 'tv' ? 'مسلسل' : 'فيلم'}</span></div>
+        <div class="fact-row"><span class="fact-key">السنة</span><span class="fact-val">${fmtYear(m.release_date || m.first_air_date)}</span></div>
+        <div class="fact-row"><span class="fact-key">التقييم</span><span class="fact-val">⭐ ${fmtScore(m.vote_average)} / 10</span></div>
+        <div class="fact-row"><span class="fact-key">التصويتات</span><span class="fact-val">${(m.vote_count || 0).toLocaleString('ar')}</span></div>
+        ${m.runtime ? `<div class="fact-row"><span class="fact-key">المدة</span><span class="fact-val">${fmtRuntime(m.runtime)}</span></div>` : ''}
+        ${m.status ? `<div class="fact-row"><span class="fact-key">الحالة</span><span class="fact-val">${m.status}</span></div>` : ''}
+        ${(m.production_countries||[]).length ? `<div class="fact-row"><span class="fact-key">الإنتاج</span><span class="fact-val">${m.production_countries.map(c=>c.name).join('، ')}</span></div>` : ''}
+        ${(m.spoken_languages||[]).length ? `<div class="fact-row"><span class="fact-key">اللغات</span><span class="fact-val">${m.spoken_languages.map(l=>l.name).join('، ')}</span></div>` : ''}
+      </div>
+    </div>`;
+
+  /* Keyboard shortcuts panel */
+  const kbHTML = `
+    <div class="panel kb-panel">
+      <div class="panel-head">
+        <span class="panel-head-title">اختصارات لوحة المفاتيح</span>
+      </div>
+      <div class="kb-list">
+        <div class="kb-row"><span class="kb-key">T</span><span class="kb-action">وضع المسرح</span></div>
+        <div class="kb-row"><span class="kb-key">S</span><span class="kb-action">المصدر التالي</span></div>
+        ${CONTENT_TYPE === 'tv' ? `
+        <div class="kb-row"><span class="kb-key">N</span><span class="kb-action">الحلقة التالية</span></div>
+        <div class="kb-row"><span class="kb-key">P</span><span class="kb-action">الحلقة السابقة</span></div>
+        ` : ''}
+        <div class="kb-row"><span class="kb-key">W</span><span class="kb-action">أضف لقائمتي</span></div>
+        <div class="kb-row"><span class="kb-key">Esc</span><span class="kb-action">خروج من المسرح</span></div>
+      </div>
+    </div>`;
+
+  /* Episode panel only for TV */
+  const epPanelHTML = CONTENT_TYPE === 'tv' ? `
+    <div class="panel ep-panel" id="epPanel">
+      <div class="panel-head">
+        <span class="panel-head-title">المواسم والحلقات</span>
+        <span class="panel-head-sub" id="epPanelSub"></span>
+      </div>
+      <div class="season-tabs" id="seasonTabs"></div>
+      <div class="ep-grid" id="epGrid"></div>
+    </div>` : '';
+
+  sidebar.innerHTML = `
+    ${document.querySelector('.panel').outerHTML}
+    ${epPanelHTML}
+    ${factsHTML}
+    ${kbHTML}
+  `;
+
+  /* Re-build source panel since innerHTML replaced it */
+  buildSourceList();
+
+  /* Build seasons if TV */
+  if (CONTENT_TYPE === 'tv' && m.seasons) {
+    buildSeasonTabs(m.seasons);
   }
-  lastScroll = window.scrollY;
-}, {passive:true});
+}
 
-/* ─────────────────────────────────────────
-   KEYBOARD
-   ───────────────────────────────────────── */
-document.addEventListener('keydown', e => {
-  if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-  if(e.key === 'f' || e.key === 'F'){ document.getElementById('fullscreenBtn').click(); }
-  if(e.key === 'Escape' && document.fullscreenElement){ document.exitFullscreen?.(); }
+function buildSeasonTabs(seasons) {
+  const tabs = document.getElementById('seasonTabs');
+  if (!tabs) return;
+  const validSeasons = seasons.filter(s => s.season_number > 0);
+  totalSeasons = validSeasons.length;
+
+  tabs.innerHTML = validSeasons.map(s => `
+    <button class="season-tab${s.season_number === currentSeason ? ' active' : ''}"
+            data-s="${s.season_number}" aria-label="الموسم ${s.season_number}">
+      ${s.season_number}
+    </button>`).join('');
+
+  tabs.querySelectorAll('.season-tab').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const s = +btn.dataset.s;
+      currentSeason  = s;
+      currentEpisode = 1;
+      tabs.querySelectorAll('.season-tab').forEach(t => t.classList.toggle('active', +t.dataset.s === s));
+      await loadSeasonEpisodes(s);
+    });
+  });
+
+  loadSeasonEpisodes(currentSeason);
+}
+
+async function loadSeasonEpisodes(s) {
+  const grid = document.getElementById('epGrid');
+  const sub  = document.getElementById('epPanelSub');
+  if (!grid) return;
+
+  grid.innerHTML = '<div class="skel" style="grid-column:1/-1;height:40px"></div>';
+
+  try {
+    const data = await tmdb(`/tv/${CONTENT_ID}/season/${s}`);
+    const eps  = data.episodes || [];
+    totalEpisodes = eps.length;
+    if (sub) sub.textContent = `${eps.length} حلقة`;
+
+    grid.innerHTML = eps.map(e => `
+      <button class="ep-btn${e.episode_number === currentEpisode && s === currentSeason ? ' active' : ''}${isWatched(s, e.episode_number) ? ' watched' : ''}"
+              data-e="${e.episode_number}"
+              aria-label="الحلقة ${e.episode_number}${e.name ? ': ' + e.name : ''}"
+              title="${e.name || 'الحلقة ' + e.episode_number}">
+        ${e.episode_number}
+      </button>`).join('');
+
+    grid.querySelectorAll('.ep-btn').forEach(btn => {
+      btn.addEventListener('click', () => loadEpisode(s, +btn.dataset.e));
+    });
+
+  } catch {
+    grid.innerHTML = '<div style="color:var(--text-dim);font-size:12px;padding:8px">فشل تحميل الحلقات</div>';
+  }
+}
+
+function refreshEpGrid() {
+  const btns = document.querySelectorAll('.ep-btn');
+  btns.forEach(btn => {
+    const e = +btn.dataset.e;
+    btn.classList.toggle('active',   e === currentEpisode);
+    btn.classList.toggle('watched',  isWatched(currentSeason, e));
+  });
+}
+
+/* ════════════════════════════════════════════════════════════
+   MAIN BOOT
+   ════════════════════════════════════════════════════════════ */
+async function boot() {
+  if (!CONTENT_ID) { showError('لم يتم تحديد معرّف العمل. ارجع واختر محتوى.'); return; }
+
+  /* 1. Build source panel immediately (don't wait for metadata) */
+  buildSourceList();
+
+  /* 2. Start loading the player */
+  loadPlayer(0);
+
+  /* 3. Fetch content metadata in background */
+  try {
+    const endpoint = CONTENT_TYPE === 'tv'
+      ? `/tv/${CONTENT_ID}`
+      : `/movie/${CONTENT_ID}`;
+    const m = await tmdb(endpoint, {
+      append_to_response: 'credits,similar,recommendations,seasons'
+    });
+    contentData = m;
+
+    const title = m.title || m.name || '—';
+
+    /* Update nav */
+    document.getElementById('navTitle').textContent = title;
+    if (CONTENT_TYPE === 'tv') {
+      document.getElementById('navSub').textContent = `الموسم ${currentSeason} · الحلقة ${currentEpisode}`;
+    } else {
+      document.getElementById('navSub').textContent = fmtYear(m.release_date || m.first_air_date);
+    }
+
+    /* Update page title */
+    document.title = `${title} — TU CENMA`;
+
+    /* Seasons count */
+    if (m.seasons) totalSeasons = m.seasons.filter(s => s.season_number > 0).length;
+
+    /* Build info column + sidebar */
+    buildInfoColumn(m);
+    buildSidebar(m);
+
+    /* Watchlist btn */
+    refreshWlBtn();
+
+    /* Watchlist toggle */
+    document.getElementById('btnWl').addEventListener('click', () => {
+      wlToggle({ id: CONTENT_ID, title, type: CONTENT_TYPE, poster: img(m.poster_path) });
+    });
+
+  } catch (err) {
+    /* Metadata failed — player still works */
+    document.getElementById('navTitle').textContent = `#${CONTENT_ID}`;
+    console.warn('[TU CENMA Player] Metadata error:', err);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   EVENT LISTENERS
+   ════════════════════════════════════════════════════════════ */
+
+/* Theater toggle */
+document.getElementById('btnTheater').addEventListener('click', toggleTheater);
+document.getElementById('tcExit')?.addEventListener('click', () => {
+  if (theaterMode) toggleTheater();
 });
 
-/* ─────────────────────────────────────────
-   BOOT
-   ───────────────────────────────────────── */
-loadComments();
-renderComments();
-loadMedia();
+/* Previous / Next in theater bar */
+document.getElementById('tcPrev')?.addEventListener('click', prevEpisode);
+document.getElementById('tcNext')?.addEventListener('click', nextEpisode);
 
-console.log('[TU CENMA Player] Loaded — Media:', MEDIA_TYPE, MEDIA_ID);
+/* Error buttons */
+document.getElementById('errorRetry')?.addEventListener('click', () => loadPlayer(currentSrcIdx));
+document.getElementById('errorNext')?.addEventListener('click', nextSource);
+
+/* Share */
+document.getElementById('btnShare').addEventListener('click', async () => {
+  const url = location.href;
+  try {
+    if (navigator.share) { await navigator.share({ title: document.title, url }); }
+    else { await navigator.clipboard.writeText(url); toast('تم نسخ الرابط 📋'); }
+  } catch { toast('تعذّرت المشاركة'); }
+});
+
+/* ── Keyboard shortcuts ── */
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+  switch (e.key.toUpperCase()) {
+    case 'T':
+      e.preventDefault();
+      toggleTheater();
+      break;
+    case 'S':
+      e.preventDefault();
+      nextSource();
+      break;
+    case 'N':
+      if (CONTENT_TYPE === 'tv') { e.preventDefault(); nextEpisode(); }
+      break;
+    case 'P':
+      if (CONTENT_TYPE === 'tv') { e.preventDefault(); prevEpisode(); }
+      break;
+    case 'W':
+      e.preventDefault();
+      if (contentData) {
+        wlToggle({ id: CONTENT_ID, title: contentData.title || contentData.name, type: CONTENT_TYPE, poster: img(contentData.poster_path) });
+        refreshWlBtn();
+      }
+      break;
+    case 'ESCAPE':
+      if (theaterMode) toggleTheater();
+      break;
+  }
+});
+
+/* ── Auto-show theater controls on mouse move ── */
+let theaterHideTimer;
+document.getElementById('playerStage').addEventListener('mousemove', () => {
+  if (!theaterMode) return;
+  document.getElementById('theaterCtrl').classList.add('visible');
+  clearTimeout(theaterHideTimer);
+  theaterHideTimer = setTimeout(() => {
+    document.getElementById('theaterCtrl').classList.remove('visible');
+  }, 3000);
+}, { passive: true });
+
+/* ── Fullscreen change: auto theater ── */
+document.addEventListener('fullscreenchange', () => {
+  if (document.fullscreenElement && !theaterMode) toggleTheater();
+  if (!document.fullscreenElement && theaterMode) toggleTheater();
+});
+
+/* ════════════════════════════════════════════════════════════
+   LAUNCH
+   ════════════════════════════════════════════════════════════ */
+boot();
+
+})(); /* END IIFE */
 </script>
 </body>
 </html>
