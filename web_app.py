@@ -1,45 +1,79 @@
 """
 ONYX CINEMA v18.0 - Cinema Streaming Platform
-Fixed: Real source loading + proper streaming
+Flask + TMDB + .env Configuration
 """
 
 import os
-import sys
 import time
 import json
-import threading
-import subprocess
 import urllib.request
 import urllib.parse
 import urllib.error
+
+from pathlib import Path
 from collections import defaultdict
-from datetime import datetime, timedelta
-from functools import lru_cache
+from datetime import datetime
+
 from flask import Flask, jsonify, request, render_template, Response, redirect
-import requests
 
 try:
     from dotenv import load_dotenv
-    load_dotenv()
 except ImportError:
-    pass
+    raise RuntimeError(
+        "مكتبة python-dotenv غير مثبتة.\n"
+        "ثبتها بالأمر التالي:\n"
+        "pip install python-dotenv"
+    )
+
+# ════════════════════════════════════════════════════════════
+# LOAD .ENV
+# ════════════════════════════════════════════════════════════
+
+BASE_DIR = Path(__file__).resolve().parent
+ENV_FILE = BASE_DIR / ".env"
+
+if not ENV_FILE.exists():
+    raise RuntimeError(
+        f"ملف .env غير موجود في هذا المسار:\n{ENV_FILE}\n\n"
+        "أنشئ ملف .env بجانب app.py."
+    )
+
+load_dotenv(dotenv_path=ENV_FILE)
+
+# ════════════════════════════════════════════════════════════
+# APP
+# ════════════════════════════════════════════════════════════
 
 app = Flask(__name__, template_folder="templates")
 
 # ════════════════════════════════════════════════════════════
-# CONFIG
+# CONFIG FROM .ENV
 # ════════════════════════════════════════════════════════════
 
-TMDB_API_KEY = os.getenv("TMDB_API_KEY", "")
-OMDB_API_KEY = os.getenv("OMDB_API_KEY", "")
-DISCORD_TOKEN = os.getenv("DISCORD_TOKEN", "")
+TMDB_API_KEY = os.getenv("TMDB_API_KEY", "").strip()
+OMDB_API_KEY = os.getenv("OMDB_API_KEY", "").strip()
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN", "").strip()
+
+RUN_BOT = os.getenv("RUN_BOT", "false").lower() in {
+    "1", "true", "yes", "on"
+}
+
+CACHE_TTL = int(os.getenv("CACHE_TTL", "600"))
+PORT = int(os.getenv("PORT", "5000"))
+FLASK_DEBUG = os.getenv("FLASK_DEBUG", "false").lower() in {
+    "1", "true", "yes", "on"
+}
+
+SECRET_KEY = os.getenv("SECRET_KEY", "").strip()
+
+if not SECRET_KEY:
+    SECRET_KEY = "change-this-in-production"
+
+app.config["SECRET_KEY"] = SECRET_KEY
 
 TMDB_BASE = "https://api.themoviedb.org/3"
 TMDB_IMG = "https://image.tmdb.org/t/p"
-TMDB_LANG = "ar"
-
-RUN_BOT = os.getenv("RUN_BOT", "false").lower() == "true"
-CACHE_TTL = 600
+TMDB_LANG = os.getenv("TMDB_LANG", "ar").strip() or "ar"
 
 # ════════════════════════════════════════════════════════════
 # CACHE SYSTEM
@@ -47,147 +81,226 @@ CACHE_TTL = 600
 
 _cache = {}
 
+
 def cache_get(key):
-    """Get from cache if not expired"""
+    """Get an item from cache if it has not expired."""
     item = _cache.get(key)
+
     if item and time.time() - item["t"] < CACHE_TTL:
         return item["v"]
+
     return None
 
+
 def cache_set(key, value):
-    """Set cache with timestamp"""
-    _cache[key] = {"v": value, "t": time.time()}
+    """Save an item to cache."""
+    _cache[key] = {
+        "v": value,
+        "t": time.time()
+    }
     return value
 
+
 def cache_clear_old():
-    """Clear expired cache entries"""
+    """Delete all expired cache entries."""
     now = time.time()
-    expired = [k for k, v in _cache.items() if now - v["t"] > CACHE_TTL]
-    for k in expired:
-        del _cache[k]
+
+    expired_keys = [
+        key for key, value in _cache.items()
+        if now - value["t"] > CACHE_TTL
+    ]
+
+    for key in expired_keys:
+        del _cache[key]
 
 # ════════════════════════════════════════════════════════════
 # TMDB CORE FUNCTIONS
 # ════════════════════════════════════════════════════════════
 
-def tmdb(ep, params=None, lang=None):
-    """Fetch from TMDB API with caching"""
+
+def tmdb(endpoint, params=None, lang=None):
+    """Fetch data from TMDB API with cache."""
+
     if not TMDB_API_KEY:
-        return {"error": "TMDB_API_KEY missing", "results": []}
-    
-    p = dict(params or {})
-    p["api_key"] = TMDB_API_KEY
-    p["language"] = lang or TMDB_LANG
-    
-    qs = urllib.parse.urlencode(p)
-    url = f"{TMDB_BASE}{ep}?{qs}"
-    ck = f"tmdb::{ep}::{qs}"
-    
-    # Check cache first
-    hit = cache_get(ck)
-    if hit is not None:
-        return hit
-    
+        return {
+            "error": "TMDB_API_KEY missing",
+            "results": []
+        }
+
+    query_params = dict(params or {})
+    query_params["api_key"] = TMDB_API_KEY
+    query_params["language"] = lang or TMDB_LANG
+
+    query_string = urllib.parse.urlencode(query_params)
+    url = f"{TMDB_BASE}{endpoint}?{query_string}"
+    cache_key = f"tmdb::{endpoint}::{query_string}"
+
+    cached_data = cache_get(cache_key)
+
+    if cached_data is not None:
+        return cached_data
+
     try:
         req = urllib.request.Request(
-            url, 
-            headers={"User-Agent": "ONYX/18.0"}
+            url,
+            headers={
+                "User-Agent": "ONYX-CINEMA/18.0"
+            }
         )
-        with urllib.request.urlopen(req, timeout=25) as r:
-            data = json.loads(r.read().decode("utf-8"))
-            return cache_set(ck, data)
-    except urllib.error.HTTPError as e:
-        print(f"[TMDB] HTTP {e.code}: {ep}")
-        return {"error": f"TMDB HTTP {e.code}", "results": []}
-    except Exception as e:
-        print(f"[TMDB] Error: {e}")
-        return {"error": str(e), "results": []}
+
+        with urllib.request.urlopen(req, timeout=25) as response:
+            data = json.loads(response.read().decode("utf-8"))
+            return cache_set(cache_key, data)
+
+    except urllib.error.HTTPError as error:
+        print(f"[TMDB] HTTP {error.code}: {endpoint}")
+
+        return {
+            "error": f"TMDB HTTP {error.code}",
+            "results": []
+        }
+
+    except Exception as error:
+        print(f"[TMDB] Error: {error}")
+
+        return {
+            "error": str(error),
+            "results": []
+        }
 
 # ════════════════════════════════════════════════════════════
 # MOVIE API FUNCTIONS
 # ════════════════════════════════════════════════════════════
 
+
 def get_trending():
     return tmdb("/trending/all/week").get("results", [])
 
-def get_popular(mt="movie"):
-    return tmdb(f"/{mt}/popular").get("results", [])
 
-def get_top_rated(mt="movie"):
-    return tmdb(f"/{mt}/top_rated").get("results", [])
+def get_popular(media_type="movie"):
+    return tmdb(f"/{media_type}/popular").get("results", [])
+
+
+def get_top_rated(media_type="movie"):
+    return tmdb(f"/{media_type}/top_rated").get("results", [])
+
 
 def get_now_playing():
     return tmdb("/movie/now_playing").get("results", [])
 
+
 def get_upcoming():
     return tmdb("/movie/upcoming").get("results", [])
 
-def search_multi(q):
-    return tmdb("/search/multi", {
-        "query": q,
+
+def search_multi(query):
+    return tmdb(
+        "/search/multi",
+        {
+            "query": query,
+            "include_adult": "false"
+        }
+    ).get("results", [])
+
+
+def search_person(query):
+    return tmdb(
+        "/search/person",
+        {
+            "query": query
+        }
+    ).get("results", [])
+
+
+def get_movie_details(movie_id, media_type="movie"):
+    return tmdb(
+        f"/{media_type}/{movie_id}",
+        {
+            "append_to_response": (
+                "credits,videos,similar,recommendations,"
+                "images,external_ids"
+            )
+        }
+    )
+
+
+def get_season_details(tv_id, season_number):
+    return tmdb(f"/tv/{tv_id}/season/{season_number}")
+
+
+def get_person_details(person_id):
+    return tmdb(
+        f"/person/{person_id}",
+        {
+            "append_to_response": "combined_credits,images,external_ids"
+        }
+    )
+
+
+def get_genres(media_type="movie"):
+    return tmdb(f"/genre/{media_type}/list").get("genres", [])
+
+
+def get_by_genre(genre_id, media_type="movie"):
+    return tmdb(
+        f"/discover/{media_type}",
+        {
+            "with_genres": genre_id,
+            "sort_by": "popularity.desc",
+            "include_adult": "false"
+        }
+    ).get("results", [])
+
+
+def discover_advanced(
+    media_type="movie",
+    genre=None,
+    year=None,
+    language=None,
+    sort="popularity.desc"
+):
+    params = {
+        "sort_by": sort,
         "include_adult": "false"
-    }).get("results", [])
+    }
 
-def search_person(q):
-    return tmdb("/search/person", {"query": q}).get("results", [])
-
-def get_movie_details(mid, mt="movie"):
-    """Get full movie/tv details with credits, videos, etc."""
-    return tmdb(f"/{mt}/{mid}", {
-        "append_to_response": "credits,videos,similar,recommendations,images,external_ids"
-    })
-
-def get_season_details(tid, s):
-    """Get TV season details"""
-    return tmdb(f"/tv/{tid}/season/{s}")
-
-def get_person_details(pid):
-    """Get person details"""
-    return tmdb(f"/person/{pid}", {
-        "append_to_response": "combined_credits,images,external_ids"
-    })
-
-def get_genres(mt="movie"):
-    """Get genres list"""
-    return tmdb(f"/genre/{mt}/list").get("genres", [])
-
-def get_by_genre(gid, mt="movie"):
-    """Get movies/shows by genre"""
-    return tmdb(f"/discover/{mt}", {
-        "with_genres": gid,
-        "sort_by": "popularity.desc"
-    }).get("results", [])
-
-def discover_advanced(mt="movie", genre=None, year=None, lang=None, sort="popularity.desc"):
-    """Advanced discovery with filters"""
-    params = {"sort_by": sort, "include_adult": "false"}
-    
     if genre:
         params["with_genres"] = genre
+
     if year:
-        year_key = "primary_release_year" if mt == "movie" else "first_air_date_year"
+        year_key = (
+            "primary_release_year"
+            if media_type == "movie"
+            else "first_air_date_year"
+        )
         params[year_key] = year
-    if lang:
-        params["with_original_language"] = lang
-    
-    return tmdb(f"/discover/{mt}", params).get("results", [])
 
-def get_movie_videos(mid, mt="movie"):
-    """Get videos (trailers, etc.)"""
-    return tmdb(f"/{mt}/{mid}/videos", {
-        "language": "ar"
-    }).get("results", [])
+    if language:
+        params["with_original_language"] = language
+
+    return tmdb(
+        f"/discover/{media_type}",
+        params
+    ).get("results", [])
+
+
+def get_movie_videos(movie_id, media_type="movie"):
+    return tmdb(
+        f"/{media_type}/{movie_id}/videos",
+        {
+            "language": TMDB_LANG
+        }
+    ).get("results", [])
 
 # ════════════════════════════════════════════════════════════
-# SOURCES & STREAMING - الجزء الحرج
+# STREAMING SOURCES
 # ════════════════════════════════════════════════════════════
 
-# مصادر البث الفعلية (Real Streaming Sources)
 STREAMING_SOURCES = [
     {
         "id": "vidsrc",
         "name": "VidSrc",
-        "quality": "720p-1080p",
+        "quality": "1080p",
         "type": "embedded",
         "movie_url": "https://vidsrc.me/embed/{id}",
         "tv_url": "https://vidsrc.me/embed/tv?tmdb={id}&season={s}&episode={e}",
@@ -217,7 +330,7 @@ STREAMING_SOURCES = [
     {
         "id": "rabbitstream",
         "name": "RabbitStream",
-        "quality": "720p-1080p",
+        "quality": "1080p",
         "type": "embedded",
         "movie_url": "https://rabbitstream.net/embed/tmdb?id={id}",
         "tv_url": "https://rabbitstream.net/embed/tmdb?id={id}&s={s}&e={e}",
@@ -236,59 +349,85 @@ STREAMING_SOURCES = [
     }
 ]
 
-def get_streaming_sources(mid, mtype="movie", title="", season=None, episode=None):
-    """
-    الحصول على جميع مصادر البث المتاحة
-    Returns list of streaming source objects with playable URLs
-    """
+
+def get_streaming_sources(
+    media_id,
+    media_type="movie",
+    title="",
+    season=None,
+    episode=None
+):
+    """Return formatted external source URLs."""
+
     sources = []
-    
+
+    safe_title = urllib.parse.quote(title or "")
+
     for source in STREAMING_SOURCES:
         try:
-            if mtype == "movie":
+            if media_type == "movie":
                 url = source["movie_url"].format(
-                    id=mid,
-                    title=title.replace(" ", "%20")
+                    id=media_id,
+                    title=safe_title
                 )
-            else:  # TV series
-                s = season or "1"
-                e = episode or "1"
+
+            else:
+                season_number = season or "1"
+                episode_number = episode or "1"
+
                 url = source["tv_url"].format(
-                    id=mid,
-                    title=title.replace(" ", "%20"),
-                    s=s,
-                    e=e
+                    id=media_id,
+                    title=safe_title,
+                    s=season_number,
+                    e=episode_number
                 )
-            
-            sources.append({
-                "id": source["id"],
-                "name": source["name"],
-                "quality": source["quality"],
-                "url": url,
-                "type": source["type"],
-                "language": source["lang"],
-                "reliability": source["reliability"],
-                "playable": True
-            })
-        except Exception as e:
-            print(f"[SOURCE] Error with {source['name']}: {e}")
-            continue
-    
+
+            sources.append(
+                {
+                    "id": source["id"],
+                    "name": source["name"],
+                    "quality": source["quality"],
+                    "url": url,
+                    "type": source["type"],
+                    "language": source["lang"],
+                    "reliability": source["reliability"],
+                    "playable": True
+                }
+            )
+
+        except Exception as error:
+            print(f"[SOURCE] Error with {source['name']}: {error}")
+
     return sources
 
-def get_all_sources(mid, mtype="movie", title="", season=None, episode=None):
-    """
-    جمع كل مصادر البث المتاحة + معلومات إضافية
-    """
-    sources = get_streaming_sources(mid, mtype, title, season, episode)
-    
+
+def get_all_sources(
+    media_id,
+    media_type="movie",
+    title="",
+    season=None,
+    episode=None
+):
+    sources = get_streaming_sources(
+        media_id,
+        media_type,
+        title,
+        season,
+        episode
+    )
+
     return {
-        "id": mid,
-        "type": mtype,
+        "id": media_id,
+        "type": media_type,
         "title": title,
         "sources": sources,
         "count": len(sources),
-        "working": len([s for s in sources if s["playable"]]),
+        "working": len(
+            [
+                source for source in sources
+                if source.get("playable")
+            ]
+        ),
         "timestamp": datetime.now().isoformat()
     }
 
@@ -300,332 +439,452 @@ _rate = defaultdict(list)
 _banned = {}
 _log = defaultdict(int)
 
+
 def get_ip():
-    """Get client IP address"""
-    for h in ("CF-Connecting-IP", "X-Forwarded-For", "X-Real-IP"):
-        if request.headers.get(h):
-            return request.headers.get(h).split(",")[0].strip()
+    """Get client IP address."""
+
+    for header in (
+        "CF-Connecting-IP",
+        "X-Forwarded-For",
+        "X-Real-IP"
+    ):
+        value = request.headers.get(header)
+
+        if value:
+            return value.split(",")[0].strip()
+
     return request.remote_addr or "unknown"
+
 
 @app.before_request
 def rate_limit():
-    """Rate limiting middleware"""
-    if (request.path.startswith("/api/") or
-        request.path.startswith("/img/") or
-        request.path in ("/health",)):
-        return
-    
+    """Simple rate-limit middleware."""
+
+    ignored_paths = (
+        request.path.startswith("/api/")
+        or request.path.startswith("/img/")
+        or request.path == "/health"
+    )
+
+    if ignored_paths:
+        return None
+
     ip = get_ip()
-    
-    # Check if banned
-    if ip in _banned and time.time() < _banned[ip]:
-        return jsonify({"error": "banned"}), 429
-    
-    # Check rate
     now = time.time()
-    _rate[ip] = [t for t in _rate[ip] if now - t < 60]
+
+    if ip in _banned and now < _banned[ip]:
+        return jsonify({"error": "banned"}), 429
+
+    _rate[ip] = [
+        timestamp
+        for timestamp in _rate[ip]
+        if now - timestamp < 60
+    ]
+
     _rate[ip].append(now)
     _log[ip] += 1
-    
+
     if _log[ip] > 5000:
         _banned[ip] = now + 1800
         return jsonify({"error": "rate limit"}), 429
-    
+
     if len(_rate[ip]) > 500:
         return jsonify({"error": "rate limit"}), 429
 
+    return None
+
+
 @app.after_request
-def security_headers(r):
-    """Add security headers"""
-    r.headers["X-Content-Type-Options"] = "nosniff"
-    r.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    r.headers.pop("X-Frame-Options", None)
-    r.headers.pop("Content-Security-Policy", None)
-    return r
+def security_headers(response):
+    """Add basic HTTP security headers."""
+
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+    # السماح بعرض iframe من المصادر المستخدمة إن احتجت ذلك
+    response.headers.pop("X-Frame-Options", None)
+    response.headers.pop("Content-Security-Policy", None)
+
+    return response
 
 # ════════════════════════════════════════════════════════════
-# ROUTES — PAGES
+# PAGE ROUTES
 # ════════════════════════════════════════════════════════════
+
 
 @app.route("/")
 def index():
-    """Home page"""
-    return render_template("index.html", tmdb_key=TMDB_API_KEY)
+    """Home page."""
+
+    # لا تمرر TMDB_API_KEY إلى HTML أو JavaScript.
+    return render_template("index.html")
+
 
 @app.route("/player")
 def player():
-    """Video player page"""
-    return render_template("player.html", tmdb_key=TMDB_API_KEY)
+    """Video player page."""
+    return render_template("player.html")
+
 
 @app.route("/match")
 def match_player():
-    """Match/sports player page"""
-    return render_template("player.html", tmdb_key=TMDB_API_KEY)
+    """Sports player page."""
+    return render_template("player.html")
 
 # ════════════════════════════════════════════════════════════
-# ROUTES — API - MOVIES & TV
+# MOVIES & TV API ROUTES
 # ════════════════════════════════════════════════════════════
+
 
 @app.route("/api/trending")
 def api_trending():
-    """Get trending movies/shows"""
     return jsonify({"results": get_trending()})
 
-@app.route("/api/popular/<mt>")
-def api_popular(mt):
-    """Get popular movies/tv"""
-    if mt not in ("movie", "tv"):
-        return jsonify({"error": "invalid type"}), 400
-    return jsonify({"results": get_popular(mt)})
 
-@app.route("/api/top_rated/<mt>")
-def api_top_rated(mt):
-    """Get top rated"""
-    if mt not in ("movie", "tv"):
+@app.route("/api/popular/<media_type>")
+def api_popular(media_type):
+    if media_type not in ("movie", "tv"):
         return jsonify({"error": "invalid type"}), 400
-    return jsonify({"results": get_top_rated(mt)})
+
+    return jsonify({"results": get_popular(media_type)})
+
+
+@app.route("/api/top_rated/<media_type>")
+def api_top_rated(media_type):
+    if media_type not in ("movie", "tv"):
+        return jsonify({"error": "invalid type"}), 400
+
+    return jsonify({"results": get_top_rated(media_type)})
+
 
 @app.route("/api/now_playing")
 def api_now_playing():
-    """Get now playing in cinemas"""
     return jsonify({"results": get_now_playing()})
+
 
 @app.route("/api/upcoming")
 def api_upcoming():
-    """Get upcoming movies"""
     return jsonify({"results": get_upcoming()})
+
 
 @app.route("/api/search")
 def api_search():
-    """Search for movies/shows/people"""
-    q = request.args.get("q", "").strip()[:100]
-    if not q:
+    query = request.args.get("q", "").strip()[:100]
+
+    if not query:
         return jsonify({"results": []})
-    return jsonify({"results": search_multi(q)})
 
-@app.route("/api/movie/<int:mid>")
-def api_movie(mid):
-    """Get movie details"""
-    return jsonify(get_movie_details(mid, "movie"))
+    return jsonify({"results": search_multi(query)})
 
-@app.route("/api/tv/<int:tid>")
-def api_tv(tid):
-    """Get TV show details"""
-    return jsonify(get_movie_details(tid, "tv"))
 
-@app.route("/api/tv/<int:tid>/season/<int:s>")
-def api_tv_season(tid, s):
-    """Get TV season details"""
-    return jsonify(get_season_details(tid, s))
+@app.route("/api/movie/<int:movie_id>")
+def api_movie(movie_id):
+    return jsonify(get_movie_details(movie_id, "movie"))
 
-@app.route("/api/person/<int:pid>")
-def api_person(pid):
-    """Get person details"""
-    return jsonify(get_person_details(pid))
+
+@app.route("/api/tv/<int:tv_id>")
+def api_tv(tv_id):
+    return jsonify(get_movie_details(tv_id, "tv"))
+
+
+@app.route("/api/tv/<int:tv_id>/season/<int:season_number>")
+def api_tv_season(tv_id, season_number):
+    return jsonify(get_season_details(tv_id, season_number))
+
+
+@app.route("/api/person/<int:person_id>")
+def api_person(person_id):
+    return jsonify(get_person_details(person_id))
+
 
 @app.route("/api/person/search")
 def api_person_search():
-    """Search for people"""
-    q = request.args.get("q", "").strip()[:100]
-    if not q:
+    query = request.args.get("q", "").strip()[:100]
+
+    if not query:
         return jsonify({"results": []})
-    return jsonify({"results": search_person(q)})
 
-@app.route("/api/genres/<mt>")
-def api_genres(mt):
-    """Get all genres"""
-    if mt not in ("movie", "tv"):
-        return jsonify({"error": "invalid"}), 400
-    return jsonify({"genres": get_genres(mt)})
+    return jsonify({"results": search_person(query)})
 
-@app.route("/api/genre/<mt>/<int:gid>")
-def api_genre(mt, gid):
-    """Get items by genre"""
-    if mt not in ("movie", "tv"):
-        return jsonify({"error": "invalid"}), 400
-    return jsonify({"results": get_by_genre(gid, mt)})
+
+@app.route("/api/genres/<media_type>")
+def api_genres(media_type):
+    if media_type not in ("movie", "tv"):
+        return jsonify({"error": "invalid type"}), 400
+
+    return jsonify({"genres": get_genres(media_type)})
+
+
+@app.route("/api/genre/<media_type>/<int:genre_id>")
+def api_genre(media_type, genre_id):
+    if media_type not in ("movie", "tv"):
+        return jsonify({"error": "invalid type"}), 400
+
+    return jsonify({
+        "results": get_by_genre(
+            genre_id,
+            media_type
+        )
+    })
+
 
 @app.route("/api/discover")
 def api_discover():
-    """Advanced discovery with filters"""
     genre = request.args.get("genre")
     year = request.args.get("year")
-    lang = request.args.get("lang")
-    mtype = request.args.get("type", "movie")
-    
-    if mtype not in ("movie", "tv"):
-        mtype = "movie"
-    
-    return jsonify({"results": discover_advanced(mtype, genre, year, lang)})
+    language = request.args.get("lang")
+    media_type = request.args.get("type", "movie")
+    sort = request.args.get("sort", "popularity.desc")
 
-@app.route("/api/videos/<mt>/<int:mid>")
-def api_videos(mt, mid):
-    """Get videos (trailers, etc.)"""
-    if mt not in ("movie", "tv"):
-        return jsonify({"error": "invalid"}), 400
-    return jsonify({"results": get_movie_videos(mid, mt)})
+    if media_type not in ("movie", "tv"):
+        media_type = "movie"
+
+    return jsonify(
+        {
+            "results": discover_advanced(
+                media_type=media_type,
+                genre=genre,
+                year=year,
+                language=language,
+                sort=sort
+            )
+        }
+    )
+
+
+@app.route("/api/videos/<media_type>/<int:media_id>")
+def api_videos(media_type, media_id):
+    if media_type not in ("movie", "tv"):
+        return jsonify({"error": "invalid type"}), 400
+
+    return jsonify(
+        {
+            "results": get_movie_videos(
+                media_id,
+                media_type
+            )
+        }
+    )
 
 # ════════════════════════════════════════════════════════════
-# ROUTES — API - STREAMING SOURCES ⭐ MAIN
+# STREAMING SOURCE ROUTES
 # ════════════════════════════════════════════════════════════
+
 
 @app.route("/api/sources")
 def api_sources():
-    """List all available streaming sources"""
-    return jsonify({
-        "sources": STREAMING_SOURCES,
-        "count": len(STREAMING_SOURCES),
-        "update": datetime.now().isoformat()
-    })
+    """Return configured source names and information."""
 
-@app.route("/api/stream/<mt>/<int:mid>")
-def api_stream(mt, mid):
-    """
-    🎬 GET STREAMING SOURCES FOR MOVIE/SHOW
-    
-    Returns all working sources with direct playable URLs
-    
-    Query params:
-    - s: season (for TV)
-    - e: episode (for TV)
-    - title: movie/show title (for search sources)
-    """
-    if mt not in ("movie", "tv"):
+    return jsonify(
+        {
+            "sources": STREAMING_SOURCES,
+            "count": len(STREAMING_SOURCES),
+            "update": datetime.now().isoformat()
+        }
+    )
+
+
+@app.route("/api/stream/<media_type>/<int:media_id>")
+def api_stream(media_type, media_id):
+    """Return formatted streaming-source URLs."""
+
+    if media_type not in ("movie", "tv"):
         return jsonify({"error": "invalid type"}), 400
-    
+
     season = request.args.get("s")
     episode = request.args.get("e")
-    title = request.args.get("title", "")
-    
-    # Get all sources
-    result = get_all_sources(mid, mt, title, season, episode)
-    
+    title = request.args.get("title", "").strip()[:300]
+
+    result = get_all_sources(
+        media_id=media_id,
+        media_type=media_type,
+        title=title,
+        season=season,
+        episode=episode
+    )
+
     return jsonify(result)
 
-@app.route("/api/play/<mt>/<int:mid>")
-def api_play(mt, mid):
+
+@app.route("/api/play/<media_type>/<int:media_id>")
+def api_play(media_type, media_id):
     """
-    Direct playback endpoint
-    Redirects to the best available source
+    Redirect to the first configured external source.
+    Prefer a licensed playback integration for production use.
     """
-    if mt not in ("movie", "tv"):
-        return jsonify({"error": "invalid"}), 400
-    
+
+    if media_type not in ("movie", "tv"):
+        return jsonify({"error": "invalid type"}), 400
+
     season = request.args.get("s", "1")
     episode = request.args.get("e", "1")
-    
-    # Get details first
-    details = get_movie_details(mid, mt)
-    title = details.get("title") or details.get("name") or ""
-    
-    # Get sources
-    sources = get_streaming_sources(mid, mt, title, season, episode)
-    
+
+    details = get_movie_details(media_id, media_type)
+
+    title = (
+        details.get("title")
+        or details.get("name")
+        or ""
+    )
+
+    sources = get_streaming_sources(
+        media_id=media_id,
+        media_type=media_type,
+        title=title,
+        season=season,
+        episode=episode
+    )
+
     if not sources:
         return jsonify({"error": "no sources found"}), 404
-    
-    # Redirect to first working source
-    best = sources[0]
-    return redirect(best["url"])
+
+    return redirect(sources[0]["url"])
 
 # ════════════════════════════════════════════════════════════
-# ROUTES — TMDB PROXY (for direct API access)
+# TMDB PROXY
 # ════════════════════════════════════════════════════════════
+
 
 @app.route("/api/3/<path:subpath>")
 def tmdb_proxy(subpath):
-    """Proxy TMDB API requests"""
+    """Proxy TMDB API requests without exposing the key to users."""
+
     if not TMDB_API_KEY:
-        return jsonify({"error": "no api key"}), 500
-    
+        return jsonify({"error": "TMDB_API_KEY missing"}), 500
+
     params = dict(request.args)
     params["api_key"] = TMDB_API_KEY
+
     if "language" not in params:
         params["language"] = TMDB_LANG
-    
-    qs = urllib.parse.urlencode(params)
-    url = f"{TMDB_BASE}/{subpath}?{qs}"
-    
+
+    query_string = urllib.parse.urlencode(params)
+    url = f"{TMDB_BASE}/{subpath}?{query_string}"
+
     try:
         req = urllib.request.Request(
             url,
-            headers={"User-Agent": "ONYX/18.0"}
+            headers={
+                "User-Agent": "ONYX-CINEMA/18.0"
+            }
         )
-        with urllib.request.urlopen(req, timeout=25) as r:
-            data = json.loads(r.read().decode("utf-8"))
+
+        with urllib.request.urlopen(req, timeout=25) as response:
+            data = json.loads(response.read().decode("utf-8"))
             return jsonify(data)
-    except urllib.error.HTTPError as e:
-        return jsonify({"error": f"TMDB HTTP {e.code}"}), e.code
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+
+    except urllib.error.HTTPError as error:
+        return jsonify(
+            {
+                "error": f"TMDB HTTP {error.code}"
+            }
+        ), error.code
+
+    except Exception as error:
+        return jsonify(
+            {
+                "error": str(error)
+            }
+        ), 500
 
 # ════════════════════════════════════════════════════════════
-# ROUTES — IMAGE PROXY
+# TMDB IMAGE PROXY
 # ════════════════════════════════════════════════════════════
+
 
 @app.route("/img/t/p/<size>/<path:filename>")
 def img_proxy(size, filename):
-    """Proxy TMDB images with caching"""
+    """Proxy TMDB image files."""
+
+    allowed_sizes = {
+        "w92",
+        "w154",
+        "w185",
+        "w342",
+        "w500",
+        "w780",
+        "original"
+    }
+
+    if size not in allowed_sizes:
+        return Response(b"", status=400)
+
     url = f"{TMDB_IMG}/{size}/{filename}"
-    
+
     try:
         req = urllib.request.Request(
             url,
-            headers={"User-Agent": "ONYX/18.0"}
+            headers={
+                "User-Agent": "ONYX-CINEMA/18.0"
+            }
         )
-        with urllib.request.urlopen(req, timeout=15) as r:
-            data = r.read()
-            content_type = r.headers.get("Content-Type", "image/jpeg")
-            
-            return Response(data, status=200, mimetype=content_type, headers={
-                "Cache-Control": "public, max-age=86400",
-            })
-    except Exception as e:
-        print(f"[IMG] Error: {e}")
+
+        with urllib.request.urlopen(req, timeout=15) as response:
+            data = response.read()
+            content_type = response.headers.get(
+                "Content-Type",
+                "image/jpeg"
+            )
+
+            return Response(
+                data,
+                status=200,
+                mimetype=content_type,
+                headers={
+                    "Cache-Control": "public, max-age=86400"
+                }
+            )
+
+    except Exception as error:
+        print(f"[IMG] Error: {error}")
         return Response(b"", status=404)
 
 # ════════════════════════════════════════════════════════════
-# ROUTES — HEALTH & STATUS
+# HEALTH CHECK
 # ════════════════════════════════════════════════════════════
+
 
 @app.route("/health")
 def health():
-    """Health check endpoint"""
+    """Application status endpoint."""
+
     cache_clear_old()
-    
-    return jsonify({
-        "status": "ok",
-        "service": "ONYX CINEMA v18.0",
-        "tmdb": "✅" if TMDB_API_KEY else "❌",
-        "sources": len(STREAMING_SOURCES),
-        "cache_size": len(_cache),
-        "time": datetime.now().isoformat(),
-        "version": "18.0"
-    })
+
+    return jsonify(
+        {
+            "status": "ok",
+            "service": "ONYX CINEMA v18.0",
+            "tmdb": "connected" if TMDB_API_KEY else "missing",
+            "sources": len(STREAMING_SOURCES),
+            "cache_size": len(_cache),
+            "time": datetime.now().isoformat(),
+            "version": "18.0"
+        }
+    )
 
 # ════════════════════════════════════════════════════════════
 # MAIN
 # ════════════════════════════════════════════════════════════
 
+
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 5000))
-    
-    print(f"""
+    print(
+        f"""
 ╔══════════════════════════════════════════════════════════════╗
 ║ ONYX CINEMA v18.0 - Streaming Platform                       ║
-║ 🎬 Movies & TV Shows - All Sources Loaded ✅                ║
-║────────────────────────────────────────────────────────────║
-║ TMDB API: {'✅ Connected' if TMDB_API_KEY else '❌ Missing'}                          ║
-║ Streaming Sources: {len(STREAMING_SOURCES)}                                           ║
-║ Server Port: {port}                                              ║
-║────────────────────────────────────────────────────────────║
-║ Ready at: http://localhost:{port}                              ║
+║──────────────────────────────────────────────────────────────║
+║ TMDB API: {"✅ Connected" if TMDB_API_KEY else "❌ Missing"}                                     
+║ Streaming Sources: {len(STREAMING_SOURCES)}                                        
+║ Server Port: {PORT}                                                 
+║──────────────────────────────────────────────────────────────║
+║ Ready at: http://localhost:{PORT}                            
 ╚══════════════════════════════════════════════════════════════╝
-""")
-    
+"""
+    )
+
     app.run(
         host="0.0.0.0",
-        port=port,
-        debug=False,
+        port=PORT,
+        debug=FLASK_DEBUG,
         threaded=True
     )
