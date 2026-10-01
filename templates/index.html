@@ -11,33 +11,24 @@
 <style>
 :root{
   --bg:#08090f;--bg2:#10111a;--bg3:#181924;
-  --oxblood:#6b1f2a;--ox-glow:#a32e3e;
-  --teal:#00c8c8;--teal-dim:#006f6f;
+  --oxblood:#6b1f2a;--teal:#00c8c8;--teal-dim:#006f6f;
   --parch:#e8e0d4;--parch-dim:#9a9187;
   --line:rgba(232,224,212,.07);--line2:rgba(232,224,212,.14);
-  --gold:#c8a84b;--gold-dim:#7a6530;
-  --ease:cubic-bezier(.16,1,.3,1);
-  --r:10px;
-  --font-d:'Cinzel',serif;
-  --font-u:'Tajawal',sans-serif;
-  --nav-h:70px;
+  --gold:#c8a84b;--ease:cubic-bezier(.16,1,.3,1);--r:10px;
+  --font-d:'Cinzel',serif;--font-u:'Tajawal',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;font-size:16px}
 body{
   background:var(--bg);color:var(--parch);font-family:var(--font-u);
   overflow-x:hidden;-webkit-font-smoothing:antialiased;
-  padding-top:env(safe-area-inset-top,0);
-  padding-bottom:env(safe-area-inset-bottom,0);
 }
 img{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
 button{font-family:var(--font-u);cursor:pointer;border:none;background:none;color:inherit;padding:0}
 ::selection{background:var(--teal);color:var(--bg)}
 ::-webkit-scrollbar{height:6px;width:6px}
-::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
-:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
 
 .grain{
   position:fixed;inset:0;pointer-events:none;z-index:1000;
@@ -48,126 +39,42 @@ button{font-family:var(--font-u);cursor:pointer;border:none;background:none;colo
 /* NAV */
 .nav{
   position:fixed;top:0;inset-inline:0;z-index:500;
-  height:var(--nav-h);display:flex;align-items:center;
-  padding:0 5vw;gap:40px;
-  transition:background .5s var(--ease),box-shadow .5s var(--ease);
+  height:70px;display:flex;align-items:center;
+  padding:0 5vw;gap:40px;background:rgba(8,9,15,.95);
+  backdrop-filter:blur(16px);box-shadow:0 1px 0 var(--line);
 }
-.nav::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(8,9,15,.9) 0%,transparent 100%);
-  pointer-events:none;
-}
-.nav.solid{background:rgba(8,9,15,.95);backdrop-filter:blur(16px);box-shadow:0 1px 0 var(--line)}
-.brand{
-  font-family:var(--font-d);font-size:22px;letter-spacing:.12em;
-  color:var(--parch);position:relative;z-index:1;flex-shrink:0;
-}
+.brand{font-family:var(--font-d);font-size:22px;letter-spacing:.12em;color:var(--parch)}
 .brand em{color:var(--teal);font-style:normal}
-.nav-links{display:flex;gap:28px;position:relative;z-index:1}
-.nav-links a{
-  font-size:15px;color:var(--parch-dim);
-  position:relative;padding-bottom:4px;transition:color .2s;
-}
-.nav-links a::after{
-  content:'';position:absolute;bottom:0;right:0;width:0;height:1.5px;
-  background:var(--teal);transition:width .35s var(--ease);
-}
-.nav-links a:hover,
-.nav-links a.active{color:var(--parch)}
-.nav-links a:hover::after,
-.nav-links a.active::after{width:100%}
-.nav-right{
-  margin-inline-start:auto;display:flex;align-items:center;
-  gap:16px;position:relative;z-index:1;
-}
-.nav-btn{
-  width:36px;height:36px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  color:var(--parch-dim);border:1px solid var(--line);transition:.25s;
-}
-.nav-btn:hover{color:var(--teal);border-color:var(--teal)}
-.nav-btn svg{width:17px;height:17px}
+.nav-links{display:flex;gap:28px}
+.nav-links a{font-size:15px;color:var(--parch-dim);transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--parch)}
+
+.nav-right{margin-inline-start:auto;display:flex;align-items:center;gap:16px;position:relative}
 .avatar-btn{
   width:40px;height:40px;border-radius:10px;
   background:linear-gradient(135deg,var(--oxblood) 0%,#1a0a0d 100%);
-  border:1px solid var(--line2);
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--font-d);font-size:15px;color:var(--gold);
-  position:relative;cursor:pointer;transition:.25s;
-  overflow:hidden;
+  border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-d);font-size:15px;color:var(--gold);cursor:pointer;overflow:hidden;
 }
-.avatar-btn:hover{border-color:var(--gold)}
-.avatar-btn img{display:block;width:100%;height:100%;object-fit:cover}
-.avatar-btn span{display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+.avatar-btn img{width:100%;height:100%;object-fit:cover}
 
+/* USER MENU */
 .user-menu{
   position:absolute;top:calc(100% + 12px);left:0;
   background:var(--bg2);border:1px solid var(--line2);border-radius:12px;
-  min-width:220px;overflow:hidden;
-  opacity:0;pointer-events:none;transform:translateY(-8px);
+  min-width:240px;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(-8px);
   transition:.25s var(--ease);box-shadow:0 20px 40px rgba(0,0,0,.5);z-index:100;
 }
 .user-menu.open{opacity:1;pointer-events:auto;transform:translateY(0)}
-.user-menu .user-info{
-  padding:16px 18px;
-  border-bottom:1px solid var(--line);
-  display:flex;align-items:center;gap:12px;
-}
-.user-menu .user-info img{
-  width:36px;height:36px;border-radius:50%;object-fit:cover;
-  background:var(--bg3);
-}
-.user-menu .user-info .name{font-size:14px;font-weight:700;color:var(--parch)}
-.user-menu .user-info .tag{font-size:11px;color:var(--parch-dim)}
+.user-menu-header{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.user-menu-header img{width:38px;height:38px;border-radius:50%;object-fit:cover;background:var(--bg3)}
+.user-menu-header .info strong{display:block;font-size:14px;color:var(--parch)}
+.user-menu-header .info small{font-size:11px;color:var(--teal)}
 .user-menu a{
   display:flex;align-items:center;gap:10px;padding:12px 18px;
   font-size:14px;color:var(--parch-dim);transition:background .15s,color .15s;
 }
 .user-menu a:hover{background:var(--bg3);color:var(--parch)}
-.user-menu hr{border:none;border-top:1px solid var(--line);margin:4px 0}
-
-/* SEARCH */
-.search-overlay{
-  position:fixed;inset:0;z-index:600;
-  background:rgba(8,9,15,.97);backdrop-filter:blur(8px);
-  display:flex;flex-direction:column;align-items:center;
-  padding:12vh 6vw 6vh;
-  opacity:0;pointer-events:none;transform:translateY(-20px);
-  transition:opacity .3s var(--ease),transform .3s var(--ease);
-}
-.search-overlay.open{opacity:1;pointer-events:auto;transform:translateY(0)}
-.search-row{
-  width:min(780px,92vw);display:flex;align-items:center;gap:14px;
-  border-bottom:1px solid var(--teal-dim);padding-bottom:18px;margin-bottom:44px;
-}
-.search-row svg{width:24px;height:24px;color:var(--teal);flex-shrink:0}
-.search-row input{
-  flex:1;background:none;border:none;outline:none;color:var(--parch);
-  font-family:var(--font-u);font-size:clamp(22px,4vw,38px);
-}
-.search-row input::placeholder{color:var(--parch-dim)}
-.search-close{
-  font-size:13px;color:var(--parch-dim);border:1px solid var(--line);
-  border-radius:20px;padding:8px 18px;transition:.2s;flex-shrink:0;
-}
-.search-close:hover{border-color:var(--teal);color:var(--teal)}
-.search-grid{
-  width:min(1140px,94vw);
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-  gap:14px;max-height:62vh;overflow-y:auto;
-}
-.search-empty{color:var(--parch-dim);font-size:15px;text-align:center;padding:40px}
-
-/* TOAST */
-.toast{
-  position:fixed;bottom:100px;left:50%;
-  transform:translateX(-50%) translateY(20px);z-index:3000;
-  background:var(--bg3);border:1px solid var(--line2);border-radius:8px;
-  padding:12px 22px;font-size:14px;color:var(--parch);
-  opacity:0;pointer-events:none;
-  transition:opacity .3s,transform .3s var(--ease);white-space:nowrap;
-}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* HERO */
 .hero{
@@ -176,203 +83,43 @@ button{font-family:var(--font-u);cursor:pointer;border:none;background:none;colo
 }
 .hero-bg{
   position:absolute;inset:0;background-size:cover;
-  background-position:center center;transition:opacity .6s;
-  background-color: var(--bg2);
+  background-position:center center;background-color:var(--bg2);
 }
 .hero-gradient{
   position:absolute;inset:0;
-  background:
-    linear-gradient(0deg,var(--bg) 0%,rgba(8,9,15,.05) 38%),
-    linear-gradient(90deg,rgba(8,9,15,.88) 0%,rgba(8,9,15,.3) 46%,rgba(8,9,15,.04) 100%),
-    linear-gradient(180deg,rgba(8,9,15,.55) 0%,transparent 30%);
+  background:linear-gradient(0deg,var(--bg) 0%,rgba(8,9,15,.05) 38%,rgba(8,9,15,.88) 100%);
 }
 .hero-content{
   position:relative;z-index:2;padding:0 5vw 9vh;max-width:640px;
-  opacity:0;transform:translateY(32px);
-  animation:fadeUp 1s var(--ease) .1s forwards;
 }
-@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
-
-.hero-label{
-  display:inline-flex;align-items:center;gap:8px;
-  font-size:12px;letter-spacing:.08em;color:var(--teal);
-  border:1px solid var(--teal-dim);border-radius:20px;
-  padding:5px 14px;margin-bottom:18px;
-}
-.hero-label::before{content:'●';font-size:7px;animation:pulse-dot 2s infinite}
-@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
-
 .hero-title{
   font-family:var(--font-d);font-size:clamp(36px,6.5vw,82px);
-  letter-spacing:.04em;line-height:1.02;color:var(--parch);
-  margin-bottom:16px;
+  color:var(--parch);margin-bottom:16px;line-height:1.02;
 }
-.hero-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
-.pill{
-  border:1px solid var(--line2);border-radius:5px;
-  padding:3px 10px;font-size:13px;color:var(--parch-dim);
-}
-.pill.gold{border-color:var(--gold-dim);color:var(--gold)}
-.pill.teal{border-color:var(--teal-dim);color:var(--teal)}
-.hero-genres{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-.genre-chip{
-  background:rgba(0,200,200,.1);color:var(--teal);
-  border:1px solid rgba(0,200,200,.25);border-radius:20px;
-  padding:4px 13px;font-size:12px;
-}
-.hero-desc{
-  font-size:15px;line-height:1.8;color:var(--parch-dim);
-  max-width:58ch;margin-bottom:30px;
-}
-.hero-actions{display:flex;gap:14px;flex-wrap:wrap}
+.hero-desc{font-size:15px;line-height:1.8;color:var(--parch-dim);margin-bottom:30px}
 
 .btn{
   display:inline-flex;align-items:center;gap:9px;
   padding:13px 28px;border-radius:8px;font-size:15px;font-weight:700;
-  transition:transform .25s var(--ease),box-shadow .25s var(--ease),background .2s;
-  white-space:nowrap;cursor:pointer;
+  cursor:pointer;background:var(--teal);color:var(--bg);transition:.2s;
 }
-.btn svg{width:17px;height:17px;flex-shrink:0}
-.btn-primary{background:var(--teal);color:var(--bg)}
-.btn-primary:hover{background:#00e8e8;transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,200,200,.3)}
-.btn-ghost{background:rgba(232,224,212,.1);color:var(--parch);border:1px solid var(--line2)}
-.btn-ghost:hover{background:rgba(232,224,212,.18);transform:translateY(-2px)}
-.btn-icon{
-  width:46px;height:46px;padding:0;border-radius:50%;
-  background:rgba(232,224,212,.1);border:1px solid var(--line2);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;
-}
-.btn-icon:hover{border-color:var(--teal);color:var(--teal)}
-.btn-icon svg{width:20px;height:20px}
+.btn:hover{background:#00e8e8}
 
-.score-ring{
-  position:absolute;bottom:9vh;left:5vw;z-index:2;
-  display:flex;align-items:center;gap:16px;
-}
-.ring-svg{width:64px;height:64px}
-.ring-bg{fill:none;stroke:var(--line2);stroke-width:3}
-.ring-fill{
-  fill:none;stroke:var(--teal);stroke-width:3;stroke-linecap:round;
-  stroke-dasharray:170;stroke-dashoffset:170;
-  transform:rotate(-90deg);transform-origin:32px 32px;
-  transition:stroke-dashoffset 1.2s var(--ease);
-}
-.ring-text{
-  text-anchor:middle;dominant-baseline:central;
-  fill:var(--parch);font-size:14px;font-family:var(--font-u);
-}
-.ring-label{font-size:11px;color:var(--parch-dim);line-height:1.5}
-.ring-label b{display:block;color:var(--parch);font-size:14px}
-
-.hero-dots{
-  position:absolute;bottom:9vh;right:5vw;z-index:2;
-  display:flex;gap:8px;align-items:center;
-}
-.hero-dot{
-  width:6px;height:6px;border-radius:3px;background:var(--parch-dim);
-  transition:width .3s var(--ease),background .3s;cursor:pointer;border:none;padding:0;
-}
-.hero-dot.active{width:22px;background:var(--teal)}
-
-/* CAT BAR */
-.cat-bar{
-  position:relative;z-index:2;padding:0 5vw;margin-top:-2vh;margin-bottom:36px;
-  display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;
-}
-.cat-bar::-webkit-scrollbar{height:0}
-.cat-tab{
-  flex-shrink:0;padding:9px 20px;border-radius:24px;font-size:14px;
-  color:var(--parch-dim);border:1px solid var(--line);
-  transition:.25s;cursor:pointer;white-space:nowrap;font-family:var(--font-u);
-}
-.cat-tab:hover{border-color:var(--line2);color:var(--parch)}
-.cat-tab.active{background:var(--teal);color:var(--bg);border-color:transparent;font-weight:700}
-
-/* ROWS */
-.rows{position:relative;z-index:2;padding-bottom:80px}
-.row{margin-bottom:52px}
-.row-head{
-  display:flex;align-items:baseline;justify-content:space-between;
-  padding:0 5vw;margin-bottom:18px;
-}
-.row-title{
-  font-family:var(--font-d);font-size:22px;letter-spacing:.06em;color:var(--parch);
-}
-.rail{
-  display:flex;gap:14px;overflow-x:auto;padding:8px 5vw 28px;
-  scroll-snap-type:x proximity;
-  -ms-overflow-style:none;scrollbar-width:none;
-}
-.rail::-webkit-scrollbar{display:none}
-
+.rows{position:relative;z-index:2;padding:40px 5vw 80px}
+.row-title{font-family:var(--font-d);font-size:22px;color:var(--parch);margin-bottom:18px}
+.rail{display:flex;gap:14px;overflow-x:auto;padding-bottom:20px}
 .card{
   flex:0 0 auto;width:200px;aspect-ratio:2/3;border-radius:var(--r);overflow:hidden;
-  background:var(--bg2);scroll-snap-align:start;cursor:pointer;
-  border:1px solid var(--line);position:relative;
-  transition:transform .45s var(--ease),box-shadow .45s var(--ease),border-color .3s;
+  background:var(--bg2);cursor:pointer;border:1px solid var(--line);position:relative;
 }
-.card:hover{
-  transform:scale(1.08) translateY(-6px);z-index:10;
-  box-shadow:0 24px 48px -10px rgba(0,0,0,.75),0 0 0 1px var(--teal-dim);
-  border-color:transparent;
-}
-.card img{
-  width:100%;height:100%;object-fit:cover;
-  transition:transform .6s var(--ease),filter .5s;
-}
-.card:hover img{transform:scale(1.06);filter:brightness(.45)}
-.card-overlay{
-  position:absolute;inset:0;
-  background:linear-gradient(0deg,rgba(8,9,15,.98) 0%,rgba(8,9,15,.3) 40%,transparent 65%);
-  opacity:0;transition:opacity .35s;
-}
-.card:hover .card-overlay{opacity:1}
-.card-body{
-  position:absolute;inset-inline:0;bottom:0;padding:14px;
-  transform:translateY(8px);opacity:0;transition:.35s var(--ease);
-}
-.card:hover .card-body{transform:translateY(0);opacity:1}
-.card-title{
-  font-family:var(--font-d);font-size:14px;letter-spacing:.04em;
-  color:var(--parch);margin-bottom:5px;line-height:1.3;
-}
-.card-meta{font-size:11px;color:var(--teal);display:flex;gap:7px}
-.card-rating{
-  position:absolute;top:9px;left:9px;background:rgba(0,0,0,.6);
-  border-radius:5px;padding:3px 7px;font-size:11px;color:var(--gold);
-}
-.card-badge{
-  position:absolute;top:9px;right:9px;background:var(--oxblood);
-  border-radius:5px;padding:3px 8px;font-size:10px;
-  color:var(--parch);font-weight:700;
-}
-.card-watch-btn{
-  position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%) scale(.7);
-  width:44px;height:44px;border-radius:50%;
-  background:rgba(0,200,200,.85);
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;transition:.3s var(--ease);border:none;cursor:pointer;
-}
-.card:hover .card-watch-btn{opacity:1;transform:translate(-50%,-50%) scale(1)}
-.card-watch-btn svg{width:18px;height:18px;fill:var(--bg)}
-
-.skel{
-  background:linear-gradient(100deg,var(--bg2) 28%,var(--bg3) 44%,var(--bg2) 60%);
-  background-size:280% 100%;animation:shimmer 1.7s infinite;
-  border:none;pointer-events:none;
-}
-@keyframes shimmer{from{background-position:160% 0}to{background-position:-60% 0}}
-
-.rail-progress{height:2px;margin:0 5vw;background:var(--line)}
-.rail-progress-fill{
-  height:100%;background:var(--teal);width:0%;border-radius:1px;transition:width .2s;
-}
+.card img{width:100%;height:100%;object-fit:cover}
+.card-body{position:absolute;inset-inline:0;bottom:0;padding:14px;background:linear-gradient(0deg,#08090f,transparent)}
+.card-title{font-family:var(--font-d);font-size:14px;color:var(--parch)}
 
 /* MODAL */
 .modal-backdrop{
   position:fixed;inset:0;z-index:700;
-  background:rgba(4,5,10,.8);backdrop-filter:blur(4px);
+  background:rgba(4,5,10,.85);backdrop-filter:blur(6px);
   display:flex;align-items:center;justify-content:center;padding:3vh 3vw;
   opacity:0;pointer-events:none;transition:opacity .3s;
 }
@@ -380,420 +127,275 @@ button{font-family:var(--font-u);cursor:pointer;border:none;background:none;colo
 .modal{
   width:min(920px,95vw);max-height:92vh;overflow-y:auto;
   border-radius:16px;background:var(--bg2);border:1px solid var(--line2);
-  box-shadow:0 40px 80px -20px rgba(0,0,0,.9);
-  transform:scale(.92) translateY(22px);
-  transition:transform .4s var(--ease);
+  padding:30px;position:relative;
 }
-.modal-backdrop.open .modal{transform:scale(1) translateY(0)}
-.modal-hero{
-  position:relative;height:360px;overflow:hidden;border-radius:16px 16px 0 0;
+.modal-close{
+  position:absolute;top:20px;left:20px;background:none;border:none;
+  color:var(--parch);font-size:20px;cursor:pointer;
 }
-.modal-hero img{width:100%;height:100%;object-fit:cover}
-.modal-hero::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(0deg,var(--bg2) 0%,rgba(16,17,26,.3) 55%,transparent 100%);
-}
-.modal-close-btn{
-  position:absolute;top:16px;left:16px;z-index:2;
-  width:36px;height:36px;border-radius:50%;
-  background:rgba(8,9,15,.7);border:1px solid var(--line);
-  display:flex;align-items:center;justify-content:center;
-  color:var(--parch-dim);transition:.2s;
-}
-.modal-close-btn:hover{color:var(--parch);border-color:var(--line2)}
-.modal-close-btn svg{width:15px;height:15px}
-.modal-title{
-  position:absolute;bottom:22px;right:28px;left:28px;z-index:2;
-}
-.modal-title h2{
-  font-family:var(--font-d);font-size:clamp(22px,4vw,40px);
-  letter-spacing:.05em;color:var(--parch);margin-bottom:6px;
-}
-.modal-title .subtitle{font-size:14px;color:var(--parch-dim)}
-.modal-body{padding:10px 28px 32px}
-.modal-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:26px}
-.modal-grid{display:grid;grid-template-columns:1.7fr 1fr;gap:36px}
-.modal-desc{font-size:14px;line-height:1.9;color:var(--parch-dim)}
-.modal-genres{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
-.modal-genres span{
-  background:rgba(0,200,200,.08);color:var(--teal);
-  border:1px solid rgba(0,200,200,.2);border-radius:20px;
-  padding:4px 14px;font-size:12px;
-}
-.modal-facts{font-size:14px;color:var(--parch-dim)}
-.modal-facts .fact{margin-bottom:12px}
-.modal-facts .fact b{
-  display:block;color:var(--parch);font-size:12px;
-  font-weight:700;margin-bottom:2px;letter-spacing:.05em;
+.modal h2{font-family:var(--font-d);font-size:28px;color:var(--parch);margin-bottom:10px}
+.modal p{color:var(--parch-dim);font-size:14px;line-height:1.7;margin-bottom:20px}
+
+.seasons-box{margin-top:20px;border-top:1px solid var(--line);padding-top:20px}
+.select-group{display:flex;gap:15px;margin-bottom:15px}
+select{
+  background:var(--bg3);color:var(--parch);border:1px solid var(--line2);
+  padding:10px 15px;border-radius:8px;font-family:var(--font-u);font-size:14px;outline:none;cursor:pointer;
 }
 
-/* FOOTER */
-.footer{
-  border-top:1px solid var(--line);padding:64px 5vw 48px;
-  display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:50px;
+/* PROFILE MODAL */
+.profile-modal{
+  width:min(450px,90vw);background:var(--bg2);border-radius:16px;padding:30px;
+  border:1px solid var(--line2);text-align:center;position:relative;
 }
-.footer-brand{
-  font-family:var(--font-d);font-size:20px;
-  letter-spacing:.1em;color:var(--parch);margin-bottom:14px;
+.profile-avatar-large{
+  width:90px;height:90px;border-radius:50%;object-fit:cover;margin:0 auto 15px;
+  border:2px solid var(--teal);background:var(--bg3);
 }
-.footer-brand em{color:var(--teal);font-style:normal}
-.footer-tagline{
-  font-size:13px;color:var(--parch-dim);line-height:1.7;
-  max-width:26ch;margin-bottom:22px;
-}
-.footer-bottom{
-  border-top:1px solid var(--line);padding:22px 5vw;
-  font-size:12px;color:var(--parch-dim);
-  display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
-}
-
-@media(max-width:900px){
-  .footer{grid-template-columns:1fr 1fr;gap:36px}
-  .modal-grid{grid-template-columns:1fr}
-  .nav-links{display:none}
+.profile-modal input{
+  width:100%;background:var(--bg3);border:1px solid var(--line2);color:var(--parch);
+  padding:12px;border-radius:8px;margin-bottom:15px;text-align:center;font-size:15px;outline:none;
 }
 </style>
 </head>
 <body>
 <div class="grain"></div>
-<div class="toast" id="toast"></div>
 
 <!-- NAV -->
-<nav class="nav" id="nav">
+<nav class="nav">
   <div class="brand">TU <em>CENMA</em></div>
-  <div class="nav-links" id="navLinks">
-    <a href="#" class="active" data-tab="home">الرئيسية</a>
-    <a href="#" data-tab="movies">أفلام</a>
-    <a href="#" data-tab="series">مسلسلات</a>
-    <a href="#" data-tab="mylist">قائمتي</a>
+  <div class="nav-links">
+    <a href="#" class="active">الرئيسية</a>
   </div>
   <div class="nav-right">
-    <button class="nav-btn" id="searchToggle" aria-label="بحث">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+    <button class="avatar-btn" id="avatarBtn">
+      <img id="userAvatarImg" src="" alt="" style="display:none;" />
+      <span id="userAvatarText">T</span>
     </button>
-    <div style="position:relative">
-      <button class="avatar-btn" id="avatarBtn">
-        <img id="userAvatarImg" src="" alt="" style="display:none" />
-        <span id="userAvatarText">T</span>
-      </button>
-      <div class="user-menu" id="userMenu">
-        <div class="user-info">
-          <img id="menuAvatar" src="" alt="" />
-          <div>
-            <div class="name" id="menuName">مستخدم</div>
-            <div class="tag" id="menuTag">@local</div>
-          </div>
+    <div class="user-menu" id="userMenu">
+      <div class="user-menu-header">
+        <img id="menuAvatar" src="" alt="">
+        <div class="info">
+          <strong id="menuName">مستخدم زائر</strong>
+          <small id="menuSource">محلي</small>
         </div>
-        <a href="#">الملف الشخصي</a>
-        <a href="#">الإعدادات</a>
-        <hr>
-        <a href="#">تسجيل الخروج</a>
       </div>
+      <a href="#" onclick="openProfileModal()">الملف الشخصي والتحكم</a>
+      <a href="#" onclick="logoutDiscord()">تسجيل الخروج</a>
     </div>
   </div>
 </nav>
 
-<!-- SEARCH -->
-<div class="search-overlay" id="searchOverlay" role="dialog">
-  <div class="search-row">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-    <input id="searchInput" type="text" placeholder="ابحث عن فيلم، مسلسل…" autocomplete="off">
-    <button class="search-close" id="searchClose">إغلاق</button>
-  </div>
-  <div class="search-grid" id="searchGrid"></div>
-  <div class="search-empty" id="searchEmpty" style="display:none">لا توجد نتائج مطابقة</div>
-</div>
-
 <!-- HERO -->
-<header class="hero" id="hero">
-  <div class="hero-bg" id="heroBg"></div>
+<header class="hero">
+  <div class="hero-bg" id="heroBg" style="background-image: url('https://image.tmdb.org/t/p/original/jZIYaISP3GBSrJOPCRpX8cu7Jq2.jpg')"></div>
   <div class="hero-gradient"></div>
-  <div class="hero-content" id="heroContent">
-    <div class="hero-label">مميز على TU CENMA</div>
-    <h1 class="hero-title" id="heroTitle">جار التحميل…</h1>
-    <div class="hero-meta" id="heroMeta"></div>
-    <div class="hero-genres" id="heroGenres"></div>
-    <p class="hero-desc" id="heroDesc"></p>
-    <div class="hero-actions">
-      <button class="btn btn-primary" id="heroPlay">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        مشاهدة الآن (4K)
-      </button>
-      <button class="btn btn-ghost" id="heroInfo">التفاصيل</button>
-    </div>
+  <div class="hero-content">
+    <h1 class="hero-title" id="heroTitle">Reacher</h1>
+    <p class="hero-desc" id="heroDesc">جاك ريتشر محقق عسكري سابق يخوض مغامرات خطيرة.</p>
+    <button class="btn" onclick="openModal(209137, 'tv')">مشاهدة المسلسل (4K)</button>
   </div>
-
-  <div class="score-ring" id="scoreRing" style="opacity:0">
-    <svg class="ring-svg" viewBox="0 0 64 64">
-      <circle class="ring-bg" cx="32" cy="32" r="27"/>
-      <circle class="ring-fill" id="ringFill" cx="32" cy="32" r="27"/>
-      <text class="ring-text" id="ringText" x="32" y="32">—</text>
-    </svg>
-    <div class="ring-label">
-      <b id="ringPct">—</b>
-      تقييم المستخدمين
-    </div>
-  </div>
-
-  <div class="hero-dots" id="heroDots"></div>
 </header>
 
-<!-- CAT BAR -->
-<div class="cat-bar" id="catBar">
-  <button class="cat-tab active" data-filter="all">الكل</button>
-  <button class="cat-tab" data-filter="28">أكشن</button>
-  <button class="cat-tab" data-filter="12">مغامرة</button>
-  <button class="cat-tab" data-filter="16">رسوم متحركة</button>
-  <button class="cat-tab" data-filter="35">كوميديا</button>
-  <button class="cat-tab" data-filter="18">دراما</button>
-  <button class="cat-tab" data-filter="27">رعب</button>
-  <button class="cat-tab" data-filter="878">خيال علمي</button>
-  <button class="cat-tab" data-filter="53">إثارة</button>
-</div>
-
-<!-- MAIN -->
-<main id="main">
-  <div class="rows" id="rows"></div>
+<main class="rows">
+  <div class="row-title">مسلسلات وأفلام مقترحة بدقة 4K</div>
+  <div class="rail" id="rail">
+    <div class="card" onclick="openModal(209137, 'tv')">
+      <img src="https://image.tmdb.org/t/p/w500/jZIYaISP3GBSrJOPCRpX8cu7Jq2.jpg" alt="Reacher">
+      <div class="card-body"><div class="card-title">Reacher (مسلسل)</div></div>
+    </div>
+    <div class="card" onclick="openModal(872585, 'movie')">
+      <img src="https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg" alt="Oppenheimer">
+      <div class="card-body"><div class="card-title">Oppenheimer (فيلم)</div></div>
+    </div>
+  </div>
 </main>
 
-<!-- MODAL -->
+<!-- MODAL WATCH -->
 <div class="modal-backdrop" id="modalBackdrop">
-  <div class="modal" id="modal" role="dialog">
-    <div class="modal-hero">
-      <button class="modal-close-btn" id="modalClose">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
-      </button>
-      <img id="modalHeroImg" src="" alt="">
-      <div class="modal-title">
-        <h2 id="modalH2"></h2>
-        <div class="subtitle" id="modalSubtitle"></div>
-      </div>
-    </div>
-    <div class="modal-body">
-      <div class="modal-actions">
-        <button class="btn btn-primary" id="modalPlay">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-          مشاهدة الآن (4K)
-        </button>
-      </div>
-      <div class="modal-grid">
+  <div class="modal" id="modalContent">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 id="mTitle">عنوان العرض</h2>
+    <p id="mDesc">الوصف هنا...</p>
+    
+    <div id="seasonsContainer" class="seasons-box" style="display:none;">
+      <div class="select-group">
         <div>
-          <p class="modal-desc" id="modalDesc"></p>
-          <div class="modal-genres" id="modalGenresList"></div>
+          <label style="display:block;font-size:12px;color:var(--parch-dim);margin-bottom:5px;">الموسم</label>
+          <select id="seasonSelect" onchange="updateEpisodes()"></select>
         </div>
-        <div class="modal-facts" id="modalFacts"></div>
+        <div>
+          <label style="display:block;font-size:12px;color:var(--parch-dim);margin-bottom:5px;">الحلقة</label>
+          <select id="episodeSelect"></select>
+        </div>
       </div>
     </div>
+
+    <button class="btn" style="margin-top:15px;" onclick="playSelected()">تشغيل مباشر (4K)</button>
   </div>
 </div>
 
-<!-- FOOTER -->
-<footer class="footer">
-  <div>
-    <div class="footer-brand">TU <em>CENMA</em></div>
-    <p class="footer-tagline">سينما بلا حدود — أعلى دقة تشغيل حقيقية</p>
+<!-- PROFILE MODAL -->
+<div class="modal-backdrop" id="profileModalBackdrop">
+  <div class="profile-modal">
+    <button class="modal-close" onclick="closeProfileModal()">✕</button>
+    <img id="profileModalAvatar" class="profile-avatar-large" src="" alt="">
+    <h3 style="font-family:var(--font-d);color:var(--parch);margin-bottom:15px;">إعدادات الحساب</h3>
+    <label style="display:block;text-align:right;font-size:12px;color:var(--parch-dim);margin-bottom:5px;">اسم المستخدم</label>
+    <input type="text" id="profileNameInput" placeholder="أدخل اسمك الجديد">
+    <button class="btn" style="width:100%;justify-content:center;" onclick="saveProfile()">حفظ التعديلات</button>
   </div>
-</footer>
+</div>
 
 <script>
-const CFG = {
-  apiKey: 'a6288fc42fb7de2837e2756a101397e5',
-  lang: 'ar-SA',
-  imgBase: 'https://image.tmdb.org/t/p/',
-};
+const DISCORD_CLIENT_ID = '1554929072885473330';
+const apiKey = 'a6288fc42fb7de2837e2756a101397e5';
+let currentId = null;
+let currentType = null;
+let tvData = null;
 
-const TMDB = {
-  trending: (type='movie') => `https://api.themoviedb.org/3/trending/${type}/week?api_key=${CFG.apiKey}&language=${CFG.lang}`,
-  popular: (type='movie') => `https://api.themoviedb.org/3/${type}/popular?api_key=${CFG.apiKey}&language=${CFG.lang}`,
-  search: (q) => `https://api.themoviedb.org/3/search/multi?api_key=${CFG.apiKey}&language=${CFG.lang}&query=${encodeURIComponent(q)}`,
-  img: (path, size='w500') => path ? CFG.imgBase + size + path : '',
-  backdrop: (path, size='w1280') => path ? CFG.imgBase + size + path : '',
-};
+// تفعيل قائمة البروفايل
+const avatarBtn = document.getElementById('avatarBtn');
+const userMenu = document.getElementById('userMenu');
+avatarBtn.addEventListener('click', e => { e.stopPropagation(); userMenu.classList.toggle('open'); });
+document.addEventListener('click', () => userMenu.classList.remove('open'));
 
-const GENRE_MAP = {
-  28:'أكشن',12:'مغامرة',16:'رسوم متحركة',35:'كوميديا',18:'دراما',27:'رعب',878:'خيال علمي',53:'إثارة'
-};
-
-async function fetchJSON(url){
-  const res = await fetch(url);
-  if(!res.ok) throw new Error(res.status);
-  return res.json();
-}
-
-function showToast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2600);
-}
-
-// دالة التشغيل باستخدام مصدر VidLink 4K القوي
-function goPlayer(id, type='movie', season=1, episode=1){
-  let url = '';
-  if(type === 'tv' || type === 'series'){
-    url = `https://vidlink.pro/tv/${id}/${season}/${episode}?quality=4k&sub=ar`;
-  } else {
-    url = `https://vidlink.pro/movie/${id}?quality=4k&sub=ar`;
+// تهيئة ديسكورد SDK وجلب صورة الحساب والاسم الحقيقي تلقائياً
+async function initDiscordUser() {
+  if (typeof window.DiscordSDK !== 'undefined') {
+    try {
+      const discordSdk = new window.DiscordSDK.DiscordSDK(DISCORD_CLIENT_ID);
+      await discordSdk.ready();
+      const { code } = await discordSdk.commands.authorize({
+        client_id: DISCORD_CLIENT_ID, response_type: 'code', state: '', prompt: 'none', scope: ['identify']
+      });
+      const auth = await discordSdk.commands.authenticate({ access_token: code });
+      if (auth && auth.user) {
+        const u = auth.user;
+        const avatarUrl = u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=128` : null;
+        const userData = { name: u.global_name || u.username, avatar: avatarUrl, source: 'متصل بديسكورد' };
+        localStorage.setItem('tucentma_user', JSON.stringify(userData));
+        applyUser(userData);
+        return;
+      }
+    } catch (e) { console.log("Discord SDK mode fallback"); }
   }
-  // فتح المشغل في نافذة جديدة أو توجيه الصفحة
+  
+  // الوضع المحلي أو المخزن مسبقاً
+  const saved = localStorage.getItem('tucentma_user');
+  if (saved) {
+    applyUser(JSON.parse(saved));
+  } else {
+    applyUser({ name: 'مستخدم زائر', avatar: null, source: 'محلي' });
+  }
+}
+
+function applyUser(user) {
+  const imgNav = document.getElementById('userAvatarImg');
+  const txtNav = document.getElementById('userAvatarText');
+  const menuImg = document.getElementById('menuAvatar');
+  const menuName = document.getElementById('menuName');
+  const menuSource = document.getElementById('menuSource');
+
+  if (user.avatar) {
+    imgNav.src = user.avatar;
+    imgNav.style.display = 'block';
+    txtNav.style.display = 'none';
+    menuImg.src = user.avatar;
+  } else {
+    imgNav.style.display = 'none';
+    txtNav.style.display = 'flex';
+    txtNav.textContent = (user.name || 'U')[0].toUpperCase();
+    menuImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect fill='%236b1f2a' width='40' height='40' rx='9'/%3E%3Ctext x='20' y='27' font-size='18' text-anchor='middle' fill='%23c8a84b' font-family='serif'%3ET%3C/text%3E%3C/svg%3E";
+  }
+  menuName.textContent = user.name;
+  menuSource.textContent = user.source;
+}
+
+function openProfileModal() {
+  const saved = JSON.parse(localStorage.getItem('tucentma_user') || '{}');
+  document.getElementById('profileNameInput').value = saved.name || 'مستخدم';
+  document.getElementById('profileModalAvatar').src = saved.avatar || document.getElementById('menuAvatar').src;
+  document.getElementById('profileModalBackdrop').classList.add('open');
+}
+
+function closeProfileModal() {
+  document.getElementById('profileModalBackdrop').classList.remove('open');
+}
+
+function saveProfile() {
+  const newName = document.getElementById('profileNameInput').value.trim();
+  let saved = JSON.parse(localStorage.getItem('tucentma_user') || '{}');
+  saved.name = newName || 'مستخدم';
+  localStorage.setItem('tucentma_user', JSON.stringify(saved));
+  applyUser(saved);
+  closeProfileModal();
+}
+
+function logoutDiscord() {
+  localStorage.removeItem('tucentma_user');
+  location.reload();
+}
+
+// Modal التشغيل والمسلسلات
+async function openModal(id, type){
+  currentId = id;
+  currentType = type;
+  document.getElementById('modalBackdrop').classList.add('open');
+  
+  const res = await fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${apiKey}&language=ar-SA`);
+  const data = await res.json();
+  
+  document.getElementById('mTitle').textContent = data.title || data.name;
+  document.getElementById('mDesc').textContent = data.overview;
+
+  const sBox = document.getElementById('seasonsContainer');
+  if(type === 'tv'){
+    sBox.style.display = 'block';
+    tvData = data;
+    let sSelect = document.getElementById('seasonSelect');
+    sSelect.innerHTML = '';
+    (data.seasons || []).forEach(s => {
+      if(s.season_number > 0){
+        sSelect.innerHTML += `<option value="${s.season_number}">الموسم ${s.season_number}</option>`;
+      }
+    });
+    updateEpisodes();
+  } else {
+    sBox.style.display = 'none';
+  }
+}
+
+async function updateEpisodes(){
+  const sNum = document.getElementById('seasonSelect').value;
+  const res = await fetch(`https://api.themoviedb.org/3/tv/${currentId}/season/${sNum}?api_key=${apiKey}&language=ar-SA`);
+  const data = await res.json();
+  
+  let eSelect = document.getElementById('episodeSelect');
+  eSelect.innerHTML = '';
+  (data.episodes || []).forEach(e => {
+    eSelect.innerHTML += `<option value="${e.episode_number}">الحلقة ${e.episode_number}: ${e.name}</option>`;
+  });
+}
+
+function closeModal(){
+  document.getElementById('modalBackdrop').classList.remove('open');
+}
+
+function playSelected(){
+  let url = '';
+  if(currentType === 'tv'){
+    const s = document.getElementById('seasonSelect').value;
+    const e = document.getElementById('episodeSelect').value;
+    url = `https://vidlink.pro/tv/${currentId}/${s}/${e}?quality=4k&sub=ar`;
+  } else {
+    url = `https://vidlink.pro/movie/${currentId}?quality=4k&sub=ar`;
+  }
   window.open(url, '_blank');
 }
 
-/* بيانات الهيرو */
-let heroMovies = [], heroIdx = 0, heroTimer;
-
-async function initHero(){
-  try {
-    const data = await fetchJSON(TMDB.trending('movie'));
-    heroMovies = data.results.slice(0, 5);
-    if(heroMovies.length){
-      setHero(heroMovies[0]);
-      buildHeroDots();
-      startHeroTimer();
-    }
-  } catch(e){
-    console.error(e);
-  }
-}
-
-function setHero(m){
-  const bg = TMDB.backdrop(m.backdrop_path) || TMDB.img(m.poster_path);
-  const title = m.title || m.name || '—';
-  const year = m.release_date ? new Date(m.release_date).getFullYear() : '';
-  const score = m.vote_average ? m.vote_average.toFixed(1) : '0';
-  const pct = Math.round(m.vote_average * 10);
-
-  document.getElementById('heroBg').style.backgroundImage = `url(${bg})`;
-  document.getElementById('heroTitle').textContent = title;
-  document.getElementById('heroDesc').textContent = m.overview || '';
-  document.getElementById('heroMeta').innerHTML = `<span class="pill">${year}</span><span class="pill gold">★ ${score}</span><span class="pill teal">فيلم 4K</span>`;
-  
-  document.getElementById('heroPlay').onclick = () => goPlayer(m.id, 'movie');
-  document.getElementById('heroInfo').onclick = () => openModal(m.id, 'movie');
-
-  const ring = document.getElementById('ringFill');
-  const circ = 2 * Math.PI * 27;
-  ring.style.strokeDashoffset = circ * (1 - pct/100);
-  document.getElementById('ringText').textContent = `${pct}%`;
-  document.getElementById('ringPct').textContent = `${pct}%`;
-  document.getElementById('scoreRing').style.opacity = '1';
-}
-
-function buildHeroDots(){
-  const c = document.getElementById('heroDots');
-  c.innerHTML = heroMovies.map((_, i) => `<button class="hero-dot${i===0?' active':''}" data-i="${i}"></button>`).join('');
-  c.querySelectorAll('.hero-dot').forEach(d => {
-    d.addEventListener('click', () => {
-      clearInterval(heroTimer);
-      heroIdx = +d.dataset.i;
-      setHero(heroMovies[heroIdx]);
-      startHeroTimer();
-    });
-  });
-}
-
-function startHeroTimer(){
-  heroTimer = setInterval(() => {
-    heroIdx = (heroIdx + 1) % heroMovies.length;
-    setHero(heroMovies[heroIdx]);
-  }, 6000);
-}
-
-/* جلب صفوف الأفلام والمسلسلات الرئيسية */
-async function loadRows(){
-  const rowsContainer = document.getElementById('rows');
-  
-  try {
-    const trending = await fetchJSON(TMDB.trending('movie'));
-    const popularTv = await fetchJSON(TMDB.popular('tv'));
-
-    rowsContainer.innerHTML = `
-      <div class="row">
-        <div class="row-head"><div class="row-title">الأفلام الرائجة (جودة 4K)</div></div>
-        <div class="rail" id="rail-trending">${trending.results.map(m => cardHTML(m, 'movie')).join('')}</div>
-        <div class="rail-progress"><div class="rail-progress-fill" id="prog-trending"></div></div>
-      </div>
-      <div class="row">
-        <div class="row-head"><div class="row-title">المسلسلات الشهيرة</div></div>
-        <div class="rail" id="rail-tv">${popularTv.results.map(m => cardHTML(m, 'tv')).join('')}</div>
-        <div class="rail-progress"><div class="rail-progress-fill" id="prog-tv"></div></div>
-      </div>
-    `;
-
-    bindCards();
-  } catch(e){
-    console.error(e);
-  }
-}
-
-function cardHTML(m, type){
-  const title = m.title || m.name || '';
-  const score = m.vote_average ? m.vote_average.toFixed(1) : '0';
-  const poster = TMDB.img(m.poster_path);
-  const year = m.release_date || m.first_air_date ? new Date(m.release_date || m.first_air_date).getFullYear() : '';
-  return `
-    <div class="card" data-id="${m.id}" data-type="${type}">
-      <img loading="lazy" src="${poster}" alt="${title}">
-      <div class="card-rating">★ ${score}</div>
-      ${type==='tv'?'<div class="card-badge">مسلسل</div>':''}
-      <button class="card-watch-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
-      <div class="card-overlay"></div>
-      <div class="card-body">
-        <div class="card-title">${title}</div>
-        <div class="card-meta">${year} · ★ ${score}</div>
-      </div>
-    </div>
-  `;
-}
-
-function bindCards(){
-  document.querySelectorAll('.card').forEach(el => {
-    el.addEventListener('click', () => openModal(el.dataset.id, el.dataset.type));
-  });
-}
-
-/* Modal التفاصيل */
-async function openModal(id, type){
-  const backdrop = document.getElementById('modalBackdrop');
-  backdrop.classList.add('open');
-  try {
-    const data = await fetchJSON(`https://api.themoviedb.org/3/${type}/${id}?api_key=${CFG.apiKey}&language=${CFG.lang}`);
-    document.getElementById('modalHeroImg').src = TMDB.backdrop(data.backdrop_path) || TMDB.img(data.poster_path);
-    document.getElementById('modalH2').textContent = data.title || data.name;
-    document.getElementById('modalSubtitle').textContent = data.tagline || '';
-    document.getElementById('modalDesc').textContent = data.overview || '';
-    document.getElementById('modalGenresList').innerHTML = (data.genres||[]).map(g=>`<span>${g.name}</span>`).join('');
-    
-    document.getElementById('modalPlay').onclick = () => goPlayer(id, type);
-  } catch(e){
-    console.error(e);
-  }
-}
-
-document.getElementById('modalClose').onclick = () => document.getElementById('modalBackdrop').classList.remove('open');
-document.getElementById('modalBackdrop').onclick = (e) => { if(e.target === e.currentTarget) e.currentTarget.classList.remove('open'); };
-
-/* البحث */
-const searchOverlay = document.getElementById('searchOverlay');
-document.getElementById('searchToggle').onclick = () => searchOverlay.classList.add('open');
-document.getElementById('searchClose').onclick = () => searchOverlay.classList.remove('open');
-
-let searchTimer;
-document.getElementById('searchInput').addEventListener('input', (e) => {
-  clearTimeout(searchTimer);
-  const q = e.target.value.trim();
-  if(q.length < 2) return;
-  searchTimer = setTimeout(async () => {
-    const res = await fetchJSON(TMDB.search(q));
-    const hits = (res.results || []).filter(x => x.poster_path);
-    document.getElementById('searchGrid').innerHTML = hits.map(m => cardHTML(m, m.media_type || 'movie')).join('');
-    bindCards();
-  }, 300);
-});
-
-// بدء التشغيل
-initHero();
-loadRows();
+// تشغيل النظام عند التحميل
+initDiscordUser();
 </script>
 </body>
 </html>
