@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-ONYX CINEMA v17.0 - Flask + Discord Bot + movie_api Integration
-Full integration with movie_api.py for cast, seasons, recommendations
+ONYX CINEMA v17.1 - Flask + Discord Bot + movie_api Integration
+Security hardened: no hardcoded keys, keys passed via template
 """
-
 from flask import Flask, jsonify, request, render_template
-import os
-import time
-import json
-import threading
-import subprocess
-import sys
+import os, time, json, threading, subprocess, sys
 from collections import defaultdict
 from datetime import datetime
 
@@ -20,7 +14,6 @@ try:
 except ImportError:
     pass
 
-# Import movie_api
 try:
     import movie_api
     HAS_MOVIE_API = True
@@ -32,19 +25,22 @@ except ImportError as e:
 app = Flask(__name__)
 
 # =========================================================
-# CONFIG
+# CONFIG — لا تضع أي مفتاح هنا، فقط اقرأ من البيئة
 # =========================================================
-TMDB_API_KEY = os.getenv("TMDB_API_KEY", "a6288fc42fb7de2837e2756a101397e5")
-TMDB_BASE = "https://api.themoviedb.org/3"
-TMDB_IMG = "https://image.tmdb.org/t/p"
-RUN_BOT = os.getenv("RUN_BOT", "true").lower() == "true"
+TMDB_API_KEY = os.getenv("TMDB_API_KEY", "")  # ← أزلت القيمة الافتراضية
+TMDB_BASE    = "https://api.themoviedb.org/3"
+TMDB_IMG     = "https://image.tmdb.org/t/p"
+RUN_BOT      = os.getenv("RUN_BOT", "false").lower() == "true"
+
+if not TMDB_API_KEY:
+    print("[ONYX] WARNING: TMDB_API_KEY is not set in environment!")
 
 # =========================================================
 # SECURITY
 # =========================================================
-_rate = defaultdict(list)
+_rate  = defaultdict(list)
 _banned = {}
-_log = defaultdict(int)
+_log   = defaultdict(int)
 
 
 def get_ip():
@@ -82,56 +78,54 @@ def sec(r):
 
 
 # =========================================================
-# SOURCES - 4 PREMIUM 4K + FALLBACK
+# SOURCES
 # =========================================================
 REAL_SOURCES = [
     {
         "name": "CinemaBox / Albox Direct Stream",
         "q": "4K",
         "movie": "https://smart.albox.co/movie/{id}",
-        "tv": "https://smart.albox.co/tv/{id}/{s}/{e}",
+        "tv":    "https://smart.albox.co/tv/{id}/{s}/{e}",
     }
 ]
-
 PLAYER_SOURCES = REAL_SOURCES
-SOURCES_JSON = json.dumps(PLAYER_SOURCES, ensure_ascii=False)
+SOURCES_JSON   = json.dumps(PLAYER_SOURCES, ensure_ascii=False)
 
 
 # =========================================================
-# TMDB FALLBACK (if movie_api not available)
+# TMDB FALLBACK — استيرادات في الأعلى
 # =========================================================
+import urllib.request
+import urllib.parse
+
+
 def tmdb_fallback(ep, params=None):
     if not TMDB_API_KEY:
         return {"error": "no key", "results": []}
-    p = params or {}
-    p["api_key"] = TMDB_API_KEY
+    p = dict(params or {})
+    p["api_key"]  = TMDB_API_KEY
     p["language"] = "ar"
     url = f"{TMDB_BASE}{ep}?{urllib.parse.urlencode(p)}"
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "ONYX/17.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "ONYX/17.1"})
         with urllib.request.urlopen(req, timeout=25) as r:
             return json.loads(r.read().decode("utf-8"))
     except Exception as e:
         return {"error": str(e), "results": []}
 
 
-# Import urllib for fallback
-import urllib.request
-import urllib.parse
-
-
 # =========================================================
 # FOOTBALL
 # =========================================================
 FOOTBALL_LEAGUES = [
-    {"id": "saudi", "name": "الدوري السعودي"},
-    {"id": "egypt", "name": "الدوري المصري"},
-    {"id": "spain", "name": "الدوري الإسباني"},
+    {"id": "saudi",   "name": "الدوري السعودي"},
+    {"id": "egypt",   "name": "الدوري المصري"},
+    {"id": "spain",   "name": "الدوري الإسباني"},
     {"id": "england", "name": "الدوري الإنجليزي"},
-    {"id": "italy", "name": "الدوري الإيطالي"},
+    {"id": "italy",   "name": "الدوري الإيطالي"},
     {"id": "germany", "name": "الدوري الألماني"},
-    {"id": "france", "name": "الدوري الفرنسي"},
-    {"id": "ucl", "name": "دوري أبطال أوروبا"},
+    {"id": "france",  "name": "الدوري الفرنسي"},
+    {"id": "ucl",     "name": "دوري أبطال أوروبا"},
 ]
 
 
@@ -157,25 +151,23 @@ def get_matches(league=None, date=None):
 
 
 # =========================================================
-# ROUTES - PAGES
+# ROUTES — PAGES (هنا نمرر المفتاح للـ template)
 # =========================================================
 @app.route("/")
 def index():
-    return render_template("index.html")
-
+    return render_template("index.html", tmdb_key=TMDB_API_KEY)
 
 @app.route("/player")
 def player():
-    return render_template("player.html")
-
+    return render_template("player.html", tmdb_key=TMDB_API_KEY)
 
 @app.route("/match")
 def match_player():
-    return render_template("player.html")
+    return render_template("player.html", tmdb_key=TMDB_API_KEY)
 
 
 # =========================================================
-# ROUTES - API (using movie_api)
+# ROUTES — API
 # =========================================================
 @app.route("/api/trending")
 def api_trending():
@@ -254,12 +246,8 @@ def api_tv_season(tid, s):
     return jsonify(tmdb_fallback(f"/tv/{tid}/season/{s}"))
 
 
-# =========================================================
-# ROUTES - PERSON (الجدبد!)
-# =========================================================
 @app.route("/api/person/<int:pid>")
 def api_person(pid):
-    """معلومات الممثل الكاملة"""
     if HAS_MOVIE_API:
         details = movie_api.get_person_details(pid)
         return jsonify(details or {"error": "not found"})
@@ -270,7 +258,6 @@ def api_person(pid):
 
 @app.route("/api/person/search")
 def api_person_search():
-    """بحث عن ممثلين"""
     q = request.args.get("q", "").strip()[:100]
     if not q:
         return jsonify({"results": []})
@@ -279,12 +266,8 @@ def api_person_search():
     return jsonify(tmdb_fallback("/search/person", {"query": q}))
 
 
-# =========================================================
-# ROUTES - GENRES + DISCOVER
-# =========================================================
 @app.route("/api/genres/<mt>")
 def api_genres(mt):
-    """قائمة التصنيفات"""
     if HAS_MOVIE_API:
         return jsonify(movie_api.get_genres(mt))
     return jsonify({})
@@ -292,7 +275,6 @@ def api_genres(mt):
 
 @app.route("/api/genre/<mt>/<int:gid>")
 def api_genre(mt, gid):
-    """أفلام حسب التصنيف"""
     if mt not in ("movie", "tv"):
         return jsonify({"error": "invalid"}), 400
     if HAS_MOVIE_API:
@@ -304,35 +286,25 @@ def api_genre(mt, gid):
 
 @app.route("/api/discover")
 def api_discover():
-    """تصفح متقدم"""
     genre = request.args.get("genre")
-    year = request.args.get("year")
-    lang = request.args.get("lang")
+    year  = request.args.get("year")
+    lang  = request.args.get("lang")
     mtype = request.args.get("type", "movie")
     if mtype not in ("movie", "tv"):
         mtype = "movie"
-
     if HAS_MOVIE_API:
-        results = movie_api.discover_advanced(mtype, genre, year, lang)
-        return jsonify({"results": results})
-
+        return jsonify({"results": movie_api.discover_advanced(mtype, genre, year, lang)})
     params = {"sort_by": "popularity.desc"}
     if genre: params["with_genres"] = genre
     if year:
-        if mtype == "movie":
-            params["primary_release_year"] = year
-        else:
-            params["first_air_date_year"] = year
+        params["primary_release_year" if mtype == "movie" else "first_air_date_year"] = year
     if lang: params["with_original_language"] = lang
     return jsonify(tmdb_fallback(f"/discover/{mtype}", params))
 
 
-# =========================================================
-# ROUTES - MATCHES
-# =========================================================
 @app.route("/api/matches")
 def api_matches():
-    league = request.args.get("league")
+    league  = request.args.get("league")
     matches = get_matches(league)
     return jsonify({"matches": matches, "count": len(matches)})
 
@@ -342,14 +314,11 @@ def api_leagues():
     return jsonify({"leagues": FOOTBALL_LEAGUES})
 
 
-# =========================================================
-# HEALTH
-# =========================================================
 @app.route("/health")
 def health():
     return jsonify({
         "status": "ok",
-        "service": "ONYX CINEMA v17.0",
+        "service": "ONYX CINEMA v17.1",
         "tmdb": "ok" if TMDB_API_KEY else "missing",
         "movie_api": "loaded" if HAS_MOVIE_API else "fallback",
         "sources": len(PLAYER_SOURCES),
@@ -360,7 +329,6 @@ def health():
 # DISCORD BOT
 # =========================================================
 _bot_started = False
-
 
 def start_discord_bot():
     global _bot_started
@@ -375,8 +343,7 @@ def start_discord_bot():
 
 
 if RUN_BOT and os.getenv("WERKZEUG_RUN_MAIN") != "true":
-    _bot_thread = threading.Thread(target=start_discord_bot, daemon=True)
-    _bot_thread.start()
+    threading.Thread(target=start_discord_bot, daemon=True).start()
 
 
 if __name__ == "__main__":
