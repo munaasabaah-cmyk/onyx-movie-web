@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-ONYX CINEMA v17.1 - Flask + Discord Bot + movie_api Integration
-Security hardened: no hardcoded keys, keys passed via template
+ONYX CINEMA v17.2 - Flask + Discord Bot + movie_api Integration
++ TMDB proxy + OMDb proxy + Image proxy (Discord Activity ready)
 """
 
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, Response
 import os
 import time
 import json
@@ -13,6 +13,7 @@ import subprocess
 import sys
 import urllib.request
 import urllib.parse
+import urllib.error
 from collections import defaultdict
 from datetime import datetime
 
@@ -22,7 +23,6 @@ try:
 except ImportError:
     pass
 
-# Import movie_api
 try:
     import movie_api
     HAS_MOVIE_API = True
@@ -34,15 +34,18 @@ except ImportError as e:
 app = Flask(__name__)
 
 # =========================================================
-# CONFIG — لا تضع أي مفتاح هنا، فقط من البيئة
+# CONFIG
 # =========================================================
 TMDB_API_KEY = os.getenv("TMDB_API_KEY", "")
+OMDB_API_KEY = os.getenv("OMDB_API_KEY", "")
 TMDB_BASE    = "https://api.themoviedb.org/3"
 TMDB_IMG     = "https://image.tmdb.org/t/p"
 RUN_BOT      = os.getenv("RUN_BOT", "false").lower() == "true"
 
 if not TMDB_API_KEY:
     print("[ONYX] WARNING: TMDB_API_KEY is not set!")
+if not OMDB_API_KEY:
+    print("[ONYX] WARNING: OMDB_API_KEY is not set!")
 
 # =========================================================
 # SECURITY
@@ -61,7 +64,10 @@ def get_ip():
 
 @app.before_request
 def gate():
-    if request.path.startswith("/api/") or request.path in ("/health",):
+    # اسمح للـ API + الصور + health بدون rate limit
+    if (request.path.startswith("/api/")
+        or request.path.startswith("/img/")
+        or request.path in ("/health",)):
         return
     ip = get_ip()
     if ip in _banned and time.time() < _banned[ip]:
@@ -112,7 +118,7 @@ def tmdb_fallback(ep, params=None):
     p["language"] = "ar"
     url = f"{TMDB_BASE}{ep}?{urllib.parse.urlencode(p)}"
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "ONYX/17.1"})
+        req = urllib.request.Request(url, headers={"User-Agent": "ONYX/17.2"})
         with urllib.request.urlopen(req, timeout=25) as r:
             return json.loads(r.read().decode("utf-8"))
     except Exception as e:
@@ -156,7 +162,7 @@ def get_matches(league=None, date=None):
 
 
 # =========================================================
-# ROUTES — PAGES (نمرر المفتاح للـ template)
+# ROUTES — PAGES
 # =========================================================
 @app.route("/")
 def index():
@@ -174,7 +180,7 @@ def match_player():
 
 
 # =========================================================
-# ROUTES — API
+# ROUTES — API (movie_api)
 # =========================================================
 @app.route("/api/trending")
 def api_trending():
@@ -321,12 +327,79 @@ def api_leagues():
     return jsonify({"leagues": FOOTBALL_LEAGUES})
 
 
+# =========================================================
+# TMDB PROXY — للعمل داخل Discord Activity
+# =========================================================
+@app.route("/api/3/<path:subpath>")
+def tmdb_proxy(subpath):
+    """يوجّه الطلبات من /api/3/* إلى api.themoviedb.org/3/*"""
+    if not TMDB_API_KEY:
+        return jsonify({"error": "no api key"}), 500
+    params = dict(request.args)
+    params["api_key"] = TMDB_API_KEY
+    qs = urllib.parse.urlencode(params)
+    url = f"{TMDB_BASE}/{subpath}?{qs}"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "ONYX/17.2"})
+        with urllib.request.urlopen(req, timeout=25) as r:
+            data = json.loads(r.read().decode("utf-8"))
+        return jsonify(data)
+    except urllib.error.HTTPError as e:
+        return jsonify({"error": f"TMDB HTTP {e.code}"}), e.code
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# =========================================================
+# OMDb PROXY
+# =========================================================
+@app.route("/api/omdb")
+def omdb_proxy():
+    """يوجّه الطلبات إلى omdbapi.com"""
+    if not OMDB_API_KEY:
+        return jsonify({"error": "no omdb key"}), 500
+    params = dict(request.args)
+    params["apikey"] = OMDB_API_KEY
+    qs = urllib.parse.urlencode(params)
+    url = f"http://www.omdbapi.com/?{qs}"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "ONYX/17.2"})
+        with urllib.request.urlopen(req, timeout=10) as r:
+            data = json.loads(r.read().decode("utf-8"))
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# =========================================================
+# IMAGE PROXY — لصور TMDB
+# =========================================================
+@app.route("/img/t/p/<size>/<path:filename>")
+def img_proxy(size, filename):
+    """يمرر طلبات الصور من /img/t/p/* إلى image.tmdb.org/t/p/*"""
+    url = f"{TMDB_IMG}/{size}/{filename}"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "ONYX/17.2"})
+        with urllib.request.urlopen(req, timeout=15) as r:
+            data = r.read()
+            content_type = r.headers.get("Content-Type", "image/jpeg")
+        return Response(data, status=200, mimetype=content_type, headers={
+            "Cache-Control": "public, max-age=86400",
+        })
+    except Exception:
+        return Response(b"", status=404)
+
+
+# =========================================================
+# HEALTH
+# =========================================================
 @app.route("/health")
 def health():
     return jsonify({
         "status": "ok",
-        "service": "ONYX CINEMA v17.1",
+        "service": "ONYX CINEMA v17.2",
         "tmdb": "ok" if TMDB_API_KEY else "missing",
+        "omdb": "ok" if OMDB_API_KEY else "missing",
         "movie_api": "loaded" if HAS_MOVIE_API else "fallback",
         "sources": len(PLAYER_SOURCES),
     })
